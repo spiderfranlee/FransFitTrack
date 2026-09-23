@@ -105,19 +105,150 @@
     <main class="max-w-2xl mx-auto p-4" id="app-container">
         <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden space-y-6 animate-in fade-in duration-300">
-            <h2 class="text-2xl font-bold text-white mb-4">Dashboard</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div class="bg-card border border-subtle rounded-xl p-4 shadow-sm">
-                    <h3 class="text-sm font-medium text-amber-500 mb-2">Estimated 1RM (Top Exercises)</h3>
-                    <div id="dashboard-1rm-list" class="space-y-2 mt-4 text-sm">
-                        <!-- Populated dynamically -->
+            <!-- Admin Client Switcher for Dashboard if Coach is logged in -->
+            <div id="dashboard-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm">
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fas fa-user-shield"></i> Coach Mode: Client Dashboard
+                    </span>
+                    <span id="dashboard-client-badge" class="text-xs text-subtle">Viewing client</span>
+                </div>
+                <select id="dashboard-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
+                    <option value="">Select a client to view their dashboard...</option>
+                </select>
+            </div>
+
+            <!-- Dashboard Header -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight">Dashboard</h2>
+                    <p id="dashboard-user-subtitle" class="text-xs text-subtle">Daily movement, steps, distance & strength</p>
+                </div>
+                <button onclick="openLogActivityModal()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white font-medium text-xs rounded-xl transition-all shadow-md flex items-center gap-1.5">
+                    <i class="fas fa-plus"></i> Log Steps / KM
+                </button>
+            </div>
+
+            <!-- Steps & Distance KM Section -->
+            <div class="bg-card border border-subtle rounded-2xl p-5 shadow-lg space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm">
+                            <i class="fas fa-shoe-prints text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white">Daily Steps & Distance</h3>
+                            <p class="text-xs text-subtle">Track daily walking, running & steps progression</p>
+                        </div>
+                    </div>
+                    <button onclick="openLogActivityModal()" class="text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1">
+                        <i class="fas fa-edit"></i> Log Activity
+                    </button>
+                </div>
+
+                <!-- 3 Metric Cards Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <!-- Today Steps Card -->
+                    <div class="bg-[#050505] border border-subtle rounded-xl p-4 space-y-2">
+                        <div class="flex justify-between items-center text-xs text-subtle">
+                            <span class="flex items-center gap-1.5 font-medium text-gray-300">
+                                <i class="fas fa-shoe-prints text-purple-400 text-xs"></i> Today's Steps
+                            </span>
+                            <span id="dash-steps-percent" class="text-[11px] text-purple-400 font-bold">0%</span>
+                        </div>
+                        <div class="text-2xl font-black text-white tracking-tight" id="dash-today-steps">0</div>
+                        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                            <div id="dash-steps-bar" class="bg-gradient-to-r from-purple-600 to-indigo-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div class="text-[11px] text-subtle flex justify-between items-center" id="dash-steps-goal">
+                            <span>Goal: 10,000 steps</span>
+                        </div>
+                    </div>
+
+                    <!-- Today Distance KM Card -->
+                    <div class="bg-[#050505] border border-subtle rounded-xl p-4 space-y-2">
+                        <div class="flex justify-between items-center text-xs text-subtle">
+                            <span class="flex items-center gap-1.5 font-medium text-gray-300">
+                                <i class="fas fa-route text-emerald-400 text-xs"></i> Today's Distance
+                            </span>
+                            <span id="dash-km-percent" class="text-[11px] text-emerald-400 font-bold">0%</span>
+                        </div>
+                        <div class="text-2xl font-black text-white tracking-tight flex items-baseline gap-1">
+                            <span id="dash-today-km">0.0</span>
+                            <span class="text-xs font-semibold text-gray-400">KM</span>
+                        </div>
+                        <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                            <div id="dash-km-bar" class="bg-gradient-to-r from-emerald-500 to-teal-400 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <div class="text-[11px] text-subtle" id="dash-km-goal">Target: 2.0 KM</div>
+                    </div>
+
+                    <!-- 7-Day Total / Average Card -->
+                    <div class="bg-[#050505] border border-subtle rounded-xl p-4 space-y-2">
+                        <div class="flex justify-between items-center text-xs text-subtle">
+                            <span class="flex items-center gap-1.5 font-medium text-gray-300">
+                                <i class="fas fa-calendar-week text-amber-400 text-xs"></i> Past 7 Days
+                            </span>
+                            <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider">Summary</span>
+                        </div>
+                        <div class="text-xl font-extrabold text-white tracking-tight flex items-baseline gap-1" id="dash-7day-km">
+                            0.0 <span class="text-xs font-normal text-subtle">KM total</span>
+                        </div>
+                        <div class="space-y-1 pt-0.5 border-t border-white/5 text-[11px]">
+                            <div class="flex justify-between items-center text-subtle">
+                                <span>Total steps:</span>
+                                <span class="text-white font-semibold" id="dash-7day-steps">0</span>
+                            </div>
+                            <div class="flex justify-between items-center text-subtle">
+                                <span>Daily average:</span>
+                                <span class="text-amber-400 font-semibold" id="dash-7day-avg-steps">0 / day</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-card border border-subtle rounded-xl p-4 shadow-sm">
-                    <h3 class="text-sm font-medium text-amber-500 mb-2">Total Load by Body Part</h3>
-                    <div class="w-full h-48 relative">
-                        <canvas id="dashboard-load-chart"></canvas>
+
+                <!-- 7-Day Trend Chart -->
+                <div class="pt-2">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-xs font-semibold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fas fa-chart-area text-purple-400"></i> Past 7 Days Trend
+                        </h4>
+                        <div class="flex items-center gap-3 text-[11px] text-subtle">
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-sm bg-purple-500 inline-block"></span> Steps
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span> Distance (KM)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="w-full h-48 relative bg-black/30 rounded-xl p-3 border border-subtle">
+                        <canvas id="dashboard-activity-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Strength & Performance Grid -->
+            <div>
+                <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <i class="fas fa-dumbbell text-amber-500"></i> Workout Performance
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-card border border-subtle rounded-xl p-4 shadow-sm">
+                        <h4 class="text-sm font-medium text-amber-500 mb-2 flex items-center gap-1.5">
+                            <i class="fas fa-medal"></i> Estimated 1RM (Top Exercises)
+                        </h4>
+                        <div id="dashboard-1rm-list" class="space-y-2 mt-4 text-sm">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                    <div class="bg-card border border-subtle rounded-xl p-4 shadow-sm">
+                        <h4 class="text-sm font-medium text-amber-500 mb-2 flex items-center gap-1.5">
+                            <i class="fas fa-chart-pie"></i> Total Load by Body Part
+                        </h4>
+                        <div class="w-full h-48 relative">
+                            <canvas id="dashboard-load-chart"></canvas>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -280,15 +411,12 @@
                     <div class="flex items-center justify-between">
                         <div class="w-10"></div>
                         
-                        <!-- Center Emblem: Spade with "75" inside (matching screenshot) -->
+                        <!-- Center Header: October Challenge -->
                         <div class="flex flex-col items-center">
-                            <div class="relative w-12 h-12 flex items-center justify-center">
-                                <svg class="w-11 h-11 fill-white drop-shadow" viewBox="0 0 24 24">
-                                    <path d="M12 2C9.2 7.2 3.5 10.5 3.5 15.2C3.5 18.4 6.1 21 9.3 21C10.5 21 11.6 20.6 12.5 19.9L11.5 22H13.5L12.5 19.9C13.4 20.6 14.5 21 15.7 21C18.9 21 21.5 18.4 21.5 15.2C21.5 10.5 15.8 7.2 12 2Z"/>
-                                </svg>
-                                <span id="challenge-badge-number" class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-black pt-1">75</span>
+                            <div class="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-1.5 shadow-sm">
+                                <i class="fas fa-fire text-lg"></i>
                             </div>
-                            <span id="challenge-title-label" class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mt-1">OCTOBER CHALLENGE</span>
+                            <span id="challenge-title-label" class="text-[11px] font-bold tracking-widest text-gray-400 uppercase">OCTOBER CHALLENGE</span>
                         </div>
 
                         <!-- Right: Calendar Icon (opens monthly tracker) -->
@@ -458,6 +586,77 @@
         </button>
     </div>
 
+    <!-- Log Activity Modal (Steps & Distance KM) -->
+    <div id="log-activity-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fas fa-shoe-prints text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-base">Log Steps & Distance</h3>
+                        <p class="text-xs text-subtle" id="log-activity-target-user">Daily movement log</p>
+                    </div>
+                </div>
+                <button onclick="closeLogActivityModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <!-- Date selector -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Date</label>
+                    <input type="date" id="activity-input-date" onchange="onActivityDateChange(this.value)" class="w-full bg-input border border-subtle rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+
+                <!-- Steps input -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Daily Steps</label>
+                        <span class="text-[11px] text-amber-400 font-medium">Target: 10,000</span>
+                    </div>
+                    <div class="relative">
+                        <input type="number" id="activity-input-steps" oninput="onActivityStepsInput(this.value)" min="0" max="100000" step="100" placeholder="e.g. 8500" class="w-full bg-input border border-subtle rounded-xl px-3 py-2.5 text-base font-bold text-white focus:outline-none focus:border-amber-500 pl-9">
+                        <i class="fas fa-shoe-prints absolute left-3 top-3.5 text-xs text-subtle"></i>
+                    </div>
+                    <!-- Quick preset buttons -->
+                    <div class="flex gap-1.5 mt-2">
+                        <button type="button" onclick="addActivitySteps(2000)" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 border border-subtle rounded-lg text-[11px] text-gray-300 transition-colors">+2,000</button>
+                        <button type="button" onclick="addActivitySteps(5000)" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 border border-subtle rounded-lg text-[11px] text-gray-300 transition-colors">+5,000</button>
+                        <button type="button" onclick="setActivitySteps(10000)" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/30 rounded-lg text-[11px] font-medium transition-colors">10,000 Goal</button>
+                    </div>
+                </div>
+
+                <!-- Distance (KM) input -->
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider">Distance (KM)</label>
+                        <button type="button" onclick="estimateKmFromSteps()" class="text-[11px] text-purple-400 hover:text-purple-300 flex items-center gap-1 transition-colors">
+                            <i class="fas fa-calculator text-[10px]"></i> Estimate from steps
+                        </button>
+                    </div>
+                    <div class="relative">
+                        <input type="number" id="activity-input-km" min="0" max="100" step="0.1" placeholder="e.g. 5.2" class="w-full bg-input border border-subtle rounded-xl px-3 py-2.5 text-base font-bold text-white focus:outline-none focus:border-amber-500 pl-9 pr-12">
+                        <i class="fas fa-route absolute left-3 top-3.5 text-xs text-subtle"></i>
+                        <span class="absolute right-3 top-3 text-xs text-subtle font-medium">KM</span>
+                    </div>
+                </div>
+
+                <div class="p-2.5 rounded-xl bg-purple-500/10 border border-purple-500/20 text-[11px] text-purple-200 flex items-center gap-2">
+                    <i class="fas fa-check-circle text-amber-400 text-sm"></i>
+                    <span>Distance automatically counts toward the 2KM daily challenge goal if active.</span>
+                </div>
+            </div>
+            <div class="p-4 border-t border-subtle flex justify-end gap-2.5 bg-[#1a0f2e]">
+                <button type="button" onclick="closeLogActivityModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button type="button" onclick="saveActivityLog()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-semibold transition-all shadow-md flex items-center gap-1.5">
+                    <i class="fas fa-check"></i> Save Activity
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Add Client Modal -->
     <div id="add-client-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
         <div class="bg-card border border-subtle w-full max-w-sm rounded-xl shadow-2xl overflow-hidden flex flex-col">
@@ -481,7 +680,7 @@
                         <input type="checkbox" id="new-client-assign-challenge" checked class="mt-0.5 w-4 h-4 rounded text-amber-500 focus:ring-0 accent-amber-500 bg-input border-subtle">
                         <div>
                             <span class="text-xs font-semibold text-white block">Assign October 2KM & Monday Yoga Challenge</span>
-                            <span class="text-[11px] text-gray-400 block mt-0.5">Enables the 75 Hard style daily checklist with 2KM daily log & Monday yoga focus.</span>
+                            <span class="text-[11px] text-gray-400 block mt-0.5">Enables the daily challenge checklist with 2KM daily log & Monday yoga focus.</span>
                         </div>
                     </label>
                 </div>
@@ -503,7 +702,7 @@
                     </div>
                     <div>
                         <h3 class="text-white font-bold text-base">Client Challenge Settings</h3>
-                        <p id="challenge-modal-client-email" class="text-xs text-subtle">Manage 75-Hard Challenge</p>
+                        <p id="challenge-modal-client-email" class="text-xs text-subtle">Manage October Challenge</p>
                     </div>
                 </div>
                 <button onclick="closeClientChallengeModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
@@ -516,7 +715,7 @@
                 <div class="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-subtle">
                     <div>
                         <span class="font-bold text-white block">Active Challenge Status</span>
-                        <span class="text-xs text-gray-400">Show 75 Hard style checklist tab for this client</span>
+                        <span class="text-xs text-gray-400">Show challenge checklist tab for this client</span>
                     </div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="cfg-challenge-enabled" checked class="sr-only peer">
@@ -903,6 +1102,25 @@
         let unsubscribeChallengeConfig = null;
         let debounceNotesTimer = null;
 
+        // Daily Activity State (Steps & Distance KM)
+        let activityLogs = {};
+        let unsubscribeActivityLogs = null;
+        let activityChartInstance = null;
+
+        function parseDateString(str) {
+            if (!str) return new Date();
+            const parts = str.split('-');
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+
+        function formatDateString(d) {
+            if (!d) return '';
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         // DOM Elements
         const viewWorkouts = document.getElementById('workouts-view');
         const viewCreator = document.getElementById('creator-view');
@@ -979,6 +1197,7 @@
                     tabCreator.classList.remove('hidden');
                     tabChallenge.classList.remove('hidden');
                     adminClientSelector.classList.remove('hidden');
+                    document.getElementById('dashboard-admin-selector')?.classList.remove('hidden');
                     document.getElementById('challenge-admin-selector')?.classList.remove('hidden');
                     btnDeleteWorkout.classList.remove('hidden');
                     btnEditWorkout.classList.remove('hidden');
@@ -1009,11 +1228,13 @@
                 } else {
                     tabCreator.classList.add('hidden');
                     adminClientSelector.classList.add('hidden');
+                    document.getElementById('dashboard-admin-selector')?.classList.add('hidden');
                     document.getElementById('challenge-admin-selector')?.classList.add('hidden');
                     btnDeleteWorkout.classList.add('hidden');
                     btnEditWorkout.classList.add('hidden');
                     currentViewUid = userEmail;
                     subscribeToWorkouts(userEmail);
+                    subscribeToActivityLogs(userEmail);
 
                     // Check if client has an assigned challenge
                     if (unsubscribeChallengeConfig) unsubscribeChallengeConfig();
@@ -1037,6 +1258,8 @@
                 tabDashboard.classList.add('hidden');
                 tabChallenge.classList.add('hidden');
                 adminClientSelector.classList.add('hidden');
+                document.getElementById('dashboard-admin-selector')?.classList.add('hidden');
+                document.getElementById('challenge-admin-selector')?.classList.add('hidden');
                 btnDeleteWorkout.classList.add('hidden');
                 btnEditWorkout.classList.add('hidden');
                 
@@ -1047,6 +1270,10 @@
                     unsubscribeWorkouts();
                     unsubscribeWorkouts = null;
                 }
+                if (unsubscribeActivityLogs) {
+                    unsubscribeActivityLogs();
+                    unsubscribeActivityLogs = null;
+                }
                 if (unsubscribeChallengeLogs) {
                     unsubscribeChallengeLogs();
                     unsubscribeChallengeLogs = null;
@@ -1056,6 +1283,7 @@
                     unsubscribeChallengeConfig = null;
                 }
                 workouts = [];
+                activityLogs = {};
                 currentChallengeEmail = null;
                 clientChallengeConfig = null;
                 if (!document.getElementById('dashboard-view').classList.contains('hidden')) {
@@ -1071,6 +1299,7 @@
             const wSelect = document.getElementById('w-client-select');
             const cSelect = document.getElementById('c-client-select');
             const chSelect = document.getElementById('challenge-client-select');
+            const dSelect = document.getElementById('dashboard-client-select');
             
             const options = `<option value="">Select a client...</option>` + 
                 allUsers.filter(u => u.email !== ADMIN_EMAIL).map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
@@ -1078,16 +1307,22 @@
             const wVal = wSelect ? wSelect.value : '';
             const cVal = cSelect ? cSelect.value : '';
             const chVal = chSelect ? chSelect.value : '';
+            const dVal = dSelect ? dSelect.value : '';
             
             if (wSelect) wSelect.innerHTML = options;
             if (cSelect) cSelect.innerHTML = options.replace('Select a client...', 'Assign to Client...');
             if (chSelect) chSelect.innerHTML = options.replace('Select a client...', 'Select client for challenge...');
+            if (dSelect) dSelect.innerHTML = options.replace('Select a client...', 'Select client for dashboard...');
             
             if (wSelect && wVal) wSelect.value = wVal;
             if (cSelect && cVal) cSelect.value = cVal;
             if (chSelect) {
                 if (chVal) chSelect.value = chVal;
                 else if (currentChallengeEmail) chSelect.value = currentChallengeEmail;
+            }
+            if (dSelect) {
+                if (dVal) dSelect.value = dVal;
+                else if (currentViewUid) dSelect.value = currentViewUid;
             }
         };
 
@@ -1457,14 +1692,32 @@
 
         window.selectClientWorkouts = (email) => {
             currentViewUid = email;
+
+            // Sync dropdown values across views
+            const wSelect = document.getElementById('w-client-select');
+            const dSelect = document.getElementById('dashboard-client-select');
+            const chSelect = document.getElementById('challenge-client-select');
+            if (wSelect && wSelect.value !== email) wSelect.value = email;
+            if (dSelect && dSelect.value !== email) dSelect.value = email;
+            if (chSelect && chSelect.value !== email) chSelect.value = email;
+
             if (email) {
                 subscribeToWorkouts(email);
+                subscribeToActivityLogs(email);
+                if (isAdmin && typeof selectChallengeClient === 'function' && currentChallengeEmail !== email) {
+                    selectChallengeClient(email);
+                }
             } else {
                 if (unsubscribeWorkouts) {
                     unsubscribeWorkouts();
                     unsubscribeWorkouts = null;
                 }
+                if (unsubscribeActivityLogs) {
+                    unsubscribeActivityLogs();
+                    unsubscribeActivityLogs = null;
+                }
                 workouts = [];
+                activityLogs = {};
                 if (!document.getElementById('dashboard-view').classList.contains('hidden')) {
                     renderDashboard();
                 } else {
@@ -1473,6 +1726,31 @@
                 if (activeWorkoutId) closeWorkout();
             }
         };
+
+        function subscribeToActivityLogs(email) {
+            if (!email) return;
+            if (unsubscribeActivityLogs) unsubscribeActivityLogs();
+
+            const collRef = collection(db, 'users', email.toLowerCase(), 'challengeLogs');
+            unsubscribeActivityLogs = onSnapshot(collRef, (snapshot) => {
+                activityLogs = {};
+                snapshot.forEach(docSnap => {
+                    activityLogs[docSnap.id] = docSnap.data();
+                });
+                if (currentChallengeEmail === email.toLowerCase()) {
+                    challengeLogs = activityLogs;
+                    if (viewChallenge && !viewChallenge.classList.contains('hidden')) {
+                        renderChallengeView();
+                    }
+                }
+                if (viewDashboard && !viewDashboard.classList.contains('hidden')) {
+                    renderDashboard();
+                }
+            }, (error) => {
+                console.error("Error fetching activity logs:", error);
+                handleFirestoreError(error, OperationType.LIST, `users/${email}/challengeLogs`);
+            });
+        }
 
         function subscribeToWorkouts(email) {
             if (!email) return;
@@ -1519,6 +1797,16 @@
             } else if (tab === 'dashboard') {
                 viewDashboard.classList.remove('hidden');
                 tabDashboard.classList.replace('tab-inactive', 'tab-active');
+                if (!currentViewUid) {
+                    if (!isAdmin && currentUser) {
+                        selectClientWorkouts(currentUser.email.toLowerCase());
+                    } else if (isAdmin && allUsers.length > 0) {
+                        const firstClient = allUsers.find(u => u.email !== ADMIN_EMAIL);
+                        if (firstClient) selectClientWorkouts(firstClient.email);
+                    }
+                } else {
+                    if (!unsubscribeActivityLogs) subscribeToActivityLogs(currentViewUid);
+                }
                 renderDashboard();
             } else if (tab === 'challenge') {
                 if (viewChallenge) viewChallenge.classList.remove('hidden');
@@ -1811,9 +2099,222 @@
         let loadChartInstance = null;
 
         window.renderDashboard = () => {
+            const targetEmail = currentViewUid || (currentUser ? currentUser.email.toLowerCase() : null);
+
+            // Coach / User Subtitle & Dropdown Sync
+            const subtitleEl = document.getElementById('dashboard-user-subtitle');
+            const dSelect = document.getElementById('dashboard-client-select');
+            const badgeEl = document.getElementById('dashboard-client-badge');
+
+            if (isAdmin) {
+                if (dSelect && targetEmail && dSelect.value !== targetEmail) {
+                    dSelect.value = targetEmail;
+                }
+                const foundClient = allUsers.find(u => u.email === targetEmail);
+                if (foundClient) {
+                    if (badgeEl) badgeEl.innerText = `${foundClient.name} (${targetEmail})`;
+                    if (subtitleEl) subtitleEl.innerText = `Viewing activity & workout stats for ${foundClient.name}`;
+                } else if (targetEmail) {
+                    if (badgeEl) badgeEl.innerText = targetEmail;
+                    if (subtitleEl) subtitleEl.innerText = `Viewing client: ${targetEmail}`;
+                } else {
+                    if (badgeEl) badgeEl.innerText = 'No client selected';
+                    if (subtitleEl) subtitleEl.innerText = 'Please select a client from the dropdown above';
+                }
+            } else {
+                if (subtitleEl) subtitleEl.innerText = 'Daily movement, steps, distance & strength';
+            }
+
+            // --- 1. Steps & Distance KM Metrics ---
+            const todayStr = formatDateString(new Date());
+            const todayLog = (activityLogs && activityLogs[todayStr]) || (challengeLogs && challengeLogs[todayStr]) || {};
+            const todaySteps = Number(todayLog.steps) || 0;
+            const todayKm = Number(todayLog.km != null ? todayLog.km : todayLog.kmLogged) || 0;
+
+            const stepsGoal = 10000;
+            const stepsPct = Math.min(100, Math.round((todaySteps / stepsGoal) * 100));
+            const kmGoal = (clientChallengeConfig && clientChallengeConfig.dailyKmTarget) ? clientChallengeConfig.dailyKmTarget : 2.0;
+            const kmPct = Math.min(100, Math.round((todayKm / kmGoal) * 100));
+
+            // Update Today's DOM elements
+            const todayStepsEl = document.getElementById('dash-today-steps');
+            const stepsBarEl = document.getElementById('dash-steps-bar');
+            const stepsPctEl = document.getElementById('dash-steps-percent');
+            const stepsGoalEl = document.getElementById('dash-steps-goal');
+
+            if (todayStepsEl) todayStepsEl.innerText = todaySteps.toLocaleString();
+            if (stepsBarEl) stepsBarEl.style.width = stepsPct + '%';
+            if (stepsPctEl) stepsPctEl.innerText = stepsPct + '%';
+            if (stepsGoalEl) {
+                if (stepsPct >= 100) {
+                    stepsGoalEl.innerHTML = `<span>Goal: ${stepsGoal.toLocaleString()} steps</span><span class="text-amber-400 font-bold"><i class="fas fa-check-circle"></i> Achieved!</span>`;
+                } else {
+                    stepsGoalEl.innerHTML = `<span>Goal: ${stepsGoal.toLocaleString()} steps</span><span>${(stepsGoal - todaySteps).toLocaleString()} left</span>`;
+                }
+            }
+
+            const todayKmEl = document.getElementById('dash-today-km');
+            const kmBarEl = document.getElementById('dash-km-bar');
+            const kmPctEl = document.getElementById('dash-km-percent');
+            const kmGoalEl = document.getElementById('dash-km-goal');
+
+            if (todayKmEl) todayKmEl.innerText = todayKm.toFixed(1);
+            if (kmBarEl) kmBarEl.style.width = kmPct + '%';
+            if (kmPctEl) kmPctEl.innerText = kmPct + '%';
+            if (kmGoalEl) {
+                if (kmPct >= 100) {
+                    kmGoalEl.innerHTML = `<span>Target: ${kmGoal.toFixed(1)} KM</span><span class="text-emerald-400 font-bold"><i class="fas fa-check-circle"></i> Complete!</span>`;
+                } else {
+                    kmGoalEl.innerHTML = `<span>Target: ${kmGoal.toFixed(1)} KM</span><span>${(kmGoal - todayKm).toFixed(1)} KM left</span>`;
+                }
+            }
+
+            // --- 2. Past 7 Days Aggregation ---
+            const last7Days = [];
+            let total7DaySteps = 0;
+            let total7DayKm = 0;
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dKey = formatDateString(d);
+                const log = (activityLogs && activityLogs[dKey]) || (challengeLogs && challengeLogs[dKey]) || {};
+                const s = Number(log.steps) || 0;
+                const k = Number(log.km != null ? log.km : log.kmLogged) || 0;
+
+                total7DaySteps += s;
+                total7DayKm += k;
+
+                const isToday = i === 0;
+                const shortDay = isToday ? 'Today' : d.toLocaleDateString(undefined, { weekday: 'short' });
+                const dateDisplay = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+
+                last7Days.push({
+                    key: dKey,
+                    label: shortDay,
+                    dateDisplay: dateDisplay,
+                    steps: s,
+                    km: k
+                });
+            }
+
+            const sevenDayKmEl = document.getElementById('dash-7day-km');
+            const sevenDayStepsEl = document.getElementById('dash-7day-steps');
+            const sevenDayAvgStepsEl = document.getElementById('dash-7day-avg-steps');
+
+            if (sevenDayKmEl) sevenDayKmEl.innerHTML = `${total7DayKm.toFixed(1)} <span class="text-xs font-normal text-subtle">KM total</span>`;
+            if (sevenDayStepsEl) sevenDayStepsEl.innerText = total7DaySteps.toLocaleString();
+            const avgSteps = Math.round(total7DaySteps / 7);
+            if (sevenDayAvgStepsEl) sevenDayAvgStepsEl.innerText = `${avgSteps.toLocaleString()} / day`;
+
+            // --- 3. 7-Day Trend Chart.js ---
+            const actChartCanvas = document.getElementById('dashboard-activity-chart');
+            if (actChartCanvas) {
+                if (activityChartInstance) {
+                    activityChartInstance.destroy();
+                    activityChartInstance = null;
+                }
+                const actCtx = actChartCanvas.getContext('2d');
+                activityChartInstance = new Chart(actCtx, {
+                    data: {
+                        labels: last7Days.map(d => d.label),
+                        datasets: [
+                            {
+                                type: 'bar',
+                                label: 'Steps',
+                                data: last7Days.map(d => d.steps),
+                                backgroundColor: 'rgba(139, 92, 246, 0.65)',
+                                hoverBackgroundColor: 'rgba(167, 139, 250, 0.9)',
+                                borderColor: '#8B5CF6',
+                                borderWidth: 1,
+                                borderRadius: 6,
+                                yAxisID: 'y'
+                            },
+                            {
+                                type: 'line',
+                                label: 'Distance (KM)',
+                                data: last7Days.map(d => d.km),
+                                borderColor: '#10B981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                borderWidth: 2.5,
+                                pointBackgroundColor: '#10B981',
+                                pointBorderColor: '#050505',
+                                pointBorderWidth: 1.5,
+                                pointRadius: 4.5,
+                                pointHoverRadius: 6,
+                                fill: false,
+                                tension: 0.35,
+                                yAxisID: 'y1'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: '#1a0f2e',
+                                titleColor: '#ffffff',
+                                bodyColor: '#e5e7eb',
+                                borderColor: 'rgba(255, 255, 255, 0.1)',
+                                borderWidth: 1,
+                                padding: 10,
+                                callbacks: {
+                                    title: (items) => {
+                                        const idx = items[0].dataIndex;
+                                        return `${last7Days[idx].label} (${last7Days[idx].dateDisplay})`;
+                                    },
+                                    label: (context) => {
+                                        if (context.dataset.yAxisID === 'y') {
+                                            return `Steps: ${context.parsed.y.toLocaleString()}`;
+                                        } else {
+                                            return `Distance: ${context.parsed.y.toFixed(1)} KM`;
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                position: 'left',
+                                beginAtZero: true,
+                                suggestedMax: 10000,
+                                grid: { color: 'rgba(255,255,255,0.05)' },
+                                ticks: {
+                                    color: 'rgba(167, 139, 250, 0.8)',
+                                    callback: (val) => val >= 1000 ? (val/1000) + 'k' : val
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                position: 'right',
+                                beginAtZero: true,
+                                suggestedMax: 5,
+                                grid: { display: false },
+                                ticks: {
+                                    color: 'rgba(16, 185, 129, 0.9)',
+                                    callback: (val) => val + ' km'
+                                }
+                            },
+                            x: {
+                                grid: { display: false },
+                                ticks: { color: 'rgba(255,255,255,0.6)' }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // --- 4. Strength & Performance (1RM and Volume Load) ---
             const listEl = document.getElementById('dashboard-1rm-list');
             if (!workouts || workouts.length === 0) {
-                listEl.innerHTML = '<p class="text-subtle">No workout data available.</p>';
+                if (listEl) listEl.innerHTML = '<p class="text-subtle">No workout logs recorded for this client yet.</p>';
                 if (loadChartInstance) {
                     loadChartInstance.destroy();
                     loadChartInstance = null;
@@ -1864,14 +2365,14 @@
                 .slice(0, 5);
 
             if (sorted1RM.length > 0) {
-                listEl.innerHTML = sorted1RM.map(([name, val]) => `
+                if (listEl) listEl.innerHTML = sorted1RM.map(([name, val]) => `
                     <div class="flex justify-between border-b border-subtle pb-1">
                         <span class="text-gray-300 truncate pr-2">${name}</span>
                         <span class="text-amber-400 font-bold">${Math.round(val)}<span class="text-[10px] text-gray-500 ml-1">kg/lbs</span></span>
                     </div>
                 `).join('');
             } else {
-                listEl.innerHTML = '<p class="text-subtle">No data logged yet.</p>';
+                if (listEl) listEl.innerHTML = '<p class="text-subtle">No strength data logged yet.</p>';
             }
 
             // Bar Chart for Body Parts
@@ -1918,6 +2419,130 @@
                     }
                 }
             });
+        };
+
+        // --- Log Activity (Steps & Distance KM) Modal Handlers ---
+        window.openLogActivityModal = (customDate) => {
+            const targetEmail = currentViewUid || (currentUser ? currentUser.email.toLowerCase() : null);
+            if (!targetEmail) {
+                alert("Please log in to log daily activity.");
+                return;
+            }
+            const modal = document.getElementById('log-activity-modal');
+            const dateInput = document.getElementById('activity-input-date');
+            const targetUserEl = document.getElementById('log-activity-target-user');
+
+            const dateKey = customDate || formatDateString(new Date());
+            if (dateInput) dateInput.value = dateKey;
+
+            if (targetUserEl) {
+                const client = allUsers.find(u => u.email === targetEmail);
+                targetUserEl.innerText = isAdmin ? `Client: ${client ? client.name : targetEmail}` : 'Daily movement log';
+            }
+
+            onActivityDateChange(dateKey);
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeLogActivityModal = () => {
+            const modal = document.getElementById('log-activity-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.onActivityDateChange = (dateKey) => {
+            const stepsInput = document.getElementById('activity-input-steps');
+            const kmInput = document.getElementById('activity-input-km');
+            
+            const log = (activityLogs && activityLogs[dateKey]) || (challengeLogs && challengeLogs[dateKey]) || {};
+            if (stepsInput) stepsInput.value = (log.steps != null && log.steps > 0) ? log.steps : '';
+            if (kmInput) kmInput.value = (log.km != null) ? log.km : ((log.kmLogged != null) ? log.kmLogged : '');
+        };
+
+        window.onActivityStepsInput = (val) => {
+            // Optional live helper
+        };
+
+        window.addActivitySteps = (delta) => {
+            const stepsInput = document.getElementById('activity-input-steps');
+            if (!stepsInput) return;
+            const current = parseInt(stepsInput.value) || 0;
+            stepsInput.value = Math.max(0, current + delta);
+        };
+
+        window.setActivitySteps = (val) => {
+            const stepsInput = document.getElementById('activity-input-steps');
+            if (stepsInput) stepsInput.value = val;
+        };
+
+        window.estimateKmFromSteps = () => {
+            const stepsInput = document.getElementById('activity-input-steps');
+            const kmInput = document.getElementById('activity-input-km');
+            const steps = parseInt(stepsInput?.value) || 0;
+            if (steps <= 0) {
+                alert("Please enter a step count first to estimate distance.");
+                return;
+            }
+            // Average ~0.75m per step (approx 1,333 steps per km)
+            const estimatedKm = (steps * 0.00075).toFixed(2);
+            if (kmInput) kmInput.value = estimatedKm;
+        };
+
+        window.saveActivityLog = async () => {
+            const targetEmail = currentViewUid || (currentUser ? currentUser.email.toLowerCase() : null);
+            if (!targetEmail) {
+                alert("Please log in first.");
+                return;
+            }
+            const dateInput = document.getElementById('activity-input-date');
+            const stepsInput = document.getElementById('activity-input-steps');
+            const kmInput = document.getElementById('activity-input-km');
+
+            const dateKey = dateInput?.value || formatDateString(new Date());
+            const stepsVal = parseInt(stepsInput?.value) || 0;
+            const kmVal = parseFloat(kmInput?.value) || 0;
+
+            if (stepsVal < 0 || kmVal < 0) {
+                alert("Steps and distance cannot be negative.");
+                return;
+            }
+
+            try {
+                const existing = (activityLogs && activityLogs[dateKey]) || (challengeLogs && challengeLogs[dateKey]) || {};
+                const existingTasks = existing.tasksCompleted || {};
+                const updatedTasks = { ...existingTasks };
+
+                // If logged distance reaches or exceeds daily KM target, auto-mark challenge 2km task complete
+                const kmGoal = (clientChallengeConfig && clientChallengeConfig.dailyKmTarget) ? clientChallengeConfig.dailyKmTarget : 2.0;
+                if (kmVal >= kmGoal) {
+                    updatedTasks.task_2km = true;
+                }
+
+                const updatedData = {
+                    ...existing,
+                    date: dateKey,
+                    steps: stepsVal,
+                    km: kmVal,
+                    kmLogged: kmVal,
+                    tasksCompleted: updatedTasks,
+                    updatedAt: new Date().toISOString()
+                };
+
+                activityLogs[dateKey] = updatedData;
+                if (currentChallengeEmail === targetEmail) {
+                    challengeLogs[dateKey] = updatedData;
+                }
+
+                await setDoc(doc(db, 'users', targetEmail, 'challengeLogs', dateKey), updatedData, { merge: true });
+                closeLogActivityModal();
+                renderDashboard();
+                if (viewChallenge && !viewChallenge.classList.contains('hidden')) {
+                    renderChallengeView();
+                }
+            } catch (err) {
+                console.error("Error saving daily activity:", err);
+                alert("Failed to save activity: " + err.message);
+                handleFirestoreError(err, OperationType.WRITE, `users/${targetEmail}/challengeLogs/${dateKey}`);
+            }
         };
 
         // --- Workouts List & Logger Logic ---
@@ -2995,18 +3620,6 @@
             }
         };
 
-        function parseDateString(str) {
-            const parts = str.split('-');
-            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
-        }
-
-        function formatDateString(d) {
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const day = String(d.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
         function getNextMondayDateStr(dateObj) {
             const d = new Date(dateObj);
             const day = d.getDay();
@@ -3081,6 +3694,8 @@
                 date: selectedChallengeDate,
                 dayNumber: Math.max(1, Math.round((currDateObj - parseDateString(clientChallengeConfig.startDate || '2026-10-01')) / (1000 * 60 * 60 * 24)) + 1),
                 tasksCompleted: tasksCompleted,
+                steps: Number(currentLog.steps) || 0,
+                km: kmLogged,
                 kmLogged: kmLogged,
                 yogaCompleted: !!tasksCompleted['task_yoga'],
                 completed: isDayComplete,
@@ -3092,6 +3707,7 @@
             try {
                 // Optimistic local update
                 challengeLogs[selectedChallengeDate] = updatedData;
+                activityLogs[selectedChallengeDate] = updatedData;
                 renderChallengeView();
 
                 await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), updatedData, { merge: true });
@@ -3112,7 +3728,7 @@
         window.quickAddKm = async (amount) => {
             if (!currentChallengeEmail || !clientChallengeConfig) return;
             const currentLog = challengeLogs[selectedChallengeDate] || {};
-            const currentKm = Number(currentLog.kmLogged) || 0;
+            const currentKm = Number(currentLog.km != null ? currentLog.km : currentLog.kmLogged) || 0;
             const newKm = Math.round((currentKm + amount) * 10) / 10;
             await updateKmLoggedValue(newKm);
         };
@@ -3121,6 +3737,7 @@
             const currentLog = challengeLogs[selectedChallengeDate] || {
                 date: selectedChallengeDate,
                 tasksCompleted: {},
+                steps: 0,
                 notes: '',
                 reminders: {}
             };
@@ -3142,6 +3759,8 @@
                 date: selectedChallengeDate,
                 dayNumber: Math.max(1, Math.round((currDateObj - parseDateString(clientChallengeConfig.startDate || '2026-10-01')) / (1000 * 60 * 60 * 24)) + 1),
                 tasksCompleted: tasksCompleted,
+                steps: Number(currentLog.steps) || 0,
+                km: val,
                 kmLogged: val,
                 yogaCompleted: !!tasksCompleted['task_yoga'],
                 completed: isDayComplete,
@@ -3152,6 +3771,7 @@
 
             try {
                 challengeLogs[selectedChallengeDate] = updatedData;
+                activityLogs[selectedChallengeDate] = updatedData;
                 renderChallengeView();
 
                 await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), updatedData, { merge: true });
