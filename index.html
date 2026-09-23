@@ -92,8 +92,13 @@
     <header class="bg-[#1b0a33]/80 backdrop-blur-md border-b border-subtle sticky top-0 z-20 shadow-md">
         <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
             <h1 class="text-xl font-bold text-white tracking-tight">FitTrack</h1>
-            <div class="flex gap-4 h-full items-center">
-                <div id="auth-container" class="mr-2"></div>
+            <div class="flex gap-2 sm:gap-3 h-full items-center">
+                <!-- Notifications Bell for Admin / Coach -->
+                <button id="btn-notifications" onclick="toggleNotificationsDrawer()" class="hidden relative p-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Client Activity Notifications">
+                    <i class="fas fa-bell text-base"></i>
+                    <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full ring-2 ring-[#1b0a33] animate-pulse">0</span>
+                </button>
+                <div id="auth-container" class="mr-1"></div>
                 <button id="tab-dashboard" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Dashboard</button>
                 <button id="tab-workouts" class="h-full px-2 tab-active font-medium text-sm transition-colors">Workouts</button>
                 <button id="tab-challenge" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors flex items-center gap-1.5"><i class="fas fa-fire text-amber-500"></i> Challenge</button>
@@ -372,7 +377,7 @@
             </div>
         </div>
 
-        <!-- Challenge View (75 Hard Style Daily Checklist) -->
+        <!-- Challenge View (Daily Habit & Movement Checklist) -->
         <div id="challenge-view" class="hidden space-y-4 animate-in fade-in duration-300">
             <!-- Admin Client Switcher for Challenge if Coach is logged in -->
             <div id="challenge-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm">
@@ -403,26 +408,34 @@
                 </button>
             </div>
 
-            <!-- Challenge Main Content Container (75 Hard Layout) -->
+            <!-- Challenge Main Content Container -->
             <div id="challenge-content-container" class="space-y-4">
-                <!-- 75 Hard Header matching user screenshot -->
+                <!-- Challenge Header -->
                 <div class="bg-[#0e071a] border border-subtle rounded-2xl p-5 shadow-xl relative overflow-hidden">
-                    <!-- Top Bar: Spacer, Spade Emblem, Calendar Icon -->
+                    <!-- Top Bar: Left Tag, Center FitTrack Challenge Logo, Right Calendar Button -->
                     <div class="flex items-center justify-between">
-                        <div class="w-10"></div>
+                        <div class="w-10 flex items-center justify-start">
+                            <span class="text-[10px] font-black tracking-widest text-amber-400/80 uppercase px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20">FIT</span>
+                        </div>
                         
-                        <!-- Center Header: October Challenge -->
+                        <!-- Center Header: FitTrack Trophy Emblem -->
                         <div class="flex flex-col items-center">
-                            <div class="w-10 h-10 rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-1.5 shadow-sm">
-                                <i class="fas fa-fire text-lg"></i>
+                            <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500/20 via-purple-600/30 to-amber-400/20 border border-amber-400/40 flex items-center justify-center text-amber-400 mb-1.5 shadow-lg shadow-amber-500/10 transition-transform hover:scale-105">
+                                <i class="fas fa-trophy text-xl text-amber-400 drop-shadow"></i>
                             </div>
-                            <span id="challenge-title-label" class="text-[11px] font-bold tracking-widest text-gray-400 uppercase">OCTOBER CHALLENGE</span>
+                            <span id="challenge-title-label" class="text-[11px] font-bold tracking-widest text-gray-300 uppercase">OCTOBER CHALLENGE</span>
                         </div>
 
-                        <!-- Right: Calendar Icon (opens monthly tracker) -->
-                        <button onclick="openChallengeCalendarModal()" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-subtle text-amber-400 flex items-center justify-center transition-colors shadow-sm" title="October Challenge Calendar">
-                            <i class="fas fa-calendar-check text-base"></i>
-                        </button>
+                        <!-- Right: Actions (Photos Gallery & Calendar) -->
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="openChallengeGalleryModal()" class="h-10 px-2.5 sm:px-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/30 text-purple-300 flex items-center justify-center gap-1.5 transition-colors shadow-sm text-xs font-semibold" title="View Progress Photos Gallery">
+                                <i class="fas fa-images text-sm text-amber-400"></i>
+                                <span class="hidden sm:inline">Photos</span>
+                            </button>
+                            <button onclick="openChallengeCalendarModal()" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-subtle text-amber-400 flex items-center justify-center transition-colors shadow-sm" title="October Challenge Calendar">
+                                <i class="fas fa-calendar-check text-base"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Big Red Day Title matching screenshot -->
@@ -512,7 +525,7 @@
                     </button>
                 </div>
 
-                <!-- All Tasks Checklist (75 Hard Style: round circular toggles) -->
+                <!-- All Tasks Checklist (Daily habit round circular toggles) -->
                 <div class="bg-card border border-subtle rounded-2xl overflow-hidden shadow-sm">
                     <div class="p-3.5 bg-black/40 border-b border-subtle flex justify-between items-center">
                         <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
@@ -767,16 +780,33 @@
                     </div>
                 </div>
 
-                <!-- 75 Hard Checklist Tasks Info -->
+                <!-- Daily Challenge Checklist Tasks Info -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-300 mb-1">Included Challenge Tasks</label>
-                    <p class="text-xs text-gray-400 mb-2">The client will track these habits daily in their checklist:</p>
-                    <div class="space-y-1.5 text-xs text-gray-300 bg-black/20 p-3 rounded-xl border border-subtle">
-                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Log 2KM Walk / Run (Daily target)</div>
-                        <div class="flex items-center gap-2"><i class="fas fa-check text-purple-400"></i> Monday Yoga Session (Active on Mondays)</div>
-                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Drink 2 litres of Water</div>
-                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Follow Clean Diet</div>
-                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Take Daily Progress Picture</div>
+                    <p class="text-xs text-gray-400 mb-2">The client tracks these core required tasks and optional daily habits:</p>
+                    <div class="space-y-2 text-xs text-gray-300 bg-black/20 p-3 rounded-xl border border-subtle">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-white font-medium"><i class="fas fa-running text-amber-400"></i> Log 2KM Walk / Run</span>
+                            <span class="text-[10px] text-amber-400 font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400/10 border border-amber-400/20">Required</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-white font-medium"><i class="fas fa-spa text-purple-400"></i> Monday Yoga Session</span>
+                            <span class="text-[10px] text-purple-300 font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-400/10 border border-purple-400/20">Mondays Required</span>
+                        </div>
+                        <div class="pt-1 border-t border-white/5 space-y-1.5">
+                            <div class="flex items-center justify-between text-gray-300">
+                                <span class="flex items-center gap-2"><i class="fas fa-tint text-blue-400"></i> Drink 2 litres of Water</span>
+                                <span class="text-[10px] text-blue-300/80 px-1.5 py-0.5 rounded bg-blue-500/10">Optional</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-300">
+                                <span class="flex items-center gap-2"><i class="fas fa-apple-alt text-emerald-400"></i> Follow Clean Diet</span>
+                                <span class="text-[10px] text-emerald-300/80 px-1.5 py-0.5 rounded bg-emerald-500/10">Optional</span>
+                            </div>
+                            <div class="flex items-center justify-between text-gray-300">
+                                <span class="flex items-center gap-2"><i class="fas fa-camera text-amber-400"></i> Take Progress Picture</span>
+                                <span class="text-[10px] text-amber-300/80 px-1.5 py-0.5 rounded bg-amber-500/10">Optional</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -843,6 +873,74 @@
                 <button onclick="closeChallengeCalendarModal()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-colors">
                     Close
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- October Challenge Progress Photos Gallery Modal -->
+    <div id="challenge-gallery-modal" class="hidden fixed inset-0 z-[65] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                        <i class="fas fa-images text-sm"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-white font-bold text-base">Progress Photos Gallery</h3>
+                            <span id="gallery-modal-count" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">0 photos</span>
+                        </div>
+                        <p id="gallery-modal-subtitle" class="text-xs text-subtle">Client photos</p>
+                    </div>
+                </div>
+                <button onclick="closeChallengeGalleryModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto flex-1">
+                <div id="gallery-modal-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+
+            <div class="p-3.5 border-t border-subtle bg-[#1a0f2e] flex justify-end">
+                <button onclick="closeChallengeGalleryModal()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-colors">
+                    Close Gallery
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Single Photo Viewer Modal -->
+    <div id="challenge-photo-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div>
+                    <h3 id="photo-modal-title" class="text-white font-bold text-sm">Progress Picture</h3>
+                    <p id="photo-modal-subtitle" class="text-xs text-subtle">Day photo</p>
+                </div>
+                <button onclick="closePhotoViewerModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4 flex items-center justify-center bg-black/60 overflow-hidden">
+                <img id="photo-modal-img" src="" class="max-h-[60vh] w-auto max-w-full rounded-xl object-contain shadow-md" alt="Full Progress Photo">
+            </div>
+
+            <div class="p-3.5 border-t border-subtle bg-[#1a0f2e] flex items-center justify-between">
+                <button id="photo-modal-delete-btn" class="px-3 py-1.5 bg-red-500/15 hover:bg-red-500/25 text-red-400 border border-red-500/30 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-trash-alt text-[10px]"></i> Delete
+                </button>
+                <div class="flex items-center gap-2">
+                    <a id="photo-modal-download-btn" href="#" download="progress-photo.jpg" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5">
+                        <i class="fas fa-download text-[10px]"></i> Download
+                    </a>
+                    <button onclick="closePhotoViewerModal()" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold transition-colors">
+                        Done
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1008,6 +1106,130 @@
         </div>
     </div>
 
+    <!-- In-App Real-time Floating Toast Alert -->
+    <div id="notif-toast" class="fixed top-16 right-4 z-50 max-w-sm w-[92vw] sm:w-[380px] bg-[#1a0c33] border border-amber-500/40 rounded-2xl p-4 shadow-2xl transition-all duration-300 transform translate-y-[-140%] opacity-0 pointer-events-none flex items-start gap-3">
+        <div id="notif-toast-icon" class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30 shadow-inner">
+            <i class="fas fa-trophy text-lg"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between gap-1">
+                <span id="notif-toast-title" class="text-xs font-bold text-amber-400 uppercase tracking-wider truncate">Client Activity</span>
+                <span class="text-[10px] text-subtle">Just now</span>
+            </div>
+            <p id="notif-toast-message" class="text-sm font-medium text-white truncate mt-0.5">Workout finished</p>
+            <p id="notif-toast-details" class="text-xs text-subtle truncate mt-0.5"></p>
+            <div class="flex gap-2 mt-2.5">
+                <button id="notif-toast-action" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm">View Client</button>
+                <button onclick="dismissToast()" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-xs transition-colors">Dismiss</button>
+            </div>
+        </div>
+        <button onclick="dismissToast()" class="text-subtle hover:text-white transition-colors p-1 shrink-0">
+            <i class="fas fa-times text-xs"></i>
+        </button>
+    </div>
+
+    <!-- Notifications Drawer Backdrop -->
+    <div id="notifications-drawer-backdrop" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 hidden transition-opacity" onclick="toggleNotificationsDrawer(false)"></div>
+
+    <!-- Notifications Flyout Drawer -->
+    <div id="notifications-drawer" class="fixed top-0 right-0 bottom-0 w-full sm:w-[440px] bg-[#120724] border-l border-subtle z-50 flex flex-col shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out">
+        <!-- Drawer Header -->
+        <div class="p-4 border-b border-subtle flex items-center justify-between bg-[#190a30]">
+            <div class="flex items-center gap-2.5">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-sm">
+                    <i class="fas fa-bell text-base"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        Activity Alerts
+                        <span id="drawer-unread-pill" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">0 unread</span>
+                    </h3>
+                    <p class="text-xs text-subtle">Real-time client workouts & challenge events</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <button onclick="toggleNotificationSettings()" class="w-8 h-8 rounded-lg text-subtle hover:text-white hover:bg-white/5 flex items-center justify-center transition-colors" title="Notification Preferences & Webhook">
+                    <i class="fas fa-cog text-sm"></i>
+                </button>
+                <button onclick="toggleNotificationsDrawer(false)" class="w-8 h-8 rounded-lg text-subtle hover:text-white hover:bg-white/5 flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Notification Settings Collapsible Panel -->
+        <div id="notif-settings-panel" class="hidden p-4 bg-[#1b0a33] border-b border-subtle space-y-3 text-xs animate-in slide-in-from-top-2 duration-200">
+            <div class="flex items-center justify-between pb-1 border-b border-white/5">
+                <span class="font-bold text-amber-400 uppercase tracking-wider text-[11px] flex items-center gap-1.5">
+                    <i class="fas fa-sliders-h"></i> Notification Preferences
+                </span>
+                <button onclick="toggleNotificationSettings()" class="text-xs text-gray-400 hover:text-white">Close</button>
+            </div>
+            <!-- Browser Desktop Alerts -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-black/30 border border-subtle">
+                <div>
+                    <div class="font-semibold text-white">Browser Desktop Alerts</div>
+                    <div class="text-[11px] text-subtle" id="browser-perm-status">Popup notifications even when tab is minimized</div>
+                </div>
+                <button id="btn-toggle-desktop-alerts" onclick="toggleDesktopAlerts()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-white font-semibold text-xs transition-colors shadow-sm">
+                    Enable
+                </button>
+            </div>
+            <!-- Audio Chime -->
+            <div class="flex items-center justify-between p-2.5 rounded-xl bg-black/30 border border-subtle">
+                <div>
+                    <div class="font-semibold text-white">Audio Chime</div>
+                    <div class="text-[11px] text-subtle">Play soft chime sound when clients finish</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="playNotificationChime(true)" class="text-xs text-amber-400 hover:underline px-1.5 py-1">Test</button>
+                    <button id="btn-toggle-sound" onclick="toggleSoundAlerts()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-colors">
+                        Sound: ON
+                    </button>
+                </div>
+            </div>
+            <!-- External Webhook Integration -->
+            <div class="p-2.5 rounded-xl bg-black/30 border border-subtle space-y-1.5">
+                <div class="flex justify-between items-center">
+                    <span class="font-semibold text-white flex items-center gap-1.5">
+                        <i class="fas fa-satellite-dish text-purple-400"></i> External Webhook (Discord / Slack / Zapier)
+                    </span>
+                    <button onclick="testWebhook()" class="text-[11px] text-amber-400 hover:underline font-medium">Test Send</button>
+                </div>
+                <p class="text-[11px] text-subtle leading-relaxed">Send instant notifications to your Discord channel, Slack, or phone (via Zapier/Make webhook) even when you're completely offline!</p>
+                <input type="url" id="webhook-url-input" placeholder="https://discord.com/api/webhooks/... or Zapier webhook" onchange="saveWebhookUrl(this.value)" class="w-full bg-input border border-subtle rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors">
+            </div>
+        </div>
+
+        <!-- Filter tabs & Mark all read -->
+        <div class="px-4 py-2.5 bg-black/40 border-b border-subtle flex items-center justify-between text-xs">
+            <div class="flex gap-1.5 overflow-x-auto">
+                <button onclick="filterNotifications('all')" id="notif-filter-all" class="px-2.5 py-1 rounded-lg font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors">All</button>
+                <button onclick="filterNotifications('unread')" id="notif-filter-unread" class="px-2.5 py-1 rounded-lg font-medium text-subtle hover:text-white transition-colors">Unread</button>
+                <button onclick="filterNotifications('workouts')" id="notif-filter-workouts" class="px-2.5 py-1 rounded-lg font-medium text-subtle hover:text-white transition-colors">Workouts</button>
+                <button onclick="filterNotifications('challenge')" id="notif-filter-challenge" class="px-2.5 py-1 rounded-lg font-medium text-subtle hover:text-white transition-colors">Challenge</button>
+            </div>
+            <div>
+                <button onclick="markAllNotificationsRead()" class="text-[11px] text-amber-400 hover:text-amber-300 font-medium transition-colors">Mark all read</button>
+            </div>
+        </div>
+
+        <!-- Notifications List -->
+        <div id="notifications-list" class="flex-1 overflow-y-auto p-4 space-y-2.5">
+            <!-- Rendered by JS -->
+        </div>
+
+        <!-- Drawer Footer -->
+        <div class="p-3 border-t border-subtle bg-[#190a30] flex justify-between items-center text-xs">
+            <button onclick="sendTestNotification()" class="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-amber-400 border border-amber-500/30 font-medium transition-colors flex items-center gap-1.5">
+                <i class="fas fa-vial"></i> Send Test Notification
+            </button>
+            <button onclick="clearAllNotifications()" class="text-subtle hover:text-red-400 transition-colors">
+                Clear all
+            </button>
+        </div>
+    </div>
+
     <script type="importmap">
         {
             "imports": {
@@ -1018,7 +1240,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot, query, orderBy, getDocFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, limit, getDocFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { GoogleGenAI } from "@google/genai";
         import firebaseConfig from "./firebase-applet-config.json" with { type: "json" };
 
@@ -1158,6 +1380,528 @@
             }
         };
 
+        // ====================================================
+        // --- CREATOR / ADMIN ACTIVITY NOTIFICATIONS LOGIC ---
+        // ====================================================
+        let notifications = [];
+        let unsubscribeNotifications = null;
+        let initialNotifsLoaded = false;
+        let activeNotifFilter = 'all';
+        let toastDismissTimeout = null;
+
+        function formatRelativeTime(dateStr) {
+            if (!dateStr) return '';
+            try {
+                const date = new Date(dateStr);
+                const now = new Date();
+                const diffSec = Math.floor((now - date) / 1000);
+                if (diffSec < 45) return 'Just now';
+                if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+                if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+                if (diffSec < 172800) return 'Yesterday';
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            } catch (e) {
+                return dateStr;
+            }
+        }
+
+        function getNotificationIcon(type) {
+            switch(type) {
+                case 'workout_completed':
+                    return { icon: 'fa-dumbbell', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/30' };
+                case 'challenge_day_completed':
+                    return { icon: 'fa-trophy', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30' };
+                case 'challenge_task_completed':
+                    return { icon: 'fa-fire', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/30' };
+                case 'activity_logged':
+                    return { icon: 'fa-shoe-prints', color: 'text-indigo-400', bg: 'bg-indigo-500/10 border-indigo-500/30' };
+                default:
+                    return { icon: 'fa-bell', color: 'text-amber-400', bg: 'bg-amber-500/10 border-amber-500/30' };
+            }
+        }
+
+        window.toggleNotificationsDrawer = (forceOpen) => {
+            const drawer = document.getElementById('notifications-drawer');
+            const backdrop = document.getElementById('notifications-drawer-backdrop');
+            if (!drawer || !backdrop) return;
+
+            const isOpen = !drawer.classList.contains('translate-x-full');
+            const willOpen = forceOpen !== undefined ? forceOpen : !isOpen;
+
+            if (willOpen) {
+                backdrop.classList.remove('hidden');
+                drawer.classList.remove('translate-x-full');
+                renderNotificationsList();
+            } else {
+                drawer.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (drawer.classList.contains('translate-x-full')) {
+                        backdrop.classList.add('hidden');
+                    }
+                }, 300);
+            }
+        };
+
+        window.toggleNotificationSettings = () => {
+            const panel = document.getElementById('notif-settings-panel');
+            if (panel) {
+                panel.classList.toggle('hidden');
+            }
+        };
+
+        // Synthesized audio alert chime (no external audio files required)
+        window.playNotificationChime = (force) => {
+            if (!force && localStorage.getItem('fittrack_sound_enabled') === 'false') return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+
+                // Tone 1: 587.33 Hz (D5)
+                const osc1 = ctx.createOscillator();
+                const gain1 = ctx.createGain();
+                osc1.type = 'sine';
+                osc1.frequency.setValueAtTime(587.33, ctx.currentTime);
+                gain1.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain1.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+                osc1.connect(gain1);
+                gain1.connect(ctx.destination);
+                osc1.start();
+                osc1.stop(ctx.currentTime + 0.35);
+
+                // Tone 2: 880.00 Hz (A5)
+                const osc2 = ctx.createOscillator();
+                const gain2 = ctx.createGain();
+                osc2.type = 'sine';
+                osc2.frequency.setValueAtTime(880.00, ctx.currentTime + 0.12);
+                gain2.gain.setValueAtTime(0.15, ctx.currentTime + 0.12);
+                gain2.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.55);
+                osc2.connect(gain2);
+                gain2.connect(ctx.destination);
+                osc2.start(ctx.currentTime + 0.12);
+                osc2.stop(ctx.currentTime + 0.55);
+            } catch (err) {
+                console.warn("Audio playback failed:", err);
+            }
+        };
+
+        window.toggleDesktopAlerts = async () => {
+            if (!("Notification" in window)) {
+                alert("Your browser does not support desktop notifications.");
+                return;
+            }
+            if (Notification.permission === "granted") {
+                const current = localStorage.getItem('fittrack_desktop_alerts') !== 'false';
+                localStorage.setItem('fittrack_desktop_alerts', current ? 'false' : 'true');
+            } else if (Notification.permission !== "denied") {
+                const permission = await Notification.requestPermission();
+                if (permission === "granted") {
+                    localStorage.setItem('fittrack_desktop_alerts', 'true');
+                }
+            } else {
+                alert("Desktop notifications are blocked in your browser settings. Please enable them in your address bar/site settings.");
+            }
+            updateNotificationPreferencesUI();
+        };
+
+        window.toggleSoundAlerts = () => {
+            const current = localStorage.getItem('fittrack_sound_enabled') !== 'false';
+            localStorage.setItem('fittrack_sound_enabled', current ? 'false' : 'true');
+            updateNotificationPreferencesUI();
+        };
+
+        window.saveWebhookUrl = (url) => {
+            localStorage.setItem('fittrack_webhook_url', (url || '').trim());
+        };
+
+        window.testWebhook = async () => {
+            const url = localStorage.getItem('fittrack_webhook_url');
+            if (!url || !url.trim().startsWith('http')) {
+                alert("Please enter a valid webhook URL (e.g. Discord, Slack, or Zapier) first.");
+                return;
+            }
+            try {
+                const payload = {
+                    content: `🏋️ **FitTrack Test Alert**: Creator webhook integration is working successfully!`,
+                    text: `🏋️ FitTrack Test Alert: Creator webhook integration is working successfully!`,
+                    username: "FitTrack Coach Bot"
+                };
+                await fetch(url.trim(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                alert("Test webhook dispatched successfully! Check your Discord / Slack / Zapier destination.");
+            } catch (err) {
+                alert("Failed to send webhook: " + err.message);
+            }
+        };
+
+        function updateNotificationPreferencesUI() {
+            const permStatus = document.getElementById('browser-perm-status');
+            const btnDesktop = document.getElementById('btn-toggle-desktop-alerts');
+            const btnSound = document.getElementById('btn-toggle-sound');
+            const webhookInput = document.getElementById('webhook-url-input');
+
+            if (webhookInput) {
+                webhookInput.value = localStorage.getItem('fittrack_webhook_url') || '';
+            }
+
+            const soundEnabled = localStorage.getItem('fittrack_sound_enabled') !== 'false';
+            if (btnSound) {
+                btnSound.innerText = soundEnabled ? 'Sound: ON' : 'Sound: OFF';
+                btnSound.className = soundEnabled 
+                    ? 'px-3 py-1.5 rounded-lg bg-white/15 hover:bg-white/25 text-white font-semibold text-xs transition-colors'
+                    : 'px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-subtle font-semibold text-xs transition-colors';
+            }
+
+            if (!("Notification" in window)) {
+                if (permStatus) permStatus.innerText = 'Not supported by this browser';
+                if (btnDesktop) { btnDesktop.disabled = true; btnDesktop.innerText = 'Unsupported'; }
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                const alertsEnabled = localStorage.getItem('fittrack_desktop_alerts') !== 'false';
+                if (permStatus) permStatus.innerText = alertsEnabled ? 'Enabled & receiving desktop popups' : 'Disabled in preferences';
+                if (btnDesktop) {
+                    btnDesktop.innerText = alertsEnabled ? 'Active' : 'Disabled';
+                    btnDesktop.className = alertsEnabled 
+                        ? 'px-3 py-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-semibold text-xs transition-colors'
+                        : 'px-3 py-1.5 rounded-lg bg-white/10 text-gray-400 font-semibold text-xs transition-colors';
+                }
+            } else if (Notification.permission === 'denied') {
+                if (permStatus) permStatus.innerText = 'Blocked in browser permissions';
+                if (btnDesktop) {
+                    btnDesktop.innerText = 'Blocked';
+                    btnDesktop.className = 'px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/30 font-semibold text-xs transition-colors';
+                }
+            } else {
+                if (permStatus) permStatus.innerText = 'Click Enable to grant desktop permission';
+                if (btnDesktop) {
+                    btnDesktop.innerText = 'Enable';
+                    btnDesktop.className = 'px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-white font-semibold text-xs transition-colors shadow-sm';
+                }
+            }
+        }
+
+        window.showNotificationToast = (notif, id) => {
+            const toast = document.getElementById('notif-toast');
+            if (!toast) return;
+
+            const iconData = getNotificationIcon(notif.type);
+            const iconEl = document.getElementById('notif-toast-icon');
+            const titleEl = document.getElementById('notif-toast-title');
+            const msgEl = document.getElementById('notif-toast-message');
+            const detailsEl = document.getElementById('notif-toast-details');
+            const actionBtn = document.getElementById('notif-toast-action');
+
+            if (iconEl) {
+                iconEl.className = `w-10 h-10 rounded-xl ${iconData.bg} ${iconData.color} flex items-center justify-center shrink-0 border shadow-inner`;
+                iconEl.innerHTML = `<i class="fas ${iconData.icon} text-lg"></i>`;
+            }
+            if (titleEl) titleEl.innerText = notif.title || 'Client Activity';
+            if (msgEl) msgEl.innerText = notif.message || 'Activity completed';
+            if (detailsEl) detailsEl.innerText = notif.details || (notif.clientName ? `Client: ${notif.clientName}` : '');
+
+            if (actionBtn) {
+                actionBtn.onclick = () => handleNotificationClick({ id, ...notif });
+            }
+
+            toast.classList.remove('translate-y-[-140%]', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            if (toastDismissTimeout) clearTimeout(toastDismissTimeout);
+            toastDismissTimeout = setTimeout(() => {
+                dismissToast();
+            }, 8000);
+        };
+
+        window.dismissToast = () => {
+            const toast = document.getElementById('notif-toast');
+            if (!toast) return;
+            toast.classList.remove('translate-y-0', 'opacity-100');
+            toast.classList.add('translate-y-[-140%]', 'opacity-0', 'pointer-events-none');
+        };
+
+        function sendDesktopNotification(title, body, onClickData) {
+            if (!("Notification" in window)) return;
+            if (Notification.permission === "granted" && localStorage.getItem('fittrack_desktop_alerts') !== 'false') {
+                try {
+                    const notif = new Notification(`FitTrack: ${title}`, {
+                        body: body,
+                        icon: "https://api.iconify.design/heroicons:check-badge-solid.svg?color=%23f59e0b"
+                    });
+                    notif.onclick = () => {
+                        window.focus();
+                        if (onClickData) {
+                            handleNotificationClick(onClickData);
+                        }
+                    };
+                } catch (e) {
+                    console.warn("Desktop notification trigger failed:", e);
+                }
+            }
+        }
+
+        async function triggerExternalWebhook(notifDoc) {
+            const webhookUrl = localStorage.getItem('fittrack_webhook_url');
+            if (!webhookUrl || !webhookUrl.trim().startsWith('http')) return;
+            try {
+                const bodyData = {
+                    content: `🏋️ **FitTrack Alert**\n**${notifDoc.title}**\n${notifDoc.message}${notifDoc.details ? `\n_${notifDoc.details}_` : ''}`,
+                    text: `🏋️ FitTrack Alert: ${notifDoc.title} - ${notifDoc.message}`,
+                    username: "FitTrack Coach Bot"
+                };
+                await fetch(webhookUrl.trim(), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(bodyData)
+                });
+            } catch (err) {
+                console.warn("Webhook dispatch error:", err);
+            }
+        }
+
+        window.createClientNotification = async (data) => {
+            try {
+                const notifDoc = {
+                    type: data.type || 'workout_completed',
+                    clientEmail: (data.clientEmail || (currentUser ? currentUser.email : 'unknown')).toLowerCase(),
+                    clientName: data.clientName || (currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : 'Client'),
+                    title: data.title || 'Client Activity Completed',
+                    message: data.message || 'A client completed a workout or task.',
+                    details: data.details || '',
+                    workoutId: data.workoutId || '',
+                    date: data.date || formatDateString(new Date()),
+                    timestamp: new Date().toISOString(),
+                    read: false
+                };
+
+                // Add to firestore
+                await addDoc(collection(db, 'notifications'), notifDoc);
+
+                // Dispatch webhook if configured
+                triggerExternalWebhook(notifDoc);
+            } catch (err) {
+                console.error("Error creating notification:", err);
+            }
+        };
+
+        window.sendTestNotification = async () => {
+            const testClients = ['Sarah Lee', 'Marcus Thorne', 'Alex Chen'];
+            const randomClient = testClients[Math.floor(Math.random() * testClients.length)];
+            const testWorkouts = ['Leg Day Hypertrophy', 'Upper Body Strength A', '5KM Conditioning & Core'];
+            const randomWorkout = testWorkouts[Math.floor(Math.random() * testWorkouts.length)];
+            
+            await createClientNotification({
+                type: 'workout_completed',
+                clientEmail: 'sarah.client@example.com',
+                clientName: randomClient,
+                title: `Workout Finished: ${randomWorkout}`,
+                message: `${randomClient} completed "${randomWorkout}"!`,
+                details: '5 exercises logged • All sets completed',
+                date: formatDateString(new Date())
+            });
+        };
+
+        function subscribeToNotifications() {
+            if (unsubscribeNotifications) unsubscribeNotifications();
+            initialNotifsLoaded = false;
+
+            const notifsQuery = query(collection(db, 'notifications'), orderBy('timestamp', 'desc'), limit(50));
+            unsubscribeNotifications = onSnapshot(notifsQuery, (snapshot) => {
+                const newNotifs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                // If not initial load, detect added notifications
+                if (initialNotifsLoaded && snapshot.docChanges) {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const data = change.doc.data();
+                            playNotificationChime();
+                            showNotificationToast(data, change.doc.id);
+                            sendDesktopNotification(data.title, data.message, { id: change.doc.id, ...data });
+                        }
+                    });
+                }
+
+                notifications = newNotifs;
+                initialNotifsLoaded = true;
+                renderNotificationBadge();
+                renderNotificationsList();
+            }, (error) => {
+                console.error("Error fetching notifications:", error);
+                handleFirestoreError(error, OperationType.LIST, 'notifications');
+            });
+        }
+
+        window.renderNotificationBadge = () => {
+            const badge = document.getElementById('notif-badge');
+            const unreadPill = document.getElementById('drawer-unread-pill');
+            const unreadCount = notifications.filter(n => !n.read).length;
+
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.innerText = unreadCount > 9 ? '9+' : unreadCount;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            }
+
+            if (unreadPill) {
+                unreadPill.innerText = `${unreadCount} unread`;
+            }
+        };
+
+        window.renderNotificationsList = () => {
+            const listEl = document.getElementById('notifications-list');
+            if (!listEl) return;
+
+            let filtered = notifications;
+            if (activeNotifFilter === 'unread') {
+                filtered = notifications.filter(n => !n.read);
+            } else if (activeNotifFilter === 'workouts') {
+                filtered = notifications.filter(n => n.type === 'workout_completed');
+            } else if (activeNotifFilter === 'challenge') {
+                filtered = notifications.filter(n => n.type && n.type.startsWith('challenge'));
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-12 px-4 space-y-3">
+                        <div class="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-gray-400 mx-auto">
+                            <i class="fas fa-bell-slash text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-semibold text-white">No notifications yet</h4>
+                            <p class="text-xs text-subtle mt-1 max-w-xs mx-auto">When clients complete workouts or daily challenge milestones, real-time alerts will appear here.</p>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(notif => {
+                const iconData = getNotificationIcon(notif.type);
+                const timeAgo = formatRelativeTime(notif.timestamp);
+                const isUnread = !notif.read;
+                const notifJson = JSON.stringify(notif).replace(/"/g, '&quot;');
+
+                return `
+                    <div class="p-3 rounded-xl border transition-all ${isUnread ? 'bg-gradient-to-r from-amber-500/10 to-transparent border-amber-500/30' : 'bg-card border-subtle hover:border-white/20'} flex items-start gap-3 relative group">
+                        <div class="w-9 h-9 rounded-xl ${iconData.bg} border flex items-center justify-center shrink-0 ${iconData.color} mt-0.5 shadow-sm">
+                            <i class="fas ${iconData.icon} text-sm"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-xs font-bold text-white truncate flex items-center gap-1.5">
+                                    ${notif.clientName || 'Client'}
+                                    ${isUnread ? '<span class="w-2 h-2 rounded-full bg-amber-400 inline-block animate-pulse"></span>' : ''}
+                                </span>
+                                <span class="text-[10px] text-subtle shrink-0">${timeAgo}</span>
+                            </div>
+                            <p class="text-xs font-semibold text-amber-300/90 truncate mt-0.5">${notif.title || 'Activity Logged'}</p>
+                            <p class="text-xs text-gray-300 leading-relaxed mt-0.5">${notif.message || ''}</p>
+                            ${notif.details ? `<p class="text-[11px] text-subtle mt-0.5">${notif.details}</p>` : ''}
+                            
+                            <div class="flex items-center gap-2 mt-2 pt-1.5 border-t border-white/5">
+                                <button onclick="handleNotificationClick(${notifJson})" class="px-2.5 py-1 rounded-md bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 text-[11px] font-semibold transition-colors flex items-center gap-1">
+                                    <i class="fas fa-external-link-alt text-[10px]"></i> View Client
+                                </button>
+                                ${isUnread ? `
+                                    <button onclick="markNotificationRead('${notif.id}', event)" class="px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white text-[11px] transition-colors">
+                                        Mark read
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.filterNotifications = (filter) => {
+            activeNotifFilter = filter;
+            ['all', 'unread', 'workouts', 'challenge'].forEach(f => {
+                const btn = document.getElementById(`notif-filter-${f}`);
+                if (btn) {
+                    if (f === filter) {
+                        btn.className = 'px-2.5 py-1 rounded-lg font-semibold bg-amber-500/20 text-amber-400 border border-amber-500/30 transition-colors';
+                    } else {
+                        btn.className = 'px-2.5 py-1 rounded-lg font-medium text-subtle hover:text-white transition-colors';
+                    }
+                }
+            });
+            renderNotificationsList();
+        };
+
+        window.markNotificationRead = async (id, e) => {
+            if (e) e.stopPropagation();
+            if (!id) return;
+            try {
+                await updateDoc(doc(db, 'notifications', id), { read: true });
+            } catch (err) {
+                console.error("Error marking notification read:", err);
+            }
+        };
+
+        window.markAllNotificationsRead = async () => {
+            const unread = notifications.filter(n => !n.read);
+            if (unread.length === 0) return;
+            try {
+                await Promise.all(unread.map(n => updateDoc(doc(db, 'notifications', n.id), { read: true })));
+            } catch (err) {
+                console.error("Error marking all read:", err);
+            }
+        };
+
+        window.clearAllNotifications = async () => {
+            if (notifications.length === 0) return;
+            if (!confirm("Are you sure you want to clear all notifications?")) return;
+            try {
+                await Promise.all(notifications.map(n => deleteDoc(doc(db, 'notifications', n.id))));
+            } catch (err) {
+                console.error("Error clearing notifications:", err);
+            }
+        };
+
+        window.handleNotificationClick = async (notif) => {
+            if (!notif) return;
+            if (!notif.read && notif.id) {
+                markNotificationRead(notif.id);
+            }
+            toggleNotificationsDrawer(false);
+            dismissToast();
+
+            const targetEmail = notif.clientEmail;
+            if (!targetEmail) return;
+
+            if (notif.type === 'workout_completed') {
+                switchTab('workouts');
+                selectClientWorkouts(targetEmail);
+                if (notif.workoutId) {
+                    setTimeout(() => {
+                        openWorkout(notif.workoutId);
+                    }, 250);
+                }
+            } else if (notif.type && notif.type.startsWith('challenge')) {
+                switchTab('challenge');
+                selectChallengeClient(targetEmail);
+                if (notif.date) {
+                    setTimeout(() => {
+                        selectChallengeDate(notif.date);
+                    }, 250);
+                }
+            } else {
+                switchTab('dashboard');
+                selectClientWorkouts(targetEmail);
+            }
+        };
+
         onAuthStateChanged(auth, async (user) => {
             currentUser = user;
             if (user) {
@@ -1201,11 +1945,68 @@
                     document.getElementById('challenge-admin-selector')?.classList.remove('hidden');
                     btnDeleteWorkout.classList.remove('hidden');
                     btnEditWorkout.classList.remove('hidden');
+                    document.getElementById('btn-notifications')?.classList.remove('hidden');
+                    
+                    subscribeToNotifications();
+                    updateNotificationPreferencesUI();
                     
                     // Fetch all users for admin dropdowns
                     onSnapshot(collection(db, 'users'), (snapshot) => {
                         allUsers = snapshot.docs.map(doc => doc.data());
                         renderClientDropdowns();
+
+                        // Automatically sync client challenges so Log 2KM and Monday Yoga are the required tasks,
+                        // and Water, Clean Diet, and Progress Picture (with camera indicator) are available as optional tasks
+                        snapshot.docs.forEach(d => {
+                            const data = d.data();
+                            const uEmail = (data.email || d.id || '').toLowerCase();
+                            const uName = (data.name || '').toLowerCase();
+                            const isAlli = uEmail.includes('alli') || uName.includes('alli');
+                            
+                            const standardTasks = [
+                                { id: 'task_2km', title: 'Log 2KM Walk / Run', type: 'distance', target: 2.0, unit: 'km', required: true, reminder: '' },
+                                { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, required: true, reminder: '' },
+                                { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', optional: true, reminder: '' },
+                                { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', optional: true, reminder: '' },
+                                { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, optional: true, reminder: '' }
+                            ];
+
+                            if (data.challenge) {
+                                const currentTasks = data.challenge.tasks || [];
+                                const hasOptional = currentTasks.some(t => t.id === 'task_water');
+                                if (!hasOptional || (isAlli && !data.challenge.enabled)) {
+                                    const kmTarget = Number(data.challenge.dailyKmTarget) || 2.0;
+                                    const cleanedConfig = {
+                                        ...data.challenge,
+                                        enabled: true,
+                                        dailyKmTarget: kmTarget,
+                                        mondayYoga: true,
+                                        tasks: [
+                                            { id: 'task_2km', title: `Log ${kmTarget}KM Walk / Run`, type: 'distance', target: kmTarget, unit: 'km', required: true, reminder: '' },
+                                            { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, required: true, reminder: '' },
+                                            { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', optional: true, reminder: '' },
+                                            { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', optional: true, reminder: '' },
+                                            { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, optional: true, reminder: '' }
+                                        ]
+                                    };
+                                    setDoc(doc(db, 'users', uEmail), { challenge: cleanedConfig }, { merge: true })
+                                        .catch(err => console.warn("Task auto-cleanup write deferred:", err));
+                                }
+                            } else if (isAlli) {
+                                const defaultConfig = {
+                                    enabled: true,
+                                    title: 'October 2KM & Monday Yoga Challenge',
+                                    type: 'daily_challenge',
+                                    startDate: '2026-10-01',
+                                    endDate: '2026-10-31',
+                                    dailyKmTarget: 2.0,
+                                    mondayYoga: true,
+                                    tasks: standardTasks
+                                };
+                                setDoc(doc(db, 'users', uEmail), { challenge: defaultConfig }, { merge: true })
+                                    .catch(err => console.warn("Alli challenge auto-init deferred:", err));
+                            }
+                        });
                     }, (error) => {
                         console.error("Error fetching users:", error);
                         alert("Failed to fetch users: " + error.message);
@@ -1232,6 +2033,13 @@
                     document.getElementById('challenge-admin-selector')?.classList.add('hidden');
                     btnDeleteWorkout.classList.add('hidden');
                     btnEditWorkout.classList.add('hidden');
+                    document.getElementById('btn-notifications')?.classList.add('hidden');
+                    if (unsubscribeNotifications) {
+                        unsubscribeNotifications();
+                        unsubscribeNotifications = null;
+                    }
+                    notifications = [];
+                    renderNotificationBadge();
                     currentViewUid = userEmail;
                     subscribeToWorkouts(userEmail);
                     subscribeToActivityLogs(userEmail);
@@ -1262,6 +2070,13 @@
                 document.getElementById('challenge-admin-selector')?.classList.add('hidden');
                 btnDeleteWorkout.classList.add('hidden');
                 btnEditWorkout.classList.add('hidden');
+                document.getElementById('btn-notifications')?.classList.add('hidden');
+                if (unsubscribeNotifications) {
+                    unsubscribeNotifications();
+                    unsubscribeNotifications = null;
+                }
+                notifications = [];
+                renderNotificationBadge();
                 
                 authContainer.innerHTML = `
                     <button onclick="login()" class="text-sm bg-amber-500 hover:bg-amber-400 text-white px-3 py-1 rounded transition-colors">Login</button>
@@ -2517,6 +3332,11 @@
                     updatedTasks.task_2km = true;
                 }
 
+                // Check if day is complete based strictly on 2KM and Monday Yoga
+                const dObj = parseDateString(dateKey);
+                const isMon = dObj.getDay() === 1;
+                const isDayComplete = updatedTasks.task_2km === true && (!isMon || updatedTasks.task_yoga === true);
+
                 const updatedData = {
                     ...existing,
                     date: dateKey,
@@ -2524,6 +3344,7 @@
                     km: kmVal,
                     kmLogged: kmVal,
                     tasksCompleted: updatedTasks,
+                    completed: isDayComplete,
                     updatedAt: new Date().toISOString()
                 };
 
@@ -2533,6 +3354,30 @@
                 }
 
                 await setDoc(doc(db, 'users', targetEmail, 'challengeLogs', dateKey), updatedData, { merge: true });
+
+                const clientName = (currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : 'Client');
+                if (isDayComplete && !existing.completed) {
+                    await createClientNotification({
+                        type: 'challenge_day_completed',
+                        clientEmail: targetEmail,
+                        clientName: clientName,
+                        title: 'Daily Challenge Complete!',
+                        message: `${clientName} completed all required challenge tasks for ${dateKey}!`,
+                        details: isMon ? '2KM Run/Walk & Monday Yoga finished' : `${kmVal.toFixed(1)}KM Run/Walk finished`,
+                        date: dateKey
+                    });
+                } else if (stepsVal >= 10000 && (!existing.steps || Number(existing.steps) < 10000)) {
+                    await createClientNotification({
+                        type: 'activity_logged',
+                        clientEmail: targetEmail,
+                        clientName: clientName,
+                        title: '10,000 Steps Milestone Hit!',
+                        message: `${clientName} reached ${stepsVal.toLocaleString()} steps today!`,
+                        details: `${kmVal.toFixed(1)} KM logged • ${dateKey}`,
+                        date: dateKey
+                    });
+                }
+
                 closeLogActivityModal();
                 renderDashboard();
                 if (viewChallenge && !viewChallenge.classList.contains('hidden')) {
@@ -2618,6 +3463,21 @@
             if (w) {
                 try {
                     await setDoc(doc(db, 'users', currentViewUid, 'workouts', activeWorkoutId), { completed: true }, { merge: true });
+                    
+                    // Trigger creator notification
+                    const clientName = currentUser.displayName || currentUser.email.split('@')[0];
+                    const numEx = (w.exercises || []).length;
+                    await createClientNotification({
+                        type: 'workout_completed',
+                        clientEmail: currentViewUid,
+                        clientName: clientName,
+                        title: `Workout Completed: ${w.title || 'Workout'}`,
+                        message: `${clientName} finished "${w.title || 'Workout'}"!`,
+                        details: `${numEx} exercises logged`,
+                        workoutId: activeWorkoutId,
+                        date: w.date || formatDateString(new Date())
+                    });
+
                     closeWorkout();
                 } catch (error) {
                     handleFirestoreError(error, OperationType.UPDATE, `users/${currentViewUid}/workouts/${activeWorkoutId}`);
@@ -3310,24 +4170,24 @@
         };
 
         // ==========================================
-        // --- 75 HARD STYLE CHALLENGE TRACKER LOGIC ---
+        // --- DAILY CHALLENGE TRACKER LOGIC ---
         // ==========================================
 
         window.getDefaultOctoberChallengeConfig = () => {
             return {
                 enabled: true,
                 title: 'October 2KM & Monday Yoga Challenge',
-                type: '75_hard',
+                type: 'daily_challenge',
                 startDate: '2026-10-01',
                 endDate: '2026-10-31',
                 dailyKmTarget: 2.0,
                 mondayYoga: true,
                 tasks: [
-                    { id: 'task_2km', title: 'Log 2KM Walk / Run', type: 'distance', target: 2.0, unit: 'km', reminder: '' },
-                    { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, reminder: '' },
-                    { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', reminder: '' },
-                    { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', reminder: '' },
-                    { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, reminder: '' }
+                    { id: 'task_2km', title: 'Log 2KM Walk / Run', type: 'distance', target: 2.0, unit: 'km', required: true, reminder: '' },
+                    { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, required: true, reminder: '' },
+                    { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', optional: true, reminder: '' },
+                    { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', optional: true, reminder: '' },
+                    { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, optional: true, reminder: '' }
                 ]
             };
         };
@@ -3361,14 +4221,32 @@
             unsubscribeChallengeConfig = onSnapshot(doc(db, 'users', currentChallengeEmail), (docSnap) => {
                 if (docSnap.exists() && docSnap.data().challenge) {
                     clientChallengeConfig = docSnap.data().challenge;
-                    // Normalize tasks: remove daily workout, reading, no-cheats, ensure 2 litres water
+                    const targetKm = Number(clientChallengeConfig.dailyKmTarget) || 2.0;
+
+                    // Preserve any custom reminders
+                    const taskReminders = {};
                     if (Array.isArray(clientChallengeConfig.tasks)) {
-                        clientChallengeConfig.tasks = clientChallengeConfig.tasks
-                            .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats')
-                            .map(t => {
-                                if (t.id === 'task_water') return { ...t, title: 'Drink 2 litres of Water' };
-                                return t;
-                            });
+                        clientChallengeConfig.tasks.forEach(t => { if (t.reminder) taskReminders[t.id] = t.reminder; });
+                    }
+
+                    const standardTasks = [
+                        { id: 'task_2km', title: `Log ${targetKm}KM Walk / Run`, type: 'distance', target: targetKm, unit: 'km', required: true, reminder: taskReminders['task_2km'] || '' },
+                        { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, required: true, reminder: taskReminders['task_yoga'] || '' },
+                        { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', optional: true, reminder: taskReminders['task_water'] || '' },
+                        { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', optional: true, reminder: taskReminders['task_diet'] || '' },
+                        { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, optional: true, reminder: taskReminders['task_picture'] || '' }
+                    ];
+
+                    const missingOptional = !Array.isArray(clientChallengeConfig.tasks) || !clientChallengeConfig.tasks.some(t => t.id === 'task_water');
+                    clientChallengeConfig.tasks = standardTasks;
+
+                    if (missingOptional && (isAdmin || (currentUser && currentUser.email.toLowerCase() === currentChallengeEmail))) {
+                        setDoc(doc(db, 'users', currentChallengeEmail), {
+                            challenge: {
+                                ...clientChallengeConfig,
+                                tasks: standardTasks
+                            }
+                        }, { merge: true }).catch(err => console.warn("Task auto-sync write deferred:", err));
                     }
                 } else {
                     clientChallengeConfig = null;
@@ -3519,14 +4397,15 @@
                 }
             }
 
-            // 3. Render 75-Hard Tasks List (Matching user uploaded image)
+            // 3. Render Daily Challenge Tasks List (Required 2KM & Monday Yoga + Optional Water, Clean Diet, Progress Picture)
             const tasksListContainer = document.getElementById('challenge-tasks-list');
-            const tasks = (clientChallengeConfig.tasks || [])
-                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats')
-                .map(t => {
-                    if (t.id === 'task_water') return { ...t, title: 'Drink 2 litres of Water' };
-                    return t;
-                });
+            const tasks = [
+                { id: 'task_2km', title: `Log ${targetKm}KM Walk / Run`, type: 'distance', target: targetKm, unit: 'km', required: true, icon: 'fas fa-running text-amber-400' },
+                { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, required: true, icon: 'fas fa-spa text-purple-400' },
+                { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', optional: true, icon: 'fas fa-tint text-blue-400' },
+                { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', optional: true, icon: 'fas fa-apple-alt text-emerald-400' },
+                { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, optional: true, icon: 'fas fa-camera text-amber-400' }
+            ];
             
             if (tasksListContainer) {
                 tasksListContainer.innerHTML = tasks.map(task => {
@@ -3535,6 +4414,11 @@
                     
                     // Task label badges
                     let extraBadge = '';
+                    let cameraIndicator = '';
+                    if (task.hasCamera) {
+                        cameraIndicator = `<span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/30 mr-1.5 shadow-sm"><i class="fas fa-camera text-[10px] text-amber-400"></i> Camera</span>`;
+                    }
+
                     if (task.id === 'task_2km') {
                         extraBadge = `<span class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${loggedKm >= targetKm ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 text-gray-400'}">${loggedKm.toFixed(1)} / ${targetKm.toFixed(1)} KM</span>`;
                     } else if (task.id === 'task_yoga') {
@@ -3543,6 +4427,8 @@
                         } else {
                             extraBadge = `<span class="ml-2 text-[10px] font-normal text-gray-500">(Mondays Only)</span>`;
                         }
+                    } else if (task.optional) {
+                        extraBadge = `<span class="ml-2 text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Optional</span>`;
                     }
 
                     // Checkbox button styling matching reference image (circular border or solid red with checkmark)
@@ -3553,28 +4439,50 @@
                         : `<button onclick="toggleChallengeTask('${task.id}')" class="w-8 h-8 rounded-full border-2 border-gray-600 hover:border-amber-400 bg-transparent flex items-center justify-center cursor-pointer transition-colors shrink-0">
                            </button>`;
 
-                    const cameraIcon = task.hasCamera ? `<i class="fas fa-camera text-gray-400 mr-2 text-sm"></i>` : '';
-
                     return `
-                        <div class="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition-colors">
+                        <div class="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.03] last:border-b-0">
                             <div class="flex items-center gap-3.5 flex-1 min-w-0">
                                 ${checkBtn}
                                 <div class="min-w-0 flex-1">
                                     <div class="flex items-center flex-wrap gap-1">
-                                        ${cameraIcon}
-                                        <span class="text-sm font-semibold ${isDone ? 'text-gray-400 line-through' : 'text-white'} transition-colors">
-                                            ${task.title}
+                                        <span class="text-sm font-semibold ${isDone ? 'text-gray-400 line-through' : 'text-white'} transition-colors inline-flex items-center gap-1 flex-wrap">
+                                            <i class="${task.icon} mr-1 text-xs"></i>
+                                            ${cameraIndicator}
+                                            <span>${task.title}</span>
                                         </span>
                                         ${extraBadge}
                                     </div>
-                                    <div class="mt-0.5">
+                                    <div class="mt-0.5 flex items-center gap-3">
                                         <button onclick="openTaskReminderModal('${task.id}', '${task.title.replace(/'/g, "\\'")}')" class="text-[11px] text-gray-500 hover:text-amber-400 transition-colors inline-flex items-center gap-1">
                                             <i class="far fa-clock text-[10px]"></i>
                                             ${reminderNote ? `<span class="text-amber-400/90 font-medium">${reminderNote}</span>` : 'Add Reminder'}
                                         </button>
+                                        ${task.hasCamera ? (currentLog.progressPicture ? `
+                                            <div class="flex items-center gap-2">
+                                                <button onclick="openPhotoViewerModal('${selectedChallengeDate}')" class="text-[11px] text-purple-300 hover:text-white font-medium inline-flex items-center gap-1 bg-purple-500/15 hover:bg-purple-500/25 px-2 py-0.5 rounded border border-purple-500/30 transition-colors">
+                                                    <i class="fas fa-eye text-[10px]"></i> View Photo
+                                                </button>
+                                                <label class="text-[11px] text-gray-400 hover:text-white transition-colors cursor-pointer inline-flex items-center gap-1">
+                                                    <i class="fas fa-redo text-[9px]"></i> Retake <input type="file" accept="image/*" class="hidden" onchange="uploadProgressPhoto(event)">
+                                                </label>
+                                                <button onclick="removeProgressPhoto('${selectedChallengeDate}')" class="text-[11px] text-red-400/80 hover:text-red-300 transition-colors">
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        ` : `
+                                            <label class="text-[11px] text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-1 cursor-pointer bg-purple-500/10 hover:bg-purple-500/20 px-2 py-0.5 rounded border border-purple-500/20 font-medium">
+                                                <i class="fas fa-camera text-[10px]"></i> Take / Upload Photo
+                                                <input type="file" accept="image/*" class="hidden" onchange="uploadProgressPhoto(event)">
+                                            </label>
+                                        `) : ''}
                                     </div>
                                 </div>
                             </div>
+                            ${task.hasCamera && currentLog.progressPicture ? `
+                                <div class="shrink-0 pl-2">
+                                    <img src="${currentLog.progressPicture}" onclick="openPhotoViewerModal('${selectedChallengeDate}')" class="w-10 h-10 rounded-xl object-cover border border-purple-400/40 cursor-pointer hover:scale-105 hover:border-purple-300 transition-all shadow-md" title="Click to view full photo">
+                                </div>
+                            ` : ''}
                         </div>
                     `;
                 }).join('');
@@ -3582,17 +4490,20 @@
 
             // 4. Progress, Completion & Streak Calculation
             // Active required tasks:
-            // If Monday, yoga is required. If not Monday, yoga is excluded from required count unless completed.
-            const requiredTasks = tasks.filter(t => {
-                if (t.id === 'task_yoga') return isMonday;
-                return true;
-            });
+            // On Mondays: Both 2KM Walk/Run and Monday Yoga Session are required.
+            // On other days (Tue-Sun): ONLY 2KM Walk/Run is required.
+            const requiredTasks = isMonday ? tasks.filter(t => t.id === 'task_2km' || t.id === 'task_yoga') : tasks.filter(t => t.id === 'task_2km');
             const completedCount = requiredTasks.filter(t => tasksCompleted[t.id]).length;
             const totalRequired = requiredTasks.length;
             const percentage = totalRequired > 0 ? Math.round((completedCount / totalRequired) * 100) : 0;
 
+            const optionalTasks = tasks.filter(t => t.optional);
+            const completedOptional = optionalTasks.filter(t => tasksCompleted[t.id]).length;
+
             const counterEl = document.getElementById('challenge-completion-counter');
-            if (counterEl) counterEl.innerText = `${completedCount}/${totalRequired} done (${percentage}%)`;
+            if (counterEl) {
+                counterEl.innerHTML = `<span class="${percentage === 100 ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}">${completedCount}/${totalRequired} Required (${percentage}%)</span> <span class="text-gray-500 mx-1">•</span> <span class="text-gray-400 text-xs">${completedOptional}/3 Optional</span>`;
+            }
 
             const progressBar = document.getElementById('challenge-day-progressbar');
             if (progressBar) progressBar.style.width = `${percentage}%`;
@@ -3601,6 +4512,31 @@
             if (completeBanner) {
                 if (percentage === 100 && totalRequired > 0) {
                     completeBanner.classList.remove('hidden');
+                    if (completedOptional === 3) {
+                        completeBanner.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-amber-400/20 text-amber-300 flex items-center justify-center shrink-0 text-sm">
+                                    <i class="fas fa-crown"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-white">Flawless Day Complete! ⭐</div>
+                                    <div class="text-xs text-amber-200/80">All core tasks and all 3 optional habits finished!</div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        completeBanner.innerHTML = `
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-sm">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-white">Daily Challenge Complete!</div>
+                                    <div class="text-xs text-emerald-300/80">Required tasks finished! (${completedOptional}/3 optional habits logged)</div>
+                                </div>
+                            </div>
+                        `;
+                    }
                 } else {
                     completeBanner.classList.add('hidden');
                 }
@@ -3634,8 +4570,8 @@
             let checkDate = parseDateString(referenceDateStr);
             let streakCount = 0;
 
-            // Check backwards day by day
-            for (let i = 0; i < 75; i++) {
+            // Check backwards day by day up to 90 days
+            for (let i = 0; i < 90; i++) {
                 const dateKey = formatDateString(checkDate);
                 const log = logs[dateKey];
                 
@@ -3655,7 +4591,7 @@
             return streakCount;
         }
 
-        // Toggle a task in the 75-Hard checklist
+        // Toggle a task in the daily challenge checklist
         window.toggleChallengeTask = async (taskId) => {
             if (!currentChallengeEmail || !clientChallengeConfig) return;
             
@@ -3683,12 +4619,11 @@
                 }
             }
 
-            // Calculate overall day completion
+            // Calculate overall day completion (Strictly Log 2KM Walk/Run and Monday Yoga)
             const currDateObj = parseDateString(selectedChallengeDate);
             const isMonday = currDateObj.getDay() === 1;
-            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats');
-            const requiredTasks = tasks.filter(t => t.id === 'task_yoga' ? isMonday : true);
-            const isDayComplete = requiredTasks.every(t => tasksCompleted[t.id] === true);
+            const requiredTaskIds = isMonday ? ['task_2km', 'task_yoga'] : ['task_2km'];
+            const isDayComplete = requiredTaskIds.every(tId => tasksCompleted[tId] === true);
 
             const updatedData = {
                 date: selectedChallengeDate,
@@ -3711,6 +4646,29 @@
                 renderChallengeView();
 
                 await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), updatedData, { merge: true });
+
+                const clientName = (currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : 'Client');
+                if (isDayComplete && !currentLog.completed) {
+                    await createClientNotification({
+                        type: 'challenge_day_completed',
+                        clientEmail: currentChallengeEmail,
+                        clientName: clientName,
+                        title: `Challenge Day ${updatedData.dayNumber} Complete!`,
+                        message: `${clientName} completed all required tasks for Day ${updatedData.dayNumber}!`,
+                        details: `Daily Challenge 100% finished • ${selectedChallengeDate}`,
+                        date: selectedChallengeDate
+                    });
+                } else if (taskId === 'task_yoga' && willBeDone) {
+                    await createClientNotification({
+                        type: 'challenge_task_completed',
+                        clientEmail: currentChallengeEmail,
+                        clientName: clientName,
+                        title: 'Monday Yoga Completed',
+                        message: `${clientName} finished their weekly recovery Yoga session!`,
+                        details: `Recovery milestone • ${selectedChallengeDate}`,
+                        date: selectedChallengeDate
+                    });
+                }
             } catch (err) {
                 console.error("Error updating challenge task:", err);
                 handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${selectedChallengeDate}`);
@@ -3751,9 +4709,8 @@
 
             const currDateObj = parseDateString(selectedChallengeDate);
             const isMonday = currDateObj.getDay() === 1;
-            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats');
-            const requiredTasks = tasks.filter(t => t.id === 'task_yoga' ? isMonday : true);
-            const isDayComplete = requiredTasks.every(t => tasksCompleted[t.id] === true);
+            const requiredTaskIds = isMonday ? ['task_2km', 'task_yoga'] : ['task_2km'];
+            const isDayComplete = requiredTaskIds.every(tId => tasksCompleted[tId] === true);
 
             const updatedData = {
                 date: selectedChallengeDate,
@@ -3775,6 +4732,29 @@
                 renderChallengeView();
 
                 await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), updatedData, { merge: true });
+
+                const clientName = (currentUser ? (currentUser.displayName || currentUser.email.split('@')[0]) : 'Client');
+                if (val >= targetKm && (!currentLog.km || currentLog.km < targetKm)) {
+                    await createClientNotification({
+                        type: 'challenge_task_completed',
+                        clientEmail: currentChallengeEmail,
+                        clientName: clientName,
+                        title: `${targetKm.toFixed(1)}KM Target Logged`,
+                        message: `${clientName} logged ${val.toFixed(1)} KM for the challenge!`,
+                        details: `Daily target: ${targetKm.toFixed(1)} KM • ${selectedChallengeDate}`,
+                        date: selectedChallengeDate
+                    });
+                } else if (isDayComplete && !currentLog.completed) {
+                    await createClientNotification({
+                        type: 'challenge_day_completed',
+                        clientEmail: currentChallengeEmail,
+                        clientName: clientName,
+                        title: `Challenge Day ${updatedData.dayNumber} Complete!`,
+                        message: `${clientName} completed all tasks for Day ${updatedData.dayNumber}!`,
+                        details: `Daily Challenge 100% finished • ${selectedChallengeDate}`,
+                        date: selectedChallengeDate
+                    });
+                }
             } catch (err) {
                 handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${selectedChallengeDate}`);
             }
@@ -3936,25 +4916,19 @@
             const dailyKmTarget = parseFloat(document.getElementById('cfg-daily-km').value) || 2.0;
             const mondayYoga = document.getElementById('cfg-monday-yoga').checked;
 
-            const existingTasks = (clientChallengeConfig && clientChallengeConfig.tasks) || getDefaultOctoberChallengeConfig().tasks;
-            
-            // Sync tasks target & clean up removed habits
-            const updatedTasks = existingTasks
-                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats')
-                .map(t => {
-                    if (t.id === 'task_2km') {
-                        return { ...t, target: dailyKmTarget, title: `Log ${dailyKmTarget}KM Walk / Run` };
-                    }
-                    if (t.id === 'task_water') {
-                        return { ...t, title: 'Drink 2 litres of Water' };
-                    }
-                    return t;
-                });
+            // Save core required tasks + optional habits
+            const updatedTasks = [
+                { id: 'task_2km', title: `Log ${dailyKmTarget}KM Walk / Run`, type: 'distance', target: dailyKmTarget, unit: 'km', required: true, reminder: '' },
+                { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, required: true, reminder: '' },
+                { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', optional: true, reminder: '' },
+                { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', optional: true, reminder: '' },
+                { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, optional: true, reminder: '' }
+            ];
 
             const newConfig = {
                 enabled: enabled,
                 title: title,
-                type: '75_hard',
+                type: 'daily_challenge',
                 startDate: startDate,
                 endDate: endDate,
                 dailyKmTarget: dailyKmTarget,
@@ -3992,6 +4966,209 @@
             } catch (err) {
                 handleFirestoreError(err, OperationType.WRITE, 'users/' + currentChallengeEmail);
             }
+        };
+
+        // Progress Photo Upload for Optional Task
+        window.uploadProgressPhoto = (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file || !currentChallengeEmail) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                const img = new Image();
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 480;
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxDim) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        }
+                    } else {
+                        if (height > maxDim) {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const thumbData = canvas.toDataURL('image/jpeg', 0.7);
+
+                    const currentLog = challengeLogs[selectedChallengeDate] || {
+                        date: selectedChallengeDate,
+                        tasksCompleted: {},
+                        notes: '',
+                        reminders: {}
+                    };
+                    const tasksCompleted = { ...(currentLog.tasksCompleted || {}) };
+                    tasksCompleted['task_picture'] = true;
+
+                    const updatedData = {
+                        ...currentLog,
+                        progressPicture: thumbData,
+                        tasksCompleted: tasksCompleted,
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    challengeLogs[selectedChallengeDate] = updatedData;
+                    renderChallengeView();
+
+                    // If gallery is open, update it
+                    const galleryModal = document.getElementById('challenge-gallery-modal');
+                    if (galleryModal && !galleryModal.classList.contains('hidden')) {
+                        openChallengeGalleryModal();
+                    }
+
+                    try {
+                        await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), updatedData, { merge: true });
+                    } catch (err) {
+                        console.error("Error saving progress photo:", err);
+                        handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${selectedChallengeDate}`);
+                    }
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.removeProgressPhoto = async (dateKey) => {
+            if (!currentChallengeEmail || !dateKey) return;
+            if (!confirm("Are you sure you want to remove this progress photo?")) return;
+
+            const currentLog = challengeLogs[dateKey] || {};
+            const updatedData = { ...currentLog };
+            delete updatedData.progressPicture;
+
+            challengeLogs[dateKey] = updatedData;
+            renderChallengeView();
+
+            const galleryModal = document.getElementById('challenge-gallery-modal');
+            if (galleryModal && !galleryModal.classList.contains('hidden')) {
+                openChallengeGalleryModal();
+            }
+
+            try {
+                await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', dateKey), {
+                    progressPicture: null
+                }, { merge: true });
+            } catch (err) {
+                console.error("Error removing progress photo:", err);
+                handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${dateKey}`);
+            }
+        };
+
+        // Progress Photo Viewer Modal
+        window.openPhotoViewerModal = (dateKey) => {
+            const log = challengeLogs[dateKey];
+            if (!log || !log.progressPicture) return;
+
+            const dateObj = parseDateString(dateKey);
+            const dayNum = dateObj.getDate();
+            const dateStr = dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+
+            const client = allUsers.find(u => u.email === currentChallengeEmail);
+            const clientName = client ? client.name : currentChallengeEmail;
+
+            document.getElementById('photo-modal-title').innerText = `Progress Picture: Day ${dayNum}`;
+            document.getElementById('photo-modal-subtitle').innerText = `${clientName} • ${dateStr}`;
+            
+            const imgEl = document.getElementById('photo-modal-img');
+            imgEl.src = log.progressPicture;
+
+            const deleteBtn = document.getElementById('photo-modal-delete-btn');
+            deleteBtn.onclick = () => {
+                closePhotoViewerModal();
+                removeProgressPhoto(dateKey);
+            };
+
+            const downloadBtn = document.getElementById('photo-modal-download-btn');
+            downloadBtn.href = log.progressPicture;
+            downloadBtn.download = `progress-photo-${currentChallengeEmail}-${dateKey}.jpg`;
+
+            document.getElementById('challenge-photo-modal').classList.remove('hidden');
+        };
+
+        window.closePhotoViewerModal = () => {
+            document.getElementById('challenge-photo-modal').classList.add('hidden');
+        };
+
+        // Progress Photos Gallery Modal
+        window.openChallengeGalleryModal = () => {
+            const client = allUsers.find(u => u.email === currentChallengeEmail);
+            const clientName = client ? client.name : (currentChallengeEmail || 'Client');
+            
+            const subTitleEl = document.getElementById('gallery-modal-subtitle');
+            if (subTitleEl) subTitleEl.innerText = `Client: ${clientName}`;
+
+            const photoEntries = [];
+            Object.keys(challengeLogs || {}).forEach(dateKey => {
+                if (challengeLogs[dateKey] && challengeLogs[dateKey].progressPicture) {
+                    photoEntries.push({
+                        dateKey: dateKey,
+                        photo: challengeLogs[dateKey].progressPicture,
+                        dateObj: parseDateString(dateKey)
+                    });
+                }
+            });
+
+            // Sort chronologically
+            photoEntries.sort((a, b) => a.dateObj.getTime() - b.dateObj.getTime());
+
+            const countBadge = document.getElementById('gallery-modal-count');
+            if (countBadge) countBadge.innerText = `${photoEntries.length} ${photoEntries.length === 1 ? 'photo' : 'photos'}`;
+
+            const gridEl = document.getElementById('gallery-modal-grid');
+            if (!gridEl) return;
+
+            if (photoEntries.length === 0) {
+                gridEl.innerHTML = `
+                    <div class="col-span-full py-12 text-center space-y-3">
+                        <div class="w-12 h-12 mx-auto rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-xl">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                        <p class="text-sm font-semibold text-white">No Progress Photos Yet</p>
+                        <p class="text-xs text-gray-400 max-w-xs mx-auto">
+                            Whenever a progress picture is logged on any day in the October Challenge, it will appear here in this gallery!
+                        </p>
+                    </div>
+                `;
+            } else {
+                gridEl.innerHTML = photoEntries.map(entry => {
+                    const dayNum = entry.dateObj.getDate();
+                    const dayStr = entry.dateObj.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                    return `
+                        <div class="group relative bg-black/40 border border-white/10 rounded-xl overflow-hidden shadow-sm hover:border-purple-400/50 transition-all flex flex-col">
+                            <div class="relative aspect-square w-full bg-black/60 overflow-hidden cursor-pointer" onclick="openPhotoViewerModal('${entry.dateKey}')">
+                                <img src="${entry.photo}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" alt="Progress Photo Day ${dayNum}">
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                    <span class="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center backdrop-blur-sm">
+                                        <i class="fas fa-search-plus text-xs"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-2.5 flex items-center justify-between bg-[#130b20]">
+                                <div>
+                                    <div class="text-xs font-bold text-white">Day ${dayNum}</div>
+                                    <div class="text-[10px] text-gray-400">${dayStr}</div>
+                                </div>
+                                <button onclick="openPhotoViewerModal('${entry.dateKey}')" class="text-xs text-purple-400 hover:text-purple-300 font-medium px-2 py-1 rounded bg-purple-500/10 hover:bg-purple-500/20 transition-colors">
+                                    View
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            document.getElementById('challenge-gallery-modal').classList.remove('hidden');
+        };
+
+        window.closeChallengeGalleryModal = () => {
+            document.getElementById('challenge-gallery-modal').classList.add('hidden');
         };
 
         // Task Reminder Modal

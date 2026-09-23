@@ -11,7 +11,7 @@
         "lastLogin": { "type": "string", "format": "date-time" },
         "challenge": {
           "type": "object",
-          "description": "Optional challenge assigned to this client (e.g. October 2KM & Monday Yoga 75-Hard Challenge).",
+          "description": "Optional challenge assigned to this client (e.g. October 2KM & Monday Yoga Challenge).",
           "properties": {
             "enabled": { "type": "boolean" },
             "title": { "type": "string" },
@@ -31,7 +31,9 @@
                   "unit": { "type": "string" },
                   "mondayOnly": { "type": "boolean" },
                   "reminder": { "type": "string" },
-                  "hasCamera": { "type": "boolean" }
+                  "hasCamera": { "type": "boolean" },
+                  "optional": { "type": "boolean" },
+                  "required": { "type": "boolean" }
                 },
                 "required": ["id", "title"]
               }
@@ -153,6 +155,71 @@
         }
       },
       "required": ["title", "exercises"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "Activity alerts for the creator/admin when a client finishes workouts or completes challenge milestones.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of event: workout_completed, challenge_day_completed, challenge_task_completed, or activity_logged."
+        },
+        "clientEmail": {
+          "type": "string",
+          "description": "Email of the client who performed the action."
+        },
+        "clientName": {
+          "type": "string",
+          "description": "Display name of the client."
+        },
+        "title": {
+          "type": "string",
+          "description": "Short title of the event or workout name."
+        },
+        "message": {
+          "type": "string",
+          "description": "Human readable notification message."
+        },
+        "details": {
+          "type": "string",
+          "description": "Additional context or statistics."
+        },
+        "workoutId": {
+          "type": "string",
+          "description": "ID of the completed workout if applicable."
+        },
+        "date": {
+          "type": "string",
+          "description": "Date associated with the activity (YYYY-MM-DD)."
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO timestamp when the notification was created."
+        },
+        "read": {
+          "type": "boolean",
+          "description": "Whether the admin has marked this notification as read."
+        }
+      },
+      "required": ["type", "clientEmail", "message", "timestamp", "read"]
+    },
+    "ActivityLog": {
+      "title": "ActivityLog",
+      "description": "Daily movement and activity log for a client.",
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "loggedKm": {
+          "type": "number"
+        }
+      }
     }
   },
   "firestore": {
@@ -168,6 +235,12 @@
       },
       "description": "Workouts belonging to a specific user."
     },
+    "/users/{emailId}/activityLogs/{logId}": {
+      "schema": {
+        "$ref": "#/entities/ActivityLog"
+      },
+      "description": "Daily activity logs belonging to a user."
+    },
     "/users/{emailId}/challengeLogs/{logDate}": {
       "schema": {
         "$ref": "#/entities/ChallengeDailyLog"
@@ -179,6 +252,12 @@
         "$ref": "#/entities/WorkoutTemplate"
       },
       "description": "Reusable workout templates."
+    },
+    "/notifications/{notificationId}": {
+      "schema": {
+        "$ref": "#/entities/Notification"
+      },
+      "description": "Activity notifications for the admin/creator."
     }
   }
 }

@@ -8,15 +8,21 @@ service cloud.firestore {
     
     function isAdmin() {
       return isAuthenticated() && (
-        (request.auth.token.email != null && request.auth.token.email.lower() == 'franny.lee@gmail.com') ||
-        request.auth.uid == 'eD4wKO4EIxQ3CAHzdx6q9N2s4Jf2'
+        request.auth.uid == 'eD4wKO4EIxQ3CAHzdx6q9N2s4Jf2' ||
+        (request.auth.token.email != null && (
+          request.auth.token.email == 'franny.lee@gmail.com' ||
+          request.auth.token.email == 'Franny.lee@gmail.com'
+        ))
       );
     }
 
     function isOwner(emailId) {
       return isAuthenticated() && (
-        (request.auth.token.email != null && request.auth.token.email.lower() == emailId.lower()) ||
-        request.auth.uid == emailId
+        request.auth.uid == emailId ||
+        (request.auth.token.email != null && (
+          request.auth.token.email == emailId ||
+          request.auth.token.email.matches('(?i)' + emailId)
+        ))
       );
     }
 
@@ -27,12 +33,24 @@ service cloud.firestore {
         allow read, write: if isOwner(emailId) || isAdmin();
       }
 
+      match /activityLogs/{logId} {
+        allow read, write: if isOwner(emailId) || isAdmin();
+      }
+
       match /challengeLogs/{logDate} {
+        allow read, write: if isOwner(emailId) || isAdmin();
+      }
+
+      match /{allSubcollections=**} {
         allow read, write: if isOwner(emailId) || isAdmin();
       }
     }
     
     match /workoutTemplates/{templateId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /notifications/{notificationId} {
       allow read, write: if isAuthenticated();
     }
     
