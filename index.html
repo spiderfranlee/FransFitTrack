@@ -577,7 +577,6 @@
                         <div class="flex items-center gap-2"><i class="fas fa-check text-purple-400"></i> Monday Yoga Session (Active on Mondays)</div>
                         <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Drink 2 litres of Water</div>
                         <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Follow Clean Diet</div>
-                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> No Cheat Meals or Alcohol</div>
                         <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Take Daily Progress Picture</div>
                     </div>
                 </div>
@@ -2703,7 +2702,6 @@
                     { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, reminder: '' },
                     { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', reminder: '' },
                     { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', reminder: '' },
-                    { id: 'task_no_cheats', title: 'No Cheat Meals or Alcohol', type: 'check', reminder: '' },
                     { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, reminder: '' }
                 ]
             };
@@ -2738,13 +2736,12 @@
             unsubscribeChallengeConfig = onSnapshot(doc(db, 'users', currentChallengeEmail), (docSnap) => {
                 if (docSnap.exists() && docSnap.data().challenge) {
                     clientChallengeConfig = docSnap.data().challenge;
-                    // Normalize tasks: remove daily workout & reading, ensure 2 litres water
+                    // Normalize tasks: remove daily workout, reading, no-cheats, ensure 2 litres water
                     if (Array.isArray(clientChallengeConfig.tasks)) {
                         clientChallengeConfig.tasks = clientChallengeConfig.tasks
-                            .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading')
+                            .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats')
                             .map(t => {
                                 if (t.id === 'task_water') return { ...t, title: 'Drink 2 litres of Water' };
-                                if (t.id === 'task_no_cheats') return { ...t, title: 'No Cheat Meals or Alcohol' };
                                 return t;
                             });
                     }
@@ -2900,10 +2897,9 @@
             // 3. Render 75-Hard Tasks List (Matching user uploaded image)
             const tasksListContainer = document.getElementById('challenge-tasks-list');
             const tasks = (clientChallengeConfig.tasks || [])
-                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading')
+                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats')
                 .map(t => {
                     if (t.id === 'task_water') return { ...t, title: 'Drink 2 litres of Water' };
-                    if (t.id === 'task_no_cheats') return { ...t, title: 'No Cheat Meals or Alcohol' };
                     return t;
                 });
             
@@ -3077,7 +3073,7 @@
             // Calculate overall day completion
             const currDateObj = parseDateString(selectedChallengeDate);
             const isMonday = currDateObj.getDay() === 1;
-            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading');
+            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats');
             const requiredTasks = tasks.filter(t => t.id === 'task_yoga' ? isMonday : true);
             const isDayComplete = requiredTasks.every(t => tasksCompleted[t.id] === true);
 
@@ -3138,7 +3134,7 @@
 
             const currDateObj = parseDateString(selectedChallengeDate);
             const isMonday = currDateObj.getDay() === 1;
-            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading');
+            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats');
             const requiredTasks = tasks.filter(t => t.id === 'task_yoga' ? isMonday : true);
             const isDayComplete = requiredTasks.every(t => tasksCompleted[t.id] === true);
 
@@ -3324,16 +3320,13 @@
             
             // Sync tasks target & clean up removed habits
             const updatedTasks = existingTasks
-                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading')
+                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading' && t.id !== 'task_no_cheats')
                 .map(t => {
                     if (t.id === 'task_2km') {
                         return { ...t, target: dailyKmTarget, title: `Log ${dailyKmTarget}KM Walk / Run` };
                     }
                     if (t.id === 'task_water') {
                         return { ...t, title: 'Drink 2 litres of Water' };
-                    }
-                    if (t.id === 'task_no_cheats') {
-                        return { ...t, title: 'No Cheat Meals or Alcohol' };
                     }
                     return t;
                 });
