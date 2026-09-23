@@ -7,11 +7,17 @@ service cloud.firestore {
     }
     
     function isAdmin() {
-      return isAuthenticated() && (request.auth.token.email == 'franny.lee@gmail.com' || request.auth.uid == 'eD4wKO4EIxQ3CAHzdx6q9N2s4Jf2');
+      return isAuthenticated() && (
+        (request.auth.token.email != null && request.auth.token.email.lower() == 'franny.lee@gmail.com') ||
+        request.auth.uid == 'eD4wKO4EIxQ3CAHzdx6q9N2s4Jf2'
+      );
     }
 
     function isOwner(emailId) {
-      return isAuthenticated() && request.auth.token.email == emailId;
+      return isAuthenticated() && (
+        (request.auth.token.email != null && request.auth.token.email.lower() == emailId.lower()) ||
+        request.auth.uid == emailId
+      );
     }
 
     match /users/{emailId} {
@@ -20,10 +26,14 @@ service cloud.firestore {
       match /workouts/{workoutId} {
         allow read, write: if isOwner(emailId) || isAdmin();
       }
+
+      match /challengeLogs/{logDate} {
+        allow read, write: if isOwner(emailId) || isAdmin();
+      }
     }
     
     match /workoutTemplates/{templateId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if isAuthenticated();
     }
     
     // Allow the connection test to succeed for anyone
@@ -32,3 +42,4 @@ service cloud.firestore {
     }
   }
 }
+

@@ -8,9 +8,55 @@
         "uid": { "type": "string" },
         "email": { "type": "string" },
         "name": { "type": "string" },
-        "lastLogin": { "type": "string", "format": "date-time" }
+        "lastLogin": { "type": "string", "format": "date-time" },
+        "challenge": {
+          "type": "object",
+          "description": "Optional challenge assigned to this client (e.g. October 2KM & Monday Yoga 75-Hard Challenge).",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "title": { "type": "string" },
+            "startDate": { "type": "string" },
+            "endDate": { "type": "string" },
+            "dailyKmTarget": { "type": "number" },
+            "mondayYoga": { "type": "boolean" },
+            "tasks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": { "type": "string" },
+                  "title": { "type": "string" },
+                  "type": { "type": "string" },
+                  "target": { "type": "number" },
+                  "unit": { "type": "string" },
+                  "mondayOnly": { "type": "boolean" },
+                  "reminder": { "type": "string" },
+                  "hasCamera": { "type": "boolean" }
+                },
+                "required": ["id", "title"]
+              }
+            }
+          }
+        }
       },
       "required": ["email"]
+    },
+    "ChallengeDailyLog": {
+      "title": "ChallengeDailyLog",
+      "description": "A client's daily completion log for their active challenge.",
+      "type": "object",
+      "properties": {
+        "date": { "type": "string", "description": "Date of the log in YYYY-MM-DD format." },
+        "dayNumber": { "type": "integer", "description": "Sequential day number in the challenge (e.g. Day 1, Day 7)." },
+        "tasksCompleted": { "type": "object", "description": "Map of task IDs to true/false status." },
+        "kmLogged": { "type": "number", "description": "Total distance logged in kilometers for the day." },
+        "yogaCompleted": { "type": "boolean", "description": "Whether Monday yoga was finished." },
+        "notes": { "type": "string", "description": "Client or coach notes for the day." },
+        "progressPicture": { "type": "string", "description": "Optional picture upload or note." },
+        "completed": { "type": "boolean", "description": "Whether all required tasks for this day are finished." },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["date"]
     },
     "Workout": {
       "title": "Workout",
@@ -60,6 +106,51 @@
         }
       },
       "required": ["userEmail", "date", "title", "exercises", "results"]
+    },
+    "WorkoutTemplate": {
+      "title": "WorkoutTemplate",
+      "description": "A reusable workout template in the database.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the template.",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date and time the template was saved."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Coach's notes for the template."
+        },
+        "warmup": {
+          "type": "string",
+          "description": "Warm-up instructions for the template."
+        },
+        "cooldown": {
+          "type": "string",
+          "description": "Cooldown instructions for the template."
+        },
+        "exercises": {
+          "type": "array",
+          "description": "List of exercises in the template.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": { "type": "string" },
+              "label": { "type": "string" },
+              "name": { "type": "string" },
+              "prescription": { "type": "string" }
+            },
+            "required": ["id", "name"]
+          }
+        }
+      },
+      "required": ["title", "exercises"]
     }
   },
   "firestore": {
@@ -74,6 +165,18 @@
         "$ref": "#/entities/Workout"
       },
       "description": "Workouts belonging to a specific user."
+    },
+    "/users/{emailId}/challengeLogs/{logDate}": {
+      "schema": {
+        "$ref": "#/entities/ChallengeDailyLog"
+      },
+      "description": "Daily challenge logs for a user."
+    },
+    "/workoutTemplates/{templateId}": {
+      "schema": {
+        "$ref": "#/entities/WorkoutTemplate"
+      },
+      "description": "Reusable workout templates."
     }
   }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wife's Workouts</title>
+    <title>Fit Track</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -88,11 +88,12 @@
 <body class="pb-24">
     <header class="bg-[#1b0a33]/80 backdrop-blur-md border-b border-subtle sticky top-0 z-20 shadow-md">
         <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-white tracking-tight">Wife's Workouts</h1>
+            <h1 class="text-xl font-bold text-white tracking-tight">Fit Track</h1>
             <div class="flex gap-4 h-full items-center">
                 <div id="auth-container" class="mr-2"></div>
                 <button id="tab-dashboard" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Dashboard</button>
                 <button id="tab-workouts" class="h-full px-2 tab-active font-medium text-sm transition-colors">Workouts</button>
+                <button id="tab-challenge" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors flex items-center gap-1.5"><i class="fas fa-fire text-amber-500"></i> Challenge</button>
                 <button id="tab-creator" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Creator</button>
             </div>
         </div>
@@ -159,14 +160,55 @@
 
         <!-- Creator View -->
         <div id="creator-view" class="hidden space-y-4 animate-in fade-in duration-300">
-            <div class="flex gap-2">
-                <select id="c-template-select" onchange="loadTemplate(this.value)" class="flex-1 bg-input border border-subtle rounded px-3 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors shadow-sm">
-                    <option value="">Load from Database...</option>
-                </select>
-                <button onclick="saveAsTemplate()" class="bg-card border border-subtle hover:bg-[#3d2b5e] text-amber-500 hover:text-white px-4 rounded text-sm transition-colors shadow-sm whitespace-nowrap">
-                    <i class="fas fa-save"></i> Save to Database
-                </button>
+            <div class="flex flex-col sm:flex-row gap-2">
+                <div class="flex-1 flex gap-2">
+                    <select id="c-template-select" onchange="loadTemplate(this.value)" class="flex-1 bg-input border border-subtle rounded px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors shadow-sm">
+                        <option value="">Load from Database...</option>
+                    </select>
+                    <button onclick="openManageTemplatesModal()" class="bg-card border border-subtle hover:bg-[#3d2b5e] text-amber-400 hover:text-white px-3.5 py-2.5 rounded text-sm transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5" title="Manage and edit database templates">
+                        <i class="fas fa-layer-group"></i> <span class="hidden sm:inline">Manage</span>
+                    </button>
+                </div>
+                <div class="flex gap-2">
+                    <button id="btn-update-template" onclick="updateLoadedTemplate()" class="hidden bg-amber-500 hover:bg-amber-400 text-white px-3.5 py-2.5 rounded text-sm font-medium transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fas fa-sync-alt"></i> Update Template
+                    </button>
+                    <button onclick="saveAsTemplate()" class="bg-card border border-subtle hover:bg-[#3d2b5e] text-white px-3.5 py-2.5 rounded text-sm transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5" title="Save current exercises as a new template">
+                        <i class="fas fa-save text-amber-500"></i> Save New Template
+                    </button>
+                </div>
             </div>
+
+            <!-- Active Template Status Banner -->
+            <div id="active-template-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 animate-in fade-in duration-200">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                        <i class="fas fa-file-alt text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">Template Loaded</span>
+                            <span id="active-template-badge-time" class="text-[10px] text-gray-400"></span>
+                        </div>
+                        <h4 id="active-template-name" class="text-sm font-bold text-white truncate"></h4>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+                    <button onclick="openRenameModalForCurrent()" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5" title="Rename this template">
+                        <i class="fas fa-edit text-amber-400"></i> Rename
+                    </button>
+                    <button onclick="updateLoadedTemplate()" class="bg-amber-500 hover:bg-amber-400 text-white px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm" title="Save changes to this template in database">
+                        <i class="fas fa-check"></i> Save Changes
+                    </button>
+                    <button onclick="deleteLoadedTemplate()" class="bg-red-500/20 hover:bg-red-500/30 text-red-300 px-2.5 py-1.5 rounded-lg text-xs transition-colors flex items-center gap-1" title="Delete this template">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button onclick="unlinkLoadedTemplate()" class="text-gray-400 hover:text-white px-2 py-1.5 text-xs transition-colors" title="Unlink (work on unlinked workout)">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
             <select id="c-client-select" class="w-full bg-input border border-subtle rounded px-3 py-3 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors shadow-sm">
                 <option value="">Assign to Client...</option>
             </select>
@@ -193,6 +235,183 @@
             <div class="flex gap-3 mt-8">
                 <button id="btn-save-workout" onclick="saveWorkout()" class="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 rounded text-sm font-medium transition-colors shadow-sm">Save Workout</button>
                 <button onclick="clearCreator()" class="bg-card border border-subtle hover:bg-[#3d2b5e] text-white px-6 py-3 rounded text-sm font-medium transition-colors">Clear</button>
+            </div>
+        </div>
+
+        <!-- Challenge View (75 Hard Style Daily Checklist) -->
+        <div id="challenge-view" class="hidden space-y-4 animate-in fade-in duration-300">
+            <!-- Admin Client Switcher for Challenge if Coach is logged in -->
+            <div id="challenge-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm">
+                <div class="flex justify-between items-center mb-1.5">
+                    <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fas fa-user-shield"></i> Coach Mode: Select Client
+                    </span>
+                    <button onclick="openClientChallengeModal()" class="text-xs text-gray-300 hover:text-white transition-colors flex items-center gap-1">
+                        <i class="fas fa-sliders-h text-amber-400"></i> Settings
+                    </button>
+                </div>
+                <select id="challenge-client-select" onchange="selectChallengeClient(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
+                    <option value="">Select a client to view their challenge...</option>
+                </select>
+            </div>
+
+            <!-- Empty / No Challenge Prompt -->
+            <div id="no-challenge-prompt" class="hidden bg-card border border-subtle rounded-2xl p-8 text-center space-y-4">
+                <div class="w-16 h-16 mx-auto rounded-full bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-2xl">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-1">No Active Challenge</h3>
+                    <p id="no-challenge-msg" class="text-sm text-subtle max-w-sm mx-auto">This client doesn't have an active daily challenge assigned yet.</p>
+                </div>
+                <button id="btn-activate-challenge" onclick="activateDefaultOctoberChallenge()" class="px-5 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-semibold text-sm rounded-xl transition-all shadow-md inline-flex items-center gap-2">
+                    <i class="fas fa-fire"></i> Activate October 2KM & Monday Yoga Challenge
+                </button>
+            </div>
+
+            <!-- Challenge Main Content Container (75 Hard Layout) -->
+            <div id="challenge-content-container" class="space-y-4">
+                <!-- 75 Hard Header matching user screenshot -->
+                <div class="bg-[#0e071a] border border-subtle rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                    <!-- Top Bar: Spacer, Spade Emblem, Calendar Icon -->
+                    <div class="flex items-center justify-between">
+                        <div class="w-10"></div>
+                        
+                        <!-- Center Emblem: Spade with "75" inside (matching screenshot) -->
+                        <div class="flex flex-col items-center">
+                            <div class="relative w-12 h-12 flex items-center justify-center">
+                                <svg class="w-11 h-11 fill-white drop-shadow" viewBox="0 0 24 24">
+                                    <path d="M12 2C9.2 7.2 3.5 10.5 3.5 15.2C3.5 18.4 6.1 21 9.3 21C10.5 21 11.6 20.6 12.5 19.9L11.5 22H13.5L12.5 19.9C13.4 20.6 14.5 21 15.7 21C18.9 21 21.5 18.4 21.5 15.2C21.5 10.5 15.8 7.2 12 2Z"/>
+                                </svg>
+                                <span id="challenge-badge-number" class="absolute inset-0 flex items-center justify-center text-[10px] font-black text-black pt-1">75</span>
+                            </div>
+                            <span id="challenge-title-label" class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mt-1">OCTOBER CHALLENGE</span>
+                        </div>
+
+                        <!-- Right: Calendar Icon (opens monthly tracker) -->
+                        <button onclick="openChallengeCalendarModal()" class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-subtle text-amber-400 flex items-center justify-center transition-colors shadow-sm" title="October Challenge Calendar">
+                            <i class="fas fa-calendar-check text-base"></i>
+                        </button>
+                    </div>
+
+                    <!-- Big Red Day Title matching screenshot -->
+                    <div class="text-center my-3">
+                        <div class="flex items-center justify-center gap-3">
+                            <button onclick="changeChallengeDay(-1)" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Previous Day">
+                                <i class="fas fa-chevron-left text-xs"></i>
+                            </button>
+                            <h2 id="challenge-day-title" class="text-4xl sm:text-5xl font-black text-[#ff3333] tracking-wider uppercase drop-shadow-md select-none">
+                                DAY 1
+                            </h2>
+                            <button onclick="changeChallengeDay(1)" class="w-9 h-9 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white flex items-center justify-center transition-colors shadow-sm" title="Next Day">
+                                <i class="fas fa-chevron-right text-xs"></i>
+                            </button>
+                        </div>
+                        
+                        <p id="challenge-current-date-str" class="text-xs text-gray-400 mt-1 font-medium tracking-wide"></p>
+                    </div>
+
+                    <!-- Sub-stats & Quick jump -->
+                    <div class="flex items-center justify-between pt-3 border-t border-white/5 text-xs">
+                        <div class="flex items-center gap-2">
+                            <span id="challenge-streak-badge" class="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-semibold flex items-center gap-1.5">
+                                <i class="fas fa-fire"></i> 0 Day Streak
+                            </span>
+                            <span id="challenge-completion-counter" class="text-gray-400 font-medium">0/0 done</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button onclick="jumpToTodayChallenge()" class="text-xs px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-colors">
+                                Jump to Today
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-gray-900 rounded-full h-1.5 mt-3 overflow-hidden">
+                        <div id="challenge-day-progressbar" class="bg-gradient-to-r from-amber-500 to-red-500 h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- 2KM Daily Target Card (October Highlight) -->
+                <div id="challenge-km-card" class="bg-card border border-subtle rounded-2xl p-4 shadow-sm space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                                <i class="fas fa-running text-lg"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h4 class="text-sm font-bold text-white">Daily 2KM Goal</h4>
+                                    <span id="km-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10">0.0 / 2.0 KM</span>
+                                </div>
+                                <p class="text-xs text-subtle">Log your daily walk or run to complete this requirement</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="relative flex-1">
+                            <input type="number" id="input-km-logged" step="0.1" min="0" max="100" placeholder="0.0" class="w-full bg-input border border-subtle rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 pl-9 transition-colors">
+                            <span class="absolute left-3 top-2.5 text-xs text-gray-500 font-bold">KM</span>
+                        </div>
+                        <button onclick="quickAddKm(0.5)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors">+0.5</button>
+                        <button onclick="quickAddKm(1.0)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors">+1.0</button>
+                        <button onclick="saveKmLogged()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-xs font-bold transition-colors shadow-sm whitespace-nowrap">
+                            Log KM
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monday Yoga Special Banner -->
+                <div id="challenge-monday-yoga-banner" class="bg-gradient-to-r from-purple-950/60 to-[#1e0e38] border border-purple-500/40 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-purple-600/30 text-purple-300 flex items-center justify-center shrink-0">
+                            <i class="fas fa-spa text-lg"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="text-sm font-bold text-white">Monday Yoga Session</h4>
+                                <span id="monday-yoga-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">MONDAY FOCUS</span>
+                            </div>
+                            <p id="monday-yoga-desc" class="text-xs text-purple-200/80">Weekly recovery and flexibility flow session.</p>
+                        </div>
+                    </div>
+                    <button id="btn-toggle-monday-yoga" onclick="toggleMondayYogaQuick()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-purple-400">
+                        Mark Done
+                    </button>
+                </div>
+
+                <!-- All Tasks Checklist (75 Hard Style: round circular toggles) -->
+                <div class="bg-card border border-subtle rounded-2xl overflow-hidden shadow-sm">
+                    <div class="p-3.5 bg-black/40 border-b border-subtle flex justify-between items-center">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fas fa-list-check text-amber-500"></i> Daily Checklist
+                        </h4>
+                        <span id="challenge-checklist-status" class="text-xs font-semibold text-amber-400"></span>
+                    </div>
+                    <div id="challenge-tasks-list" class="divide-y divide-subtle/40">
+                        <!-- Populated dynamically with tasks matching screenshot -->
+                    </div>
+                </div>
+
+                <!-- Daily Completion Celebration Alert (when all done) -->
+                <div id="challenge-day-complete-banner" class="hidden bg-emerald-950/50 border border-emerald-500/40 rounded-2xl p-4 text-center space-y-1 animate-in zoom-in-95 duration-200">
+                    <div class="flex items-center justify-center gap-2 text-emerald-400 font-bold text-sm">
+                        <i class="fas fa-check-circle text-base"></i> DAY COMPLETED!
+                    </div>
+                    <p class="text-xs text-emerald-200/90">Incredible discipline today. Streak maintained!</p>
+                </div>
+
+                <!-- Daily Notes & Reflection -->
+                <div class="bg-card border border-subtle rounded-2xl p-4 shadow-sm space-y-2.5">
+                    <div class="flex justify-between items-center">
+                        <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fas fa-pen text-amber-500"></i> Daily Notes / Coach Comments
+                        </label>
+                        <span id="challenge-notes-status" class="text-[11px] text-gray-500">Auto-saved</span>
+                    </div>
+                    <textarea id="challenge-day-notes" oninput="debounceSaveChallengeNotes()" rows="2" placeholder="Notes on energy, 2KM walk, nutrition, or workout..." class="w-full bg-input border border-subtle rounded-xl p-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 resize-none transition-colors"></textarea>
+                </div>
             </div>
         </div>
     </main>
@@ -254,10 +473,201 @@
                     <label class="block text-xs text-gray-400 mb-1">Client Name (Optional)</label>
                     <input type="text" id="new-client-name" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" placeholder="John Doe">
                 </div>
+                <div class="pt-2 border-t border-subtle">
+                    <label class="flex items-start gap-2.5 cursor-pointer">
+                        <input type="checkbox" id="new-client-assign-challenge" checked class="mt-0.5 w-4 h-4 rounded text-amber-500 focus:ring-0 accent-amber-500 bg-input border-subtle">
+                        <div>
+                            <span class="text-xs font-semibold text-white block">Assign October 2KM & Monday Yoga Challenge</span>
+                            <span class="text-[11px] text-gray-400 block mt-0.5">Enables the 75 Hard style daily checklist with 2KM daily log & Monday yoga focus.</span>
+                        </div>
+                    </label>
+                </div>
             </div>
             <div class="p-4 border-t border-subtle flex justify-end gap-3 bg-[#1a0f2e]">
                 <button onclick="closeAddClientModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
                 <button onclick="addClient()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded text-sm font-medium transition-colors">Add Client</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Client Challenge Settings Modal (Coach Config) -->
+    <div id="client-challenge-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fas fa-fire text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-base">Client Challenge Settings</h3>
+                        <p id="challenge-modal-client-email" class="text-xs text-subtle">Manage 75-Hard Challenge</p>
+                    </div>
+                </div>
+                <button onclick="closeClientChallengeModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 flex-1 overflow-y-auto space-y-4 text-sm">
+                <!-- Enable/Disable Toggle -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-black/30 border border-subtle">
+                    <div>
+                        <span class="font-bold text-white block">Active Challenge Status</span>
+                        <span class="text-xs text-gray-400">Show 75 Hard style checklist tab for this client</span>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="cfg-challenge-enabled" checked class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                </div>
+
+                <!-- Challenge Title -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Challenge Name</label>
+                    <input type="text" id="cfg-challenge-title" value="October 2KM & Monday Yoga Challenge" class="w-full bg-input border border-subtle rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 text-sm">
+                </div>
+
+                <!-- Start & End Date -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">Start Date</label>
+                        <input type="date" id="cfg-challenge-start" value="2026-10-01" class="w-full bg-input border border-subtle rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1">End Date</label>
+                        <input type="date" id="cfg-challenge-end" value="2026-10-31" class="w-full bg-input border border-subtle rounded-lg px-3 py-2 text-white focus:outline-none focus:border-amber-500 text-sm">
+                    </div>
+                </div>
+
+                <!-- 2KM Daily Target & Monday Yoga toggles -->
+                <div class="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-3">
+                    <h4 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fas fa-star"></i> Core Challenge Targets
+                    </h4>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-xs font-semibold text-white block">Daily KM Target</span>
+                            <span class="text-[11px] text-gray-400">Target distance required each day</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <input type="number" id="cfg-daily-km" step="0.5" min="0.5" max="50" value="2.0" class="w-20 bg-input border border-subtle rounded px-2 py-1 text-center text-white text-sm focus:outline-none focus:border-amber-500">
+                            <span class="text-xs text-gray-400 font-bold">KM</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-2 border-t border-amber-500/20">
+                        <div>
+                            <span class="text-xs font-semibold text-white block">Monday Yoga Focus</span>
+                            <span class="text-[11px] text-gray-400">Activate dedicated Yoga session task every Monday</span>
+                        </div>
+                        <input type="checkbox" id="cfg-monday-yoga" checked class="w-4 h-4 rounded text-amber-500 focus:ring-0 accent-amber-500 bg-input border-subtle">
+                    </div>
+                </div>
+
+                <!-- 75 Hard Checklist Tasks Info -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Included Challenge Tasks</label>
+                    <p class="text-xs text-gray-400 mb-2">The client will track these habits daily in their checklist:</p>
+                    <div class="space-y-1.5 text-xs text-gray-300 bg-black/20 p-3 rounded-xl border border-subtle">
+                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Log 2KM Walk / Run (Daily target)</div>
+                        <div class="flex items-center gap-2"><i class="fas fa-check text-purple-400"></i> Monday Yoga Session (Active on Mondays)</div>
+                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Drink 2 litres of Water</div>
+                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Follow Clean Diet</div>
+                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> No Cheat Meals or Alcohol</div>
+                        <div class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Take Daily Progress Picture</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-subtle flex justify-end gap-2.5 bg-[#1a0f2e]">
+                <button onclick="closeClientChallengeModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button onclick="saveClientChallengeConfig()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                    Save Challenge
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- October Challenge Calendar Modal -->
+    <div id="challenge-calendar-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fas fa-calendar-alt text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-base">October Challenge Calendar</h3>
+                        <p class="text-xs text-subtle">Select any day to view or log</p>
+                    </div>
+                </div>
+                <button onclick="closeChallengeCalendarModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4 space-y-4">
+                <!-- Day of week headers -->
+                <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-400">
+                    <div>Su</div>
+                    <div class="text-purple-400 font-extrabold">Mo</div>
+                    <div>Tu</div>
+                    <div>We</div>
+                    <div>Th</div>
+                    <div>Fr</div>
+                    <div>Sa</div>
+                </div>
+
+                <!-- Calendar Days Grid (October 2026: starts Thursday Oct 1, 31 days) -->
+                <div id="challenge-calendar-grid" class="grid grid-cols-7 gap-1.5 text-center">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Legend -->
+                <div class="flex flex-wrap items-center justify-between text-[11px] text-gray-400 pt-3 border-t border-subtle gap-2">
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div> Complete
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div> In Progress
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <div class="w-2.5 h-2.5 rounded-full bg-purple-500"></div> Yoga Monday
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3.5 border-t border-subtle bg-[#1a0f2e] flex justify-end">
+                <button onclick="closeChallengeCalendarModal()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Reminder / Note Modal -->
+    <div id="task-reminder-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-sm rounded-xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2">
+                    <i class="far fa-clock text-amber-400 text-sm"></i>
+                    <h3 id="task-reminder-title" class="text-white font-bold text-sm">Set Reminder</h3>
+                </div>
+                <button onclick="closeTaskReminderModal()" class="text-gray-400 hover:text-white transition-colors">
+                    <i class="fas fa-times text-xs"></i>
+                </button>
+            </div>
+            <div class="p-4 space-y-3">
+                <input type="hidden" id="task-reminder-id" value="">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1">Reminder Time / Note</label>
+                    <input type="text" id="task-reminder-text" placeholder="e.g. 7:00 AM Morning Run or 45 min walk" class="w-full bg-input border border-subtle rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500">
+                </div>
+            </div>
+            <div class="p-3 border-t border-subtle flex justify-end gap-2 bg-[#1a0f2e]">
+                <button onclick="closeTaskReminderModal()" class="px-3 py-1.5 text-xs text-gray-400 hover:text-white">Cancel</button>
+                <button onclick="saveTaskReminder()" class="px-4 py-1.5 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold">Save</button>
             </div>
         </div>
     </div>
@@ -325,6 +735,74 @@
                     <i class="fas fa-spinner fa-spin text-amber-500 text-2xl mb-4"></i>
                     <p class="text-sm text-subtle" id="gif-loading-text">Loading...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Templates Modal -->
+    <div id="manage-templates-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fas fa-layer-group text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-lg">Workout Templates</h3>
+                        <p id="manage-templates-count" class="text-xs text-subtle">0 templates in database</p>
+                    </div>
+                </div>
+                <button onclick="closeManageTemplatesModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="p-4 border-b border-subtle bg-black/30">
+                <div class="relative">
+                    <input type="text" id="template-search-input" placeholder="Search templates by title or exercise..." oninput="renderManageTemplatesList(this.value)" class="w-full bg-input border border-subtle rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-amber-500 pl-9 transition-colors placeholder-gray-500">
+                    <i class="fas fa-search absolute left-3.5 top-3 text-gray-500 text-xs"></i>
+                </div>
+            </div>
+
+            <div id="manage-templates-list" class="flex-1 overflow-y-auto p-4 space-y-2.5 min-h-[240px]">
+                <!-- Templates list injected here -->
+            </div>
+
+            <div class="p-4 border-t border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <button onclick="createNewBlankTemplate()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-plus text-amber-400"></i> New Blank Workout
+                </button>
+                <button onclick="closeManageTemplatesModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors">
+                    Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rename Template Modal -->
+    <div id="rename-template-modal" class="hidden fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-sm rounded-xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fas fa-edit text-xs"></i>
+                    </div>
+                    <h3 class="text-white font-bold text-base">Rename Template</h3>
+                </div>
+                <button onclick="closeRenameTemplateModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="p-4 flex-1 space-y-3">
+                <input type="hidden" id="rename-template-id" value="">
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1 font-medium">Template Title</label>
+                    <input type="text" id="rename-template-input" class="w-full bg-input border border-subtle rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500" placeholder="e.g. Upper Body Hypertrophy" onkeypress="if(event.key === 'Enter') submitRenameTemplate()">
+                </div>
+            </div>
+            <div class="p-4 border-t border-subtle flex justify-end gap-2.5 bg-[#1a0f2e]">
+                <button onclick="closeRenameTemplateModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button onclick="submitRenameTemplate()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">Save Title</button>
             </div>
         </div>
     </div>
@@ -405,6 +883,7 @@
         let isAdmin = false;
         let allUsers = [];
         let templates = [];
+        let loadedTemplateId = null;
         let currentViewUid = null;
         let workouts = [];
         let creatorExercises = [];
@@ -413,13 +892,24 @@
         let currentUser = null;
         let unsubscribeWorkouts = null;
 
+        // Challenge State
+        let currentChallengeEmail = null;
+        let clientChallengeConfig = null;
+        let selectedChallengeDate = '2026-10-01'; // Default to Oct 1, 2026 (starts Day 1)
+        let challengeLogs = {};
+        let unsubscribeChallengeLogs = null;
+        let unsubscribeChallengeConfig = null;
+        let debounceNotesTimer = null;
+
         // DOM Elements
         const viewWorkouts = document.getElementById('workouts-view');
         const viewCreator = document.getElementById('creator-view');
         const viewDashboard = document.getElementById('dashboard-view');
+        const viewChallenge = document.getElementById('challenge-view');
         const tabWorkouts = document.getElementById('tab-workouts');
         const tabCreator = document.getElementById('tab-creator');
         const tabDashboard = document.getElementById('tab-dashboard');
+        const tabChallenge = document.getElementById('tab-challenge');
         const listWorkouts = document.getElementById('workouts-list');
         const activeWorkoutContainer = document.getElementById('active-workout');
         const workoutDisplay = document.getElementById('workout-display');
@@ -485,7 +975,9 @@
 
                 if (isAdmin) {
                     tabCreator.classList.remove('hidden');
+                    tabChallenge.classList.remove('hidden');
                     adminClientSelector.classList.remove('hidden');
+                    document.getElementById('challenge-admin-selector')?.classList.remove('hidden');
                     btnDeleteWorkout.classList.remove('hidden');
                     btnEditWorkout.classList.remove('hidden');
                     
@@ -502,6 +994,8 @@
                     onSnapshot(collection(db, 'workoutTemplates'), (snapshot) => {
                         templates = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                         renderTemplateDropdown();
+                        renderManageTemplatesList();
+                        updateActiveTemplateBanner();
                     }, (error) => {
                         console.error("Error fetching templates:", error);
                         handleFirestoreError(error, OperationType.LIST, 'workoutTemplates');
@@ -513,10 +1007,25 @@
                 } else {
                     tabCreator.classList.add('hidden');
                     adminClientSelector.classList.add('hidden');
+                    document.getElementById('challenge-admin-selector')?.classList.add('hidden');
                     btnDeleteWorkout.classList.add('hidden');
                     btnEditWorkout.classList.add('hidden');
                     currentViewUid = userEmail;
                     subscribeToWorkouts(userEmail);
+
+                    // Check if client has an assigned challenge
+                    if (unsubscribeChallengeConfig) unsubscribeChallengeConfig();
+                    unsubscribeChallengeConfig = onSnapshot(doc(db, 'users', userEmail), (docSnap) => {
+                        if (docSnap.exists() && docSnap.data().challenge && docSnap.data().challenge.enabled) {
+                            tabChallenge.classList.remove('hidden');
+                            selectChallengeClient(userEmail);
+                        } else {
+                            tabChallenge.classList.add('hidden');
+                        }
+                    }, (err) => {
+                        handleFirestoreError(err, OperationType.GET, 'users/' + userEmail);
+                    });
+
                     switchTab('dashboard');
                 }
             } else {
@@ -524,6 +1033,7 @@
                 currentViewUid = null;
                 tabCreator.classList.add('hidden');
                 tabDashboard.classList.add('hidden');
+                tabChallenge.classList.add('hidden');
                 adminClientSelector.classList.add('hidden');
                 btnDeleteWorkout.classList.add('hidden');
                 btnEditWorkout.classList.add('hidden');
@@ -535,7 +1045,17 @@
                     unsubscribeWorkouts();
                     unsubscribeWorkouts = null;
                 }
+                if (unsubscribeChallengeLogs) {
+                    unsubscribeChallengeLogs();
+                    unsubscribeChallengeLogs = null;
+                }
+                if (unsubscribeChallengeConfig) {
+                    unsubscribeChallengeConfig();
+                    unsubscribeChallengeConfig = null;
+                }
                 workouts = [];
+                currentChallengeEmail = null;
+                clientChallengeConfig = null;
                 if (!document.getElementById('dashboard-view').classList.contains('hidden')) {
                     renderDashboard();
                 } else {
@@ -548,53 +1068,154 @@
         window.renderClientDropdowns = () => {
             const wSelect = document.getElementById('w-client-select');
             const cSelect = document.getElementById('c-client-select');
+            const chSelect = document.getElementById('challenge-client-select');
             
             const options = `<option value="">Select a client...</option>` + 
                 allUsers.filter(u => u.email !== ADMIN_EMAIL).map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
                 
-            const wVal = wSelect.value;
-            const cVal = cSelect.value;
+            const wVal = wSelect ? wSelect.value : '';
+            const cVal = cSelect ? cSelect.value : '';
+            const chVal = chSelect ? chSelect.value : '';
             
-            wSelect.innerHTML = options;
-            cSelect.innerHTML = options.replace('Select a client...', 'Assign to Client...');
+            if (wSelect) wSelect.innerHTML = options;
+            if (cSelect) cSelect.innerHTML = options.replace('Select a client...', 'Assign to Client...');
+            if (chSelect) chSelect.innerHTML = options.replace('Select a client...', 'Select client for challenge...');
             
-            if (wVal) wSelect.value = wVal;
-            if (cVal) cSelect.value = cVal;
+            if (wSelect && wVal) wSelect.value = wVal;
+            if (cSelect && cVal) cSelect.value = cVal;
+            if (chSelect) {
+                if (chVal) chSelect.value = chVal;
+                else if (currentChallengeEmail) chSelect.value = currentChallengeEmail;
+            }
+        };
+
+        window.updateActiveTemplateBanner = () => {
+            const banner = document.getElementById('active-template-banner');
+            const updateBtn = document.getElementById('btn-update-template');
+            const nameEl = document.getElementById('active-template-name');
+            const timeEl = document.getElementById('active-template-badge-time');
+            const tSelect = document.getElementById('c-template-select');
+            
+            if (!loadedTemplateId) {
+                if (banner) banner.classList.add('hidden');
+                if (updateBtn) updateBtn.classList.add('hidden');
+                if (tSelect && tSelect.value !== '') tSelect.value = '';
+                return;
+            }
+
+            const t = templates.find(temp => temp.id === loadedTemplateId);
+            if (!t) {
+                loadedTemplateId = null;
+                if (banner) banner.classList.add('hidden');
+                if (updateBtn) updateBtn.classList.add('hidden');
+                if (tSelect) tSelect.value = '';
+                return;
+            }
+
+            if (banner) banner.classList.remove('hidden');
+            if (updateBtn) updateBtn.classList.remove('hidden');
+            if (nameEl) nameEl.textContent = t.title || 'Untitled Template';
+            if (timeEl) {
+                const d = t.date ? new Date(t.date) : null;
+                timeEl.textContent = d && !isNaN(d.getTime()) ? `• ${d.toLocaleDateString()}` : '';
+            }
+            if (tSelect && tSelect.value !== loadedTemplateId) {
+                tSelect.value = loadedTemplateId;
+            }
         };
 
         window.renderTemplateDropdown = () => {
             const tSelect = document.getElementById('c-template-select');
             if (!tSelect) return;
-            const val = tSelect.value;
             const options = `<option value="">Load from Database...</option>` + 
-                templates.map(t => `<option value="${t.id}">${t.title}</option>`).join('');
+                templates.map(t => `<option value="${t.id}">${t.title || 'Untitled Template'}</option>`).join('');
             tSelect.innerHTML = options;
-            if (val) tSelect.value = val;
+            if (loadedTemplateId) {
+                tSelect.value = loadedTemplateId;
+            }
+            updateActiveTemplateBanner();
         };
 
         window.loadTemplate = (id) => {
-            if (!id) return;
+            if (!id) {
+                unlinkLoadedTemplate();
+                return;
+            }
             const t = templates.find(temp => temp.id === id);
             if (!t) return;
             
+            loadedTemplateId = id;
             document.getElementById('c-title').value = t.title || '';
             document.getElementById('c-warmup').value = t.warmup || '';
             document.getElementById('c-notes').value = t.notes || '';
             document.getElementById('c-cooldown').value = t.cooldown || '';
             
-            // Populate exercises but give them new IDs so they can be modified
+            // Populate exercises
             creatorExercises = (t.exercises || []).map(ex => ({ ...ex, id: uuid() }));
             renderCreatorExercises();
             
             // Keep editingWorkoutData as null since we're loading a template for a new assignment
             editingWorkoutData = null;
             document.getElementById('btn-save-workout').innerText = 'Save Workout';
+            updateActiveTemplateBanner();
+        };
+
+        window.unlinkLoadedTemplate = () => {
+            loadedTemplateId = null;
+            const tSelect = document.getElementById('c-template-select');
+            if (tSelect) tSelect.value = '';
+            updateActiveTemplateBanner();
+        };
+
+        window.updateLoadedTemplate = async () => {
+            if (!isAdmin) return;
+            if (!loadedTemplateId) {
+                saveAsTemplate();
+                return;
+            }
+            
+            const title = document.getElementById('c-title').value.trim() || 'Untitled Template';
+            if (title.length > 200) {
+                alert('Template title must be 200 characters or less.');
+                return;
+            }
+            const notes = document.getElementById('c-notes').value.trim();
+            const warmup = document.getElementById('c-warmup').value.trim();
+            const cooldown = document.getElementById('c-cooldown').value.trim();
+            
+            const validExercises = creatorExercises.filter(ex => ex.name.trim() !== '' || ex.prescription.trim() !== '');
+            
+            if (validExercises.length === 0 && !notes && !warmup && !cooldown) {
+                alert('Please add some content to the template before updating.');
+                return;
+            }
+
+            const templateData = {
+                title,
+                notes,
+                warmup,
+                cooldown,
+                date: new Date().toISOString(),
+                exercises: JSON.parse(JSON.stringify(validExercises))
+            };
+
+            try {
+                await setDoc(doc(db, 'workoutTemplates', loadedTemplateId), templateData, { merge: true });
+                updateActiveTemplateBanner();
+                alert(`Template "${title}" updated successfully!`);
+            } catch (error) {
+                handleFirestoreError(error, OperationType.WRITE, 'workoutTemplates/' + loadedTemplateId);
+            }
         };
 
         window.saveAsTemplate = async () => {
             if (!isAdmin) return;
             
             const title = document.getElementById('c-title').value.trim() || 'Untitled Template';
+            if (title.length > 200) {
+                alert('Template title must be 200 characters or less.');
+                return;
+            }
             const notes = document.getElementById('c-notes').value.trim();
             const warmup = document.getElementById('c-warmup').value.trim();
             const cooldown = document.getElementById('c-cooldown').value.trim();
@@ -618,9 +1239,217 @@
 
             try {
                 await setDoc(doc(db, 'workoutTemplates', templateId), templateData);
-                alert("Saved to Database successfully!");
+                loadedTemplateId = templateId;
+                updateActiveTemplateBanner();
+                alert(`Template "${title}" saved as a new template in the database!`);
             } catch (error) {
                 handleFirestoreError(error, OperationType.WRITE, 'workoutTemplates/' + templateId);
+            }
+        };
+
+        window.deleteLoadedTemplate = async () => {
+            if (!isAdmin || !loadedTemplateId) return;
+            const t = templates.find(temp => temp.id === loadedTemplateId);
+            const name = t ? t.title : 'this template';
+            if (!confirm(`Are you sure you want to delete the template "${name}" from the database?`)) return;
+
+            const idToDelete = loadedTemplateId;
+            try {
+                await deleteDoc(doc(db, 'workoutTemplates', idToDelete));
+                loadedTemplateId = null;
+                updateActiveTemplateBanner();
+                alert(`Template "${name}" deleted.`);
+            } catch (error) {
+                handleFirestoreError(error, OperationType.DELETE, 'workoutTemplates/' + idToDelete);
+            }
+        };
+
+        window.deleteTemplateById = async (id, event) => {
+            if (event) event.stopPropagation();
+            if (!isAdmin || !id) return;
+            const t = templates.find(temp => temp.id === id);
+            const name = t ? t.title : 'this template';
+            if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+
+            try {
+                await deleteDoc(doc(db, 'workoutTemplates', id));
+                if (loadedTemplateId === id) {
+                    loadedTemplateId = null;
+                    updateActiveTemplateBanner();
+                }
+            } catch (error) {
+                handleFirestoreError(error, OperationType.DELETE, 'workoutTemplates/' + id);
+            }
+        };
+
+        window.duplicateTemplateById = async (id, event) => {
+            if (event) event.stopPropagation();
+            if (!isAdmin || !id) return;
+            const t = templates.find(temp => temp.id === id);
+            if (!t) return;
+
+            const newId = uuid();
+            const clone = {
+                title: `${t.title || 'Untitled'} (Copy)`,
+                notes: t.notes || '',
+                warmup: t.warmup || '',
+                cooldown: t.cooldown || '',
+                date: new Date().toISOString(),
+                exercises: JSON.parse(JSON.stringify(t.exercises || []))
+            };
+
+            try {
+                await setDoc(doc(db, 'workoutTemplates', newId), clone);
+            } catch (error) {
+                handleFirestoreError(error, OperationType.WRITE, 'workoutTemplates/' + newId);
+            }
+        };
+
+        window.openManageTemplatesModal = () => {
+            const modal = document.getElementById('manage-templates-modal');
+            const searchInput = document.getElementById('template-search-input');
+            if (searchInput) searchInput.value = '';
+            renderManageTemplatesList();
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeManageTemplatesModal = () => {
+            const modal = document.getElementById('manage-templates-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.renderManageTemplatesList = (filterText = '') => {
+            const listEl = document.getElementById('manage-templates-list');
+            const countEl = document.getElementById('manage-templates-count');
+            if (!listEl) return;
+
+            const q = (filterText || '').trim().toLowerCase();
+            const filtered = templates.filter(t => {
+                if (!q) return true;
+                const matchTitle = (t.title || '').toLowerCase().includes(q);
+                const matchNotes = (t.notes || '').toLowerCase().includes(q);
+                const matchEx = (t.exercises || []).some(e => (e.name || '').toLowerCase().includes(q) || (e.prescription || '').toLowerCase().includes(q));
+                return matchTitle || matchNotes || matchEx;
+            });
+
+            if (countEl) {
+                countEl.textContent = `${templates.length} template${templates.length === 1 ? '' : 's'} in database`;
+            }
+
+            if (templates.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-gray-400">
+                        <i class="fas fa-layer-group text-3xl mb-3 text-gray-600 block"></i>
+                        <p class="text-sm font-medium text-white mb-1">No templates in database</p>
+                        <p class="text-xs text-subtle max-w-xs mx-auto">Create a workout in the Creator view and click "Save New Template" to build your database library.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-10 text-gray-400">
+                        <i class="fas fa-search text-2xl mb-2 text-gray-600 block"></i>
+                        <p class="text-sm">No templates matching "${filterText}"</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = filtered.map(t => {
+                const isCurrent = t.id === loadedTemplateId;
+                const exCount = (t.exercises || []).length;
+                const dateStr = t.date ? new Date(t.date).toLocaleDateString() : '';
+                return `
+                    <div class="p-3.5 rounded-xl border ${isCurrent ? 'bg-amber-500/10 border-amber-500/40' : 'bg-card border-subtle hover:border-gray-600'} transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <h4 class="text-sm font-bold text-white truncate">${t.title || 'Untitled Template'}</h4>
+                                ${isCurrent ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">LOADED</span>' : ''}
+                            </div>
+                            <div class="flex items-center gap-3 text-xs text-gray-400">
+                                <span><i class="fas fa-dumbbell mr-1 text-amber-500"></i>${exCount} exercise${exCount === 1 ? '' : 's'}</span>
+                                ${dateStr ? `<span><i class="far fa-calendar-alt mr-1 text-gray-500"></i>${dateStr}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+                            <button onclick="loadTemplateFromManage('${t.id}')" class="px-3 py-1.5 rounded-lg text-xs font-semibold ${isCurrent ? 'bg-amber-500 text-white' : 'bg-white/10 hover:bg-white/20 text-white'} transition-colors flex items-center gap-1">
+                                <i class="fas fa-edit"></i> ${isCurrent ? 'Editing' : 'Load'}
+                            </button>
+                            <button onclick="openRenameModal('${t.id}', event)" class="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors" title="Rename template">
+                                <i class="fas fa-pencil-alt text-xs"></i>
+                            </button>
+                            <button onclick="duplicateTemplateById('${t.id}', event)" class="p-2 text-gray-400 hover:text-amber-400 hover:bg-white/10 rounded-lg transition-colors" title="Duplicate template">
+                                <i class="fas fa-clone text-xs"></i>
+                            </button>
+                            <button onclick="deleteTemplateById('${t.id}', event)" class="p-2 text-gray-400 hover:text-red-400 hover:bg-white/10 rounded-lg transition-colors" title="Delete template">
+                                <i class="fas fa-trash text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.loadTemplateFromManage = (id) => {
+            loadTemplate(id);
+            closeManageTemplatesModal();
+            switchTab('creator');
+        };
+
+        window.createNewBlankTemplate = () => {
+            clearCreator();
+            unlinkLoadedTemplate();
+            closeManageTemplatesModal();
+            switchTab('creator');
+        };
+
+        window.openRenameModal = (id, event) => {
+            if (event) event.stopPropagation();
+            const t = templates.find(temp => temp.id === id);
+            if (!t) return;
+            
+            document.getElementById('rename-template-id').value = id;
+            const input = document.getElementById('rename-template-input');
+            input.value = t.title || '';
+            document.getElementById('rename-template-modal').classList.remove('hidden');
+            setTimeout(() => { input.focus(); input.select(); }, 50);
+        };
+
+        window.openRenameModalForCurrent = () => {
+            if (!loadedTemplateId) return;
+            openRenameModal(loadedTemplateId);
+        };
+
+        window.closeRenameTemplateModal = () => {
+            document.getElementById('rename-template-modal').classList.add('hidden');
+        };
+
+        window.submitRenameTemplate = async () => {
+            const id = document.getElementById('rename-template-id').value;
+            const newTitle = document.getElementById('rename-template-input').value.trim();
+            if (!id) return;
+            if (!newTitle) {
+                alert('Please enter a template title.');
+                return;
+            }
+            if (newTitle.length > 200) {
+                alert('Template title must be 200 characters or less.');
+                return;
+            }
+
+            try {
+                await setDoc(doc(db, 'workoutTemplates', id), { title: newTitle }, { merge: true });
+                closeRenameTemplateModal();
+                
+                // If it's the currently loaded template in creator, update title field as well
+                if (loadedTemplateId === id) {
+                    document.getElementById('c-title').value = newTitle;
+                    updateActiveTemplateBanner();
+                }
+            } catch (error) {
+                handleFirestoreError(error, OperationType.WRITE, 'workoutTemplates/' + id);
             }
         };
 
@@ -674,10 +1503,12 @@
             viewWorkouts.classList.add('hidden');
             viewCreator.classList.add('hidden');
             viewDashboard.classList.add('hidden');
+            if (viewChallenge) viewChallenge.classList.add('hidden');
             
             tabWorkouts.classList.replace('tab-active', 'tab-inactive');
             tabCreator.classList.replace('tab-active', 'tab-inactive');
             tabDashboard.classList.replace('tab-active', 'tab-inactive');
+            if (tabChallenge) tabChallenge.classList.replace('tab-active', 'tab-inactive');
 
             if (tab === 'workouts') {
                 viewWorkouts.classList.remove('hidden');
@@ -687,6 +1518,24 @@
                 viewDashboard.classList.remove('hidden');
                 tabDashboard.classList.replace('tab-inactive', 'tab-active');
                 renderDashboard();
+            } else if (tab === 'challenge') {
+                if (viewChallenge) viewChallenge.classList.remove('hidden');
+                if (tabChallenge) tabChallenge.classList.replace('tab-inactive', 'tab-active');
+                if (!currentChallengeEmail) {
+                    if (currentViewUid) {
+                        selectChallengeClient(currentViewUid);
+                    } else if (!isAdmin && currentUser) {
+                        selectChallengeClient(currentUser.email.toLowerCase());
+                    } else if (isAdmin && allUsers.length > 0) {
+                        const firstClient = allUsers.find(u => u.email !== ADMIN_EMAIL);
+                        if (firstClient) selectChallengeClient(firstClient.email);
+                        else renderChallengeView();
+                    } else {
+                        renderChallengeView();
+                    }
+                } else {
+                    renderChallengeView();
+                }
             } else {
                 if (!currentUser) {
                     alert("Please login to create workouts.");
@@ -701,6 +1550,7 @@
         tabWorkouts.onclick = () => switchTab('workouts');
         tabCreator.onclick = () => switchTab('creator');
         tabDashboard.onclick = () => switchTab('dashboard');
+        if (tabChallenge) tabChallenge.onclick = () => switchTab('challenge');
 
         function uuid() { return Math.random().toString(36).substr(2, 9); }
 
@@ -724,6 +1574,7 @@
             if (!isAdmin) return;
             const email = document.getElementById('new-client-email').value.trim().toLowerCase();
             const name = document.getElementById('new-client-name').value.trim() || email;
+            const assignChallenge = document.getElementById('new-client-assign-challenge')?.checked;
             
             if (!email || !email.includes('@')) {
                 alert('Please enter a valid email address.');
@@ -731,13 +1582,17 @@
             }
 
             try {
-                await setDoc(doc(db, 'users', email), {
+                const clientData = {
                     email: email,
                     name: name,
                     lastLogin: null
-                }, { merge: true });
+                };
+                if (assignChallenge) {
+                    clientData.challenge = getDefaultOctoberChallengeConfig();
+                }
+                await setDoc(doc(db, 'users', email), clientData, { merge: true });
                 closeAddClientModal();
-                alert('Client added successfully!');
+                alert(assignChallenge ? 'Client added with October 2KM & Monday Yoga Challenge!' : 'Client added successfully!');
             } catch (error) {
                 handleFirestoreError(error, OperationType.WRITE, `users/${email}`);
             }
@@ -888,11 +1743,15 @@
 
         window.clearCreator = () => {
             editingWorkoutData = null;
+            loadedTemplateId = null;
             document.getElementById('c-title').value = '';
             document.getElementById('c-notes').value = '';
             document.getElementById('c-warmup').value = '';
             document.getElementById('c-cooldown').value = '';
             document.getElementById('btn-save-workout').innerText = 'Save Workout';
+            const tSelect = document.getElementById('c-template-select');
+            if (tSelect) tSelect.value = '';
+            updateActiveTemplateBanner();
             creatorExercises = [];
             renderCreatorExercises();
         };
@@ -1820,6 +2679,748 @@
             } catch (error) {
                 console.error("Error fetching GIF:", error);
                 content.innerHTML = '<div class="text-center p-4"><p class="text-red-400">Failed to load video.</p></div>';
+            }
+        };
+
+        // ==========================================
+        // --- 75 HARD STYLE CHALLENGE TRACKER LOGIC ---
+        // ==========================================
+
+        window.getDefaultOctoberChallengeConfig = () => {
+            return {
+                enabled: true,
+                title: 'October 2KM & Monday Yoga Challenge',
+                type: '75_hard',
+                startDate: '2026-10-01',
+                endDate: '2026-10-31',
+                dailyKmTarget: 2.0,
+                mondayYoga: true,
+                tasks: [
+                    { id: 'task_2km', title: 'Log 2KM Walk / Run', type: 'distance', target: 2.0, unit: 'km', reminder: '' },
+                    { id: 'task_yoga', title: 'Monday Yoga Session', type: 'yoga', mondayOnly: true, reminder: '' },
+                    { id: 'task_water', title: 'Drink 2 litres of Water', type: 'check', reminder: '' },
+                    { id: 'task_diet', title: 'Follow Clean Diet', type: 'check', reminder: '' },
+                    { id: 'task_no_cheats', title: 'No Cheat Meals or Alcohol', type: 'check', reminder: '' },
+                    { id: 'task_picture', title: 'Take Progress Picture', type: 'photo', hasCamera: true, reminder: '' }
+                ]
+            };
+        };
+
+        window.selectChallengeClient = (email) => {
+            if (!email) return;
+            currentChallengeEmail = email.toLowerCase();
+            
+            const chSelect = document.getElementById('challenge-client-select');
+            if (chSelect && chSelect.value !== currentChallengeEmail) {
+                chSelect.value = currentChallengeEmail;
+            }
+
+            // Sync with workout client selector if admin
+            const wSelect = document.getElementById('w-client-select');
+            if (wSelect && wSelect.value !== currentChallengeEmail) {
+                wSelect.value = currentChallengeEmail;
+            }
+
+            // Unsubscribe existing listeners
+            if (unsubscribeChallengeLogs) {
+                unsubscribeChallengeLogs();
+                unsubscribeChallengeLogs = null;
+            }
+            if (unsubscribeChallengeConfig) {
+                unsubscribeChallengeConfig();
+                unsubscribeChallengeConfig = null;
+            }
+
+            // 1. Subscribe to client's profile for challenge configuration
+            unsubscribeChallengeConfig = onSnapshot(doc(db, 'users', currentChallengeEmail), (docSnap) => {
+                if (docSnap.exists() && docSnap.data().challenge) {
+                    clientChallengeConfig = docSnap.data().challenge;
+                    // Normalize tasks: remove daily workout & reading, ensure 2 litres water
+                    if (Array.isArray(clientChallengeConfig.tasks)) {
+                        clientChallengeConfig.tasks = clientChallengeConfig.tasks
+                            .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading')
+                            .map(t => {
+                                if (t.id === 'task_water') return { ...t, title: 'Drink 2 litres of Water' };
+                                if (t.id === 'task_no_cheats') return { ...t, title: 'No Cheat Meals or Alcohol' };
+                                return t;
+                            });
+                    }
+                } else {
+                    clientChallengeConfig = null;
+                }
+                updateChallengeUIState();
+            }, (error) => {
+                console.error("Error fetching client challenge config:", error);
+                handleFirestoreError(error, OperationType.GET, 'users/' + currentChallengeEmail);
+            });
+
+            // 2. Subscribe to client's daily challenge logs
+            unsubscribeChallengeLogs = onSnapshot(collection(db, 'users', currentChallengeEmail, 'challengeLogs'), (snapshot) => {
+                challengeLogs = {};
+                snapshot.forEach(docSnap => {
+                    challengeLogs[docSnap.id] = docSnap.data();
+                });
+                renderChallengeView();
+            }, (error) => {
+                console.error("Error fetching challenge logs:", error);
+                handleFirestoreError(error, OperationType.LIST, `users/${currentChallengeEmail}/challengeLogs`);
+            });
+        };
+
+        function updateChallengeUIState() {
+            const noChallengePrompt = document.getElementById('no-challenge-prompt');
+            const challengeContent = document.getElementById('challenge-content-container');
+            const noChallengeMsg = document.getElementById('no-challenge-msg');
+            
+            if (!clientChallengeConfig || !clientChallengeConfig.enabled) {
+                if (noChallengePrompt) noChallengePrompt.classList.remove('hidden');
+                if (challengeContent) challengeContent.classList.add('hidden');
+                if (noChallengeMsg) {
+                    noChallengeMsg.innerText = `No active daily challenge is set up for ${currentChallengeEmail}.`;
+                }
+            } else {
+                if (noChallengePrompt) noChallengePrompt.classList.add('hidden');
+                if (challengeContent) challengeContent.classList.remove('hidden');
+                
+                const titleLabel = document.getElementById('challenge-title-label');
+                if (titleLabel) titleLabel.innerText = (clientChallengeConfig.title || 'OCTOBER CHALLENGE').toUpperCase();
+                
+                renderChallengeView();
+            }
+        }
+
+        window.renderChallengeView = () => {
+            if (!currentChallengeEmail || !clientChallengeConfig || !clientChallengeConfig.enabled) {
+                return;
+            }
+
+            const currDateObj = parseDateString(selectedChallengeDate);
+            const startStr = clientChallengeConfig.startDate || '2026-10-01';
+            const startDateObj = parseDateString(startStr);
+            
+            // Calculate Day Number
+            const dayDiff = Math.round((currDateObj - startDateObj) / (1000 * 60 * 60 * 24)) + 1;
+            const dayTitleEl = document.getElementById('challenge-day-title');
+            if (dayTitleEl) {
+                if (dayDiff >= 1 && dayDiff <= 31) {
+                    dayTitleEl.innerText = `DAY ${dayDiff}`;
+                } else if (dayDiff < 1) {
+                    dayTitleEl.innerText = `DAY 1 (PREVIEW)`;
+                } else {
+                    dayTitleEl.innerText = `DAY ${dayDiff}`;
+                }
+            }
+
+            // Date String format: e.g. "Monday, Oct 5, 2026"
+            const dateStrEl = document.getElementById('challenge-current-date-str');
+            if (dateStrEl) {
+                dateStrEl.innerText = currDateObj.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    month: 'short',
+                    day: 'numeric',
+                    year: 'numeric'
+                });
+            }
+
+            const isMonday = currDateObj.getDay() === 1;
+
+            // Fetch day log
+            const currentLog = challengeLogs[selectedChallengeDate] || {
+                tasksCompleted: {},
+                kmLogged: 0,
+                notes: '',
+                reminders: {}
+            };
+            const tasksCompleted = currentLog.tasksCompleted || {};
+            const loggedKm = Number(currentLog.kmLogged) || 0;
+            const targetKm = Number(clientChallengeConfig.dailyKmTarget) || 2.0;
+
+            // 1. Update 2KM Card
+            const kmBadge = document.getElementById('km-status-badge');
+            const kmInput = document.getElementById('input-km-logged');
+            if (kmBadge) {
+                if (loggedKm >= targetKm) {
+                    kmBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                    kmBadge.innerHTML = `<i class="fas fa-check"></i> ${loggedKm.toFixed(1)} / ${targetKm.toFixed(1)} KM`;
+                } else {
+                    kmBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10';
+                    kmBadge.innerText = `${loggedKm.toFixed(1)} / ${targetKm.toFixed(1)} KM`;
+                }
+            }
+            if (kmInput && document.activeElement !== kmInput) {
+                kmInput.value = loggedKm > 0 ? loggedKm : '';
+            }
+
+            // 2. Update Monday Yoga Banner
+            const yogaBanner = document.getElementById('challenge-monday-yoga-banner');
+            const yogaBtn = document.getElementById('btn-toggle-monday-yoga');
+            const yogaBadge = document.getElementById('monday-yoga-badge');
+            const yogaDesc = document.getElementById('monday-yoga-desc');
+            
+            if (yogaBanner && yogaBtn) {
+                const yogaDone = !!tasksCompleted['task_yoga'];
+                if (isMonday) {
+                    yogaBanner.classList.remove('hidden');
+                    yogaBanner.className = 'bg-gradient-to-r from-purple-950/80 to-[#220d3d] border-2 border-purple-500/60 rounded-2xl p-4 shadow-lg flex items-center justify-between gap-3 animate-pulse-subtle';
+                    if (yogaBadge) {
+                        yogaBadge.innerText = '⭐ MONDAY SPECIAL - REQUIRED';
+                        yogaBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 border border-purple-400';
+                    }
+                    if (yogaDesc) yogaDesc.innerText = 'Weekly recovery & flow session. Required to complete Day ' + (dayDiff > 0 ? dayDiff : 1) + '!';
+                    
+                    if (yogaDone) {
+                        yogaBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 shadow-sm';
+                        yogaBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Completed';
+                    } else {
+                        yogaBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-purple-400 shadow-sm';
+                        yogaBtn.innerText = 'Mark Done';
+                    }
+                } else {
+                    // Non-Monday
+                    yogaBanner.className = 'bg-gradient-to-r from-purple-950/30 to-[#150a26] border border-purple-900/40 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 opacity-80';
+                    if (yogaBadge) {
+                        yogaBadge.innerText = 'MONDAYS ONLY';
+                        yogaBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-purple-300 border border-white/10';
+                    }
+                    if (yogaDesc) yogaDesc.innerText = 'Scheduled weekly for Mondays. (Next session: ' + getNextMondayDateStr(currDateObj) + ')';
+                    
+                    if (yogaDone) {
+                        yogaBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 bg-emerald-600 text-white border-emerald-400';
+                        yogaBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Done Early';
+                    } else {
+                        yogaBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shrink-0 bg-white/5 hover:bg-white/10 text-gray-400 border-subtle';
+                        yogaBtn.innerText = 'Rest / Optional';
+                    }
+                }
+            }
+
+            // 3. Render 75-Hard Tasks List (Matching user uploaded image)
+            const tasksListContainer = document.getElementById('challenge-tasks-list');
+            const tasks = (clientChallengeConfig.tasks || [])
+                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading')
+                .map(t => {
+                    if (t.id === 'task_water') return { ...t, title: 'Drink 2 litres of Water' };
+                    if (t.id === 'task_no_cheats') return { ...t, title: 'No Cheat Meals or Alcohol' };
+                    return t;
+                });
+            
+            if (tasksListContainer) {
+                tasksListContainer.innerHTML = tasks.map(task => {
+                    const isDone = !!tasksCompleted[task.id];
+                    const reminderNote = (currentLog.reminders && currentLog.reminders[task.id]) || task.reminder || '';
+                    
+                    // Task label badges
+                    let extraBadge = '';
+                    if (task.id === 'task_2km') {
+                        extraBadge = `<span class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${loggedKm >= targetKm ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 text-gray-400'}">${loggedKm.toFixed(1)} / ${targetKm.toFixed(1)} KM</span>`;
+                    } else if (task.id === 'task_yoga') {
+                        if (isMonday) {
+                            extraBadge = `<span class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-300 border border-purple-500/40">MONDAY SPECIAL</span>`;
+                        } else {
+                            extraBadge = `<span class="ml-2 text-[10px] font-normal text-gray-500">(Mondays Only)</span>`;
+                        }
+                    }
+
+                    // Checkbox button styling matching reference image (circular border or solid red with checkmark)
+                    const checkBtn = isDone
+                        ? `<button onclick="toggleChallengeTask('${task.id}')" class="w-8 h-8 rounded-full bg-[#e52323] hover:bg-[#ff3333] text-white flex items-center justify-center cursor-pointer shadow-md transition-transform active:scale-90 shrink-0">
+                                <i class="fas fa-check text-xs"></i>
+                           </button>`
+                        : `<button onclick="toggleChallengeTask('${task.id}')" class="w-8 h-8 rounded-full border-2 border-gray-600 hover:border-amber-400 bg-transparent flex items-center justify-center cursor-pointer transition-colors shrink-0">
+                           </button>`;
+
+                    const cameraIcon = task.hasCamera ? `<i class="fas fa-camera text-gray-400 mr-2 text-sm"></i>` : '';
+
+                    return `
+                        <div class="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition-colors">
+                            <div class="flex items-center gap-3.5 flex-1 min-w-0">
+                                ${checkBtn}
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center flex-wrap gap-1">
+                                        ${cameraIcon}
+                                        <span class="text-sm font-semibold ${isDone ? 'text-gray-400 line-through' : 'text-white'} transition-colors">
+                                            ${task.title}
+                                        </span>
+                                        ${extraBadge}
+                                    </div>
+                                    <div class="mt-0.5">
+                                        <button onclick="openTaskReminderModal('${task.id}', '${task.title.replace(/'/g, "\\'")}')" class="text-[11px] text-gray-500 hover:text-amber-400 transition-colors inline-flex items-center gap-1">
+                                            <i class="far fa-clock text-[10px]"></i>
+                                            ${reminderNote ? `<span class="text-amber-400/90 font-medium">${reminderNote}</span>` : 'Add Reminder'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // 4. Progress, Completion & Streak Calculation
+            // Active required tasks:
+            // If Monday, yoga is required. If not Monday, yoga is excluded from required count unless completed.
+            const requiredTasks = tasks.filter(t => {
+                if (t.id === 'task_yoga') return isMonday;
+                return true;
+            });
+            const completedCount = requiredTasks.filter(t => tasksCompleted[t.id]).length;
+            const totalRequired = requiredTasks.length;
+            const percentage = totalRequired > 0 ? Math.round((completedCount / totalRequired) * 100) : 0;
+
+            const counterEl = document.getElementById('challenge-completion-counter');
+            if (counterEl) counterEl.innerText = `${completedCount}/${totalRequired} done (${percentage}%)`;
+
+            const progressBar = document.getElementById('challenge-day-progressbar');
+            if (progressBar) progressBar.style.width = `${percentage}%`;
+
+            const completeBanner = document.getElementById('challenge-day-complete-banner');
+            if (completeBanner) {
+                if (percentage === 100 && totalRequired > 0) {
+                    completeBanner.classList.remove('hidden');
+                } else {
+                    completeBanner.classList.add('hidden');
+                }
+            }
+
+            // Streak calculation
+            const streak = calculateChallengeStreak(clientChallengeConfig, challengeLogs, selectedChallengeDate);
+            const streakBadge = document.getElementById('challenge-streak-badge');
+            if (streakBadge) {
+                streakBadge.innerHTML = `<i class="fas fa-fire"></i> ${streak} Day Streak`;
+            }
+
+            // 5. Notes
+            const notesEl = document.getElementById('challenge-day-notes');
+            if (notesEl && document.activeElement !== notesEl) {
+                notesEl.value = currentLog.notes || '';
+            }
+        };
+
+        function parseDateString(str) {
+            const parts = str.split('-');
+            return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        }
+
+        function formatDateString(d) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getNextMondayDateStr(dateObj) {
+            const d = new Date(dateObj);
+            const day = d.getDay();
+            const diff = (1 + 7 - day) % 7 || 7;
+            d.setDate(d.getDate() + diff);
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        }
+
+        function calculateChallengeStreak(config, logs, referenceDateStr) {
+            if (!config) return 0;
+            const startStr = config.startDate || '2026-10-01';
+            let checkDate = parseDateString(referenceDateStr);
+            let streakCount = 0;
+
+            // Check backwards day by day
+            for (let i = 0; i < 75; i++) {
+                const dateKey = formatDateString(checkDate);
+                const log = logs[dateKey];
+                
+                // If checking today and nothing logged yet, check yesterday for ongoing streak
+                if (i === 0 && (!log || !log.completed)) {
+                    checkDate.setDate(checkDate.getDate() - 1);
+                    continue;
+                }
+
+                if (log && log.completed) {
+                    streakCount++;
+                    checkDate.setDate(checkDate.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+            return streakCount;
+        }
+
+        // Toggle a task in the 75-Hard checklist
+        window.toggleChallengeTask = async (taskId) => {
+            if (!currentChallengeEmail || !clientChallengeConfig) return;
+            
+            const currentLog = challengeLogs[selectedChallengeDate] || {
+                date: selectedChallengeDate,
+                tasksCompleted: {},
+                kmLogged: 0,
+                notes: '',
+                reminders: {}
+            };
+
+            const tasksCompleted = { ...(currentLog.tasksCompleted || {}) };
+            const willBeDone = !tasksCompleted[taskId];
+            tasksCompleted[taskId] = willBeDone;
+
+            let kmLogged = Number(currentLog.kmLogged) || 0;
+            const targetKm = Number(clientChallengeConfig.dailyKmTarget) || 2.0;
+
+            // If 2KM task was manually checked, ensure km is at target
+            if (taskId === 'task_2km') {
+                if (willBeDone && kmLogged < targetKm) {
+                    kmLogged = targetKm;
+                } else if (!willBeDone && kmLogged === targetKm) {
+                    kmLogged = 0;
+                }
+            }
+
+            // Calculate overall day completion
+            const currDateObj = parseDateString(selectedChallengeDate);
+            const isMonday = currDateObj.getDay() === 1;
+            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading');
+            const requiredTasks = tasks.filter(t => t.id === 'task_yoga' ? isMonday : true);
+            const isDayComplete = requiredTasks.every(t => tasksCompleted[t.id] === true);
+
+            const updatedData = {
+                date: selectedChallengeDate,
+                dayNumber: Math.max(1, Math.round((currDateObj - parseDateString(clientChallengeConfig.startDate || '2026-10-01')) / (1000 * 60 * 60 * 24)) + 1),
+                tasksCompleted: tasksCompleted,
+                kmLogged: kmLogged,
+                yogaCompleted: !!tasksCompleted['task_yoga'],
+                completed: isDayComplete,
+                notes: currentLog.notes || '',
+                reminders: currentLog.reminders || {},
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                // Optimistic local update
+                challengeLogs[selectedChallengeDate] = updatedData;
+                renderChallengeView();
+
+                await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), updatedData, { merge: true });
+            } catch (err) {
+                console.error("Error updating challenge task:", err);
+                handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${selectedChallengeDate}`);
+            }
+        };
+
+        // Quick 2KM Distance Logging
+        window.saveKmLogged = async () => {
+            if (!currentChallengeEmail || !clientChallengeConfig) return;
+            const input = document.getElementById('input-km-logged');
+            const val = parseFloat(input.value) || 0;
+            await updateKmLoggedValue(val);
+        };
+
+        window.quickAddKm = async (amount) => {
+            if (!currentChallengeEmail || !clientChallengeConfig) return;
+            const currentLog = challengeLogs[selectedChallengeDate] || {};
+            const currentKm = Number(currentLog.kmLogged) || 0;
+            const newKm = Math.round((currentKm + amount) * 10) / 10;
+            await updateKmLoggedValue(newKm);
+        };
+
+        async function updateKmLoggedValue(val) {
+            const currentLog = challengeLogs[selectedChallengeDate] || {
+                date: selectedChallengeDate,
+                tasksCompleted: {},
+                notes: '',
+                reminders: {}
+            };
+            const tasksCompleted = { ...(currentLog.tasksCompleted || {}) };
+            const targetKm = Number(clientChallengeConfig.dailyKmTarget) || 2.0;
+
+            // Automatically check 2KM task if distance >= target
+            if (val >= targetKm) {
+                tasksCompleted['task_2km'] = true;
+            }
+
+            const currDateObj = parseDateString(selectedChallengeDate);
+            const isMonday = currDateObj.getDay() === 1;
+            const tasks = (clientChallengeConfig.tasks || []).filter(t => t.id !== 'task_workout' && t.id !== 'task_reading');
+            const requiredTasks = tasks.filter(t => t.id === 'task_yoga' ? isMonday : true);
+            const isDayComplete = requiredTasks.every(t => tasksCompleted[t.id] === true);
+
+            const updatedData = {
+                date: selectedChallengeDate,
+                dayNumber: Math.max(1, Math.round((currDateObj - parseDateString(clientChallengeConfig.startDate || '2026-10-01')) / (1000 * 60 * 60 * 24)) + 1),
+                tasksCompleted: tasksCompleted,
+                kmLogged: val,
+                yogaCompleted: !!tasksCompleted['task_yoga'],
+                completed: isDayComplete,
+                notes: currentLog.notes || '',
+                reminders: currentLog.reminders || {},
+                updatedAt: new Date().toISOString()
+            };
+
+            try {
+                challengeLogs[selectedChallengeDate] = updatedData;
+                renderChallengeView();
+
+                await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), updatedData, { merge: true });
+            } catch (err) {
+                handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${selectedChallengeDate}`);
+            }
+        }
+
+        // Monday Yoga Quick Toggle
+        window.toggleMondayYogaQuick = async () => {
+            await toggleChallengeTask('task_yoga');
+        };
+
+        // Day Navigation
+        window.changeChallengeDay = (delta) => {
+            const d = parseDateString(selectedChallengeDate);
+            d.setDate(d.getDate() + delta);
+            selectedChallengeDate = formatDateString(d);
+            renderChallengeView();
+        };
+
+        window.jumpToTodayChallenge = () => {
+            const todayStr = formatDateString(new Date());
+            const startStr = clientChallengeConfig?.startDate || '2026-10-01';
+            const endStr = clientChallengeConfig?.endDate || '2026-10-31';
+            
+            // If today is within challenge dates, use today; otherwise jump to start date
+            if (todayStr >= startStr && todayStr <= endStr) {
+                selectedChallengeDate = todayStr;
+            } else {
+                selectedChallengeDate = startStr;
+            }
+            renderChallengeView();
+        };
+
+        // Notes Auto-save
+        window.debounceSaveChallengeNotes = () => {
+            const indicator = document.getElementById('challenge-notes-status');
+            if (indicator) indicator.innerText = 'Saving...';
+            
+            clearTimeout(debounceNotesTimer);
+            debounceNotesTimer = setTimeout(async () => {
+                if (!currentChallengeEmail) return;
+                const notes = document.getElementById('challenge-day-notes').value;
+                try {
+                    await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), {
+                        date: selectedChallengeDate,
+                        notes: notes,
+                        updatedAt: new Date().toISOString()
+                    }, { merge: true });
+                    if (indicator) indicator.innerText = 'Saved';
+                } catch (err) {
+                    if (indicator) indicator.innerText = 'Save error';
+                    handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${selectedChallengeDate}`);
+                }
+            }, 800);
+        };
+
+        // Calendar Modal Logic
+        window.openChallengeCalendarModal = () => {
+            renderChallengeCalendar();
+            document.getElementById('challenge-calendar-modal').classList.remove('hidden');
+        };
+
+        window.closeChallengeCalendarModal = () => {
+            document.getElementById('challenge-calendar-modal').classList.add('hidden');
+        };
+
+        function renderChallengeCalendar() {
+            const grid = document.getElementById('challenge-calendar-grid');
+            if (!grid) return;
+
+            // October 2026: 31 days. Oct 1 is Thursday (index 4: 0=Su, 1=Mo, 2=Tu, 3=We, 4=Th, 5=Fr, 6=Sa)
+            const firstDayOfWeek = 4; // Thursday
+            const totalDays = 31;
+            let cells = '';
+
+            // Leading empty cells
+            for (let i = 0; i < firstDayOfWeek; i++) {
+                cells += `<div class="h-11 rounded-lg bg-black/10 opacity-30"></div>`;
+            }
+
+            // October days 1 to 31
+            for (let day = 1; day <= totalDays; day++) {
+                const dayStr = String(day).padStart(2, '0');
+                const dateKey = `2026-10-${dayStr}`;
+                const log = challengeLogs[dateKey] || {};
+                const isSelected = dateKey === selectedChallengeDate;
+                
+                // Day of week for this October day
+                const dayOfWeek = (firstDayOfWeek + (day - 1)) % 7;
+                const isMonday = dayOfWeek === 1;
+
+                let bgClass = 'bg-card border border-subtle hover:border-amber-400/60 text-gray-300';
+                let indicator = '';
+
+                if (log.completed) {
+                    bgClass = 'bg-emerald-950/40 border border-emerald-500/60 text-emerald-200';
+                    indicator = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>`;
+                } else if (log.kmLogged > 0 || (log.tasksCompleted && Object.values(log.tasksCompleted).some(Boolean))) {
+                    bgClass = 'bg-amber-950/30 border border-amber-500/40 text-amber-200';
+                    indicator = `<span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>`;
+                }
+
+                if (isSelected) {
+                    bgClass += ' ring-2 ring-amber-400 font-black';
+                }
+
+                const yogaBadge = isMonday ? `<span class="text-[9px] text-purple-300 font-bold">🧘</span>` : '';
+
+                cells += `
+                    <button onclick="selectChallengeCalendarDate('${dateKey}')" class="h-11 rounded-lg flex flex-col items-center justify-center p-1 transition-all ${bgClass} cursor-pointer relative group">
+                        <span class="text-xs font-semibold leading-none">${day}</span>
+                        <div class="flex items-center gap-1 mt-1">
+                            ${yogaBadge}
+                            ${indicator}
+                        </div>
+                    </button>
+                `;
+            }
+
+            grid.innerHTML = cells;
+        }
+
+        window.selectChallengeCalendarDate = (dateKey) => {
+            selectedChallengeDate = dateKey;
+            closeChallengeCalendarModal();
+            renderChallengeView();
+        };
+
+        // Client Challenge Config Settings Modal
+        window.openClientChallengeModal = () => {
+            if (!currentChallengeEmail) {
+                alert("Please select a client first.");
+                return;
+            }
+            
+            document.getElementById('challenge-modal-client-email').innerText = `Client: ${currentChallengeEmail}`;
+            
+            const cfg = clientChallengeConfig || getDefaultOctoberChallengeConfig();
+            document.getElementById('cfg-challenge-enabled').checked = cfg.enabled !== false;
+            document.getElementById('cfg-challenge-title').value = cfg.title || 'October 2KM & Monday Yoga Challenge';
+            document.getElementById('cfg-challenge-start').value = cfg.startDate || '2026-10-01';
+            document.getElementById('cfg-challenge-end').value = cfg.endDate || '2026-10-31';
+            document.getElementById('cfg-daily-km').value = cfg.dailyKmTarget || 2.0;
+            document.getElementById('cfg-monday-yoga').checked = cfg.mondayYoga !== false;
+            
+            document.getElementById('client-challenge-modal').classList.remove('hidden');
+        };
+
+        window.closeClientChallengeModal = () => {
+            document.getElementById('client-challenge-modal').classList.add('hidden');
+        };
+
+        window.saveClientChallengeConfig = async () => {
+            if (!currentChallengeEmail) return;
+
+            const enabled = document.getElementById('cfg-challenge-enabled').checked;
+            const title = document.getElementById('cfg-challenge-title').value.trim() || 'October 2KM & Monday Yoga Challenge';
+            const startDate = document.getElementById('cfg-challenge-start').value || '2026-10-01';
+            const endDate = document.getElementById('cfg-challenge-end').value || '2026-10-31';
+            const dailyKmTarget = parseFloat(document.getElementById('cfg-daily-km').value) || 2.0;
+            const mondayYoga = document.getElementById('cfg-monday-yoga').checked;
+
+            const existingTasks = (clientChallengeConfig && clientChallengeConfig.tasks) || getDefaultOctoberChallengeConfig().tasks;
+            
+            // Sync tasks target & clean up removed habits
+            const updatedTasks = existingTasks
+                .filter(t => t.id !== 'task_workout' && t.id !== 'task_reading')
+                .map(t => {
+                    if (t.id === 'task_2km') {
+                        return { ...t, target: dailyKmTarget, title: `Log ${dailyKmTarget}KM Walk / Run` };
+                    }
+                    if (t.id === 'task_water') {
+                        return { ...t, title: 'Drink 2 litres of Water' };
+                    }
+                    if (t.id === 'task_no_cheats') {
+                        return { ...t, title: 'No Cheat Meals or Alcohol' };
+                    }
+                    return t;
+                });
+
+            const newConfig = {
+                enabled: enabled,
+                title: title,
+                type: '75_hard',
+                startDate: startDate,
+                endDate: endDate,
+                dailyKmTarget: dailyKmTarget,
+                mondayYoga: mondayYoga,
+                tasks: updatedTasks
+            };
+
+            try {
+                await setDoc(doc(db, 'users', currentChallengeEmail), {
+                    challenge: newConfig
+                }, { merge: true });
+
+                clientChallengeConfig = newConfig;
+                closeClientChallengeModal();
+                updateChallengeUIState();
+                alert("Challenge configuration saved successfully!");
+            } catch (err) {
+                console.error("Error saving challenge config:", err);
+                handleFirestoreError(err, OperationType.WRITE, 'users/' + currentChallengeEmail);
+            }
+        };
+
+        window.activateDefaultOctoberChallenge = async () => {
+            if (!currentChallengeEmail) {
+                alert("Please select a client from the dropdown first.");
+                return;
+            }
+            const defaultConfig = getDefaultOctoberChallengeConfig();
+            try {
+                await setDoc(doc(db, 'users', currentChallengeEmail), {
+                    challenge: defaultConfig
+                }, { merge: true });
+                clientChallengeConfig = defaultConfig;
+                updateChallengeUIState();
+            } catch (err) {
+                handleFirestoreError(err, OperationType.WRITE, 'users/' + currentChallengeEmail);
+            }
+        };
+
+        // Task Reminder Modal
+        window.openTaskReminderModal = (taskId, taskTitle) => {
+            document.getElementById('task-reminder-id').value = taskId;
+            document.getElementById('task-reminder-title').innerText = `Reminder: ${taskTitle}`;
+            
+            const currentLog = challengeLogs[selectedChallengeDate] || {};
+            const existing = (currentLog.reminders && currentLog.reminders[taskId]) || '';
+            document.getElementById('task-reminder-text').value = existing;
+            
+            document.getElementById('task-reminder-modal').classList.remove('hidden');
+        };
+
+        window.closeTaskReminderModal = () => {
+            document.getElementById('task-reminder-modal').classList.add('hidden');
+        };
+
+        window.saveTaskReminder = async () => {
+            const taskId = document.getElementById('task-reminder-id').value;
+            const text = document.getElementById('task-reminder-text').value.trim();
+            if (!currentChallengeEmail || !taskId) return;
+
+            const currentLog = challengeLogs[selectedChallengeDate] || {};
+            const reminders = { ...(currentLog.reminders || {}) };
+            if (text) {
+                reminders[taskId] = text;
+            } else {
+                delete reminders[taskId];
+            }
+
+            try {
+                await setDoc(doc(db, 'users', currentChallengeEmail, 'challengeLogs', selectedChallengeDate), {
+                    date: selectedChallengeDate,
+                    reminders: reminders,
+                    updatedAt: new Date().toISOString()
+                }, { merge: true });
+
+                if (challengeLogs[selectedChallengeDate]) {
+                    challengeLogs[selectedChallengeDate].reminders = reminders;
+                }
+                closeTaskReminderModal();
+                renderChallengeView();
+            } catch (err) {
+                handleFirestoreError(err, OperationType.WRITE, `users/${currentChallengeEmail}/challengeLogs/${selectedChallengeDate}`);
             }
         };
     </script>
