@@ -72,10 +72,17 @@
         .border-\[\#0a0510\] { border-color: transparent !important; }
         .text-\[\#3d2b5e\] { color: rgba(255, 255, 255, 0.2) !important; }
 
-        /* General element rounding to match reference image */
-        input, select, textarea, button { border-radius: 1rem; }
+        /* General element rounding */
+        input, select, textarea { border-radius: 0.75rem; }
+        button { border-radius: 0.75rem; }
         option { background-color: #0a0a0a; color: #ffffff; }
-        .rounded, .rounded-md, .rounded-lg, .rounded-xl { border-radius: 1.5rem !important; }
+        .rounded-xl { border-radius: 1rem !important; }
+        .rounded-2xl { border-radius: 1.25rem !important; }
+        
+        /* Mobile safe area */
+        .safe-area-bottom {
+            padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0.5rem));
+        }
         
         /* Specific header transparency to blend */
         header { background: rgba(0,0,0,0.7) !important; border-bottom: 1px solid rgba(255,255,255,0.05) !important;}
@@ -88,10 +95,10 @@
         .markdown-body strong { font-weight: 500; color: #fff; }
     </style>
 </head>
-<body class="pb-24">
-    <header class="bg-[#1b0a33]/80 backdrop-blur-md border-b border-subtle sticky top-0 z-20 shadow-md">
+<body class="pb-28 sm:pb-16 min-h-screen">
+    <header class="bg-[#1b0a33]/80 backdrop-blur-md border-b border-subtle sticky top-0 z-30 shadow-md">
         <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-white tracking-tight">FitTrack</h1>
+            <h1 class="text-xl font-bold text-white tracking-tight shrink-0">FitTrack</h1>
             <div class="flex gap-2 sm:gap-3 h-full items-center">
                 <!-- Notifications Bell for Admin / Coach -->
                 <button id="btn-notifications" onclick="toggleNotificationsDrawer()" class="hidden relative p-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Client Activity Notifications">
@@ -99,10 +106,13 @@
                     <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full ring-2 ring-[#1b0a33] animate-pulse">0</span>
                 </button>
                 <div id="auth-container" class="mr-1"></div>
-                <button id="tab-dashboard" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Dashboard</button>
-                <button id="tab-workouts" class="h-full px-2 tab-active font-medium text-sm transition-colors">Workouts</button>
-                <button id="tab-challenge" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors flex items-center gap-1.5"><i class="fas fa-fire text-amber-500"></i> Challenge</button>
-                <button id="tab-creator" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Creator</button>
+                <!-- Desktop Tab Navigation (Hidden on mobile to eliminate header text collisions) -->
+                <div id="desktop-tabs" class="hidden sm:flex h-full items-center gap-1">
+                    <button id="tab-dashboard" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Dashboard</button>
+                    <button id="tab-workouts" class="h-full px-2 tab-active font-medium text-sm transition-colors">Workouts</button>
+                    <button id="tab-challenge" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors flex items-center gap-1.5"><i class="fas fa-fire text-amber-500"></i> Challenge</button>
+                    <button id="tab-creator" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Creator</button>
+                </div>
             </div>
         </div>
     </header>
@@ -112,7 +122,7 @@
         <div id="dashboard-view" class="hidden space-y-6 animate-in fade-in duration-300">
             <!-- Admin Client Switcher for Dashboard if Coach is logged in -->
             <div id="dashboard-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm">
-                <div class="flex justify-between items-center mb-1.5">
+                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-1.5">
                     <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fas fa-user-shield"></i> Coach Mode: Client Dashboard
                     </span>
@@ -262,7 +272,7 @@
         <!-- Workouts List / Logger View -->
         <div id="workouts-view" class="space-y-6 animate-in fade-in duration-300">
             <div id="admin-client-selector" class="hidden bg-card border border-subtle rounded-lg p-4 shadow-sm">
-                <div class="flex justify-between items-center mb-2">
+                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">View Client Workouts</label>
                     <button onclick="openAddClientModal()" class="text-xs text-amber-400 hover:text-amber-300 transition-colors"><i class="fas fa-plus"></i> Add Client</button>
                 </div>
@@ -308,11 +318,11 @@
                         <i class="fas fa-layer-group"></i> <span class="hidden sm:inline">Manage</span>
                     </button>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
                     <button id="btn-update-template" onclick="updateLoadedTemplate()" class="hidden bg-amber-500 hover:bg-amber-400 text-white px-3.5 py-2.5 rounded text-sm font-medium transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5">
                         <i class="fas fa-sync-alt"></i> Update Template
                     </button>
-                    <button onclick="saveAsTemplate()" class="bg-card border border-subtle hover:bg-[#3d2b5e] text-white px-3.5 py-2.5 rounded text-sm transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5" title="Save current exercises as a new template">
+                    <button onclick="saveAsTemplate()" class="flex-1 sm:flex-none bg-card border border-subtle hover:bg-[#3d2b5e] text-white px-3.5 py-2.5 rounded text-sm transition-colors shadow-sm whitespace-nowrap flex items-center justify-center gap-1.5" title="Save current exercises as a new template">
                         <i class="fas fa-save text-amber-500"></i> Save New Template
                     </button>
                 </div>
@@ -324,7 +334,7 @@
                     <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
                         <i class="fas fa-file-alt text-sm"></i>
                     </div>
-                    <div class="min-w-0">
+                    <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2">
                             <span class="text-[11px] font-semibold text-amber-400 uppercase tracking-wider">Template Loaded</span>
                             <span id="active-template-badge-time" class="text-[10px] text-gray-400"></span>
@@ -332,7 +342,7 @@
                         <h4 id="active-template-name" class="text-sm font-bold text-white truncate"></h4>
                     </div>
                 </div>
-                <div class="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+                <div class="flex flex-wrap items-center gap-1.5 self-start sm:self-auto shrink-0">
                     <button onclick="openRenameModalForCurrent()" class="bg-white/10 hover:bg-white/20 text-white px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5" title="Rename this template">
                         <i class="fas fa-edit text-amber-400"></i> Rename
                     </button>
@@ -381,7 +391,7 @@
         <div id="challenge-view" class="hidden space-y-4 animate-in fade-in duration-300">
             <!-- Admin Client Switcher for Challenge if Coach is logged in -->
             <div id="challenge-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm">
-                <div class="flex justify-between items-center mb-1.5">
+                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-1.5">
                     <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fas fa-user-shield"></i> Coach Mode: Select Client
                     </span>
@@ -456,15 +466,15 @@
                     </div>
 
                     <!-- Sub-stats & Quick jump -->
-                    <div class="flex items-center justify-between pt-3 border-t border-white/5 text-xs">
-                        <div class="flex items-center gap-2">
-                            <span id="challenge-streak-badge" class="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-semibold flex items-center gap-1.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-white/5 text-xs">
+                        <div class="flex flex-wrap items-center gap-2 min-w-0">
+                            <span id="challenge-streak-badge" class="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 font-semibold flex items-center gap-1.5 shrink-0">
                                 <i class="fas fa-fire"></i> 0 Day Streak
                             </span>
-                            <span id="challenge-completion-counter" class="text-gray-400 font-medium">0/0 done</span>
+                            <span id="challenge-completion-counter" class="text-gray-400 font-medium text-xs break-words">0/0 done</span>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <button onclick="jumpToTodayChallenge()" class="text-xs px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-colors">
+                        <div class="flex items-center gap-1.5 shrink-0">
+                            <button onclick="jumpToTodayChallenge()" class="text-xs px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition-colors whitespace-nowrap">
                                 Jump to Today
                             </button>
                         </div>
@@ -479,48 +489,48 @@
                 <!-- 2KM Daily Target Card (October Highlight) -->
                 <div id="challenge-km-card" class="bg-card border border-subtle rounded-2xl p-4 shadow-sm space-y-3">
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2.5">
+                        <div class="flex items-center gap-2.5 min-w-0">
                             <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
                                 <i class="fas fa-running text-lg"></i>
                             </div>
-                            <div>
-                                <div class="flex items-center gap-2">
+                            <div class="min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-1.5">
                                     <h4 class="text-sm font-bold text-white">Daily 2KM Goal</h4>
-                                    <span id="km-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10">0.0 / 2.0 KM</span>
+                                    <span id="km-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-gray-300 border border-white/10 shrink-0">0.0 / 2.0 KM</span>
                                 </div>
-                                <p class="text-xs text-subtle">Log your daily walk or run to complete this requirement</p>
+                                <p class="text-xs text-subtle truncate sm:whitespace-normal">Log your daily walk or run to complete this requirement</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="flex items-center gap-2">
-                        <div class="relative flex-1">
-                            <input type="number" id="input-km-logged" step="0.1" min="0" max="100" placeholder="0.0" class="w-full bg-input border border-subtle rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 pl-9 transition-colors">
+                    <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                        <div class="relative flex-1 min-w-[90px]">
+                            <input type="number" id="input-km-logged" step="0.1" min="0" max="100" placeholder="0.0" class="w-full bg-input border border-subtle rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 pl-9 pr-3 transition-colors">
                             <span class="absolute left-3 top-2.5 text-xs text-gray-500 font-bold">KM</span>
                         </div>
-                        <button onclick="quickAddKm(0.5)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors">+0.5</button>
-                        <button onclick="quickAddKm(1.0)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors">+1.0</button>
-                        <button onclick="saveKmLogged()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-xs font-bold transition-colors shadow-sm whitespace-nowrap">
+                        <button onclick="quickAddKm(0.5)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors shrink-0">+0.5</button>
+                        <button onclick="quickAddKm(1.0)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors shrink-0">+1.0</button>
+                        <button onclick="saveKmLogged()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-xs font-bold transition-colors shadow-sm whitespace-nowrap shrink-0">
                             Log KM
                         </button>
                     </div>
                 </div>
 
                 <!-- Monday Yoga Special Banner -->
-                <div id="challenge-monday-yoga-banner" class="bg-gradient-to-r from-purple-950/60 to-[#1e0e38] border border-purple-500/40 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
+                <div id="challenge-monday-yoga-banner" class="bg-gradient-to-r from-purple-950/60 to-[#1e0e38] border border-purple-500/40 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
                         <div class="w-10 h-10 rounded-xl bg-purple-600/30 text-purple-300 flex items-center justify-center shrink-0">
                             <i class="fas fa-spa text-lg"></i>
                         </div>
-                        <div>
-                            <div class="flex items-center gap-2">
+                        <div class="min-w-0 flex-1">
+                            <div class="flex flex-wrap items-center gap-1.5">
                                 <h4 class="text-sm font-bold text-white">Monday Yoga Session</h4>
-                                <span id="monday-yoga-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">MONDAY FOCUS</span>
+                                <span id="monday-yoga-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 shrink-0">MONDAY FOCUS</span>
                             </div>
-                            <p id="monday-yoga-desc" class="text-xs text-purple-200/80">Weekly recovery and flexibility flow session.</p>
+                            <p id="monday-yoga-desc" class="text-xs text-purple-200/80 mt-0.5 leading-snug">Weekly recovery and flexibility flow session.</p>
                         </div>
                     </div>
-                    <button id="btn-toggle-monday-yoga" onclick="toggleMondayYogaQuick()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-purple-400">
+                    <button id="btn-toggle-monday-yoga" onclick="toggleMondayYogaQuick()" class="px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-purple-400 self-end sm:self-auto">
                         Mark Done
                     </button>
                 </div>
@@ -560,8 +570,28 @@
         </div>
     </main>
 
-    <!-- Chatbot UI -->
-    <div id="chatbot-container" class="fixed bottom-4 right-4 z-50 flex flex-col items-end">
+    <!-- Mobile Bottom Navigation Bar (Prevents header text overlap & provides native mobile UX) -->
+    <nav id="mobile-nav-bar" class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0d0718]/95 backdrop-blur-xl border-t border-white/10 px-2 py-1 flex items-center justify-around shadow-2xl safe-area-bottom">
+        <button id="mobile-tab-dashboard" onclick="switchTab('dashboard')" class="hidden flex-1 flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-white transition-colors" title="Dashboard">
+            <i class="fas fa-chart-line text-base mb-1"></i>
+            <span class="text-[10px] font-medium leading-none">Dashboard</span>
+        </button>
+        <button id="mobile-tab-workouts" onclick="switchTab('workouts')" class="flex-1 flex flex-col items-center justify-center py-1.5 text-amber-400 transition-colors" title="Workouts">
+            <i class="fas fa-dumbbell text-base mb-1"></i>
+            <span class="text-[10px] font-semibold leading-none">Workouts</span>
+        </button>
+        <button id="mobile-tab-challenge" onclick="switchTab('challenge')" class="hidden flex-1 flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-white transition-colors" title="Daily Challenge">
+            <i class="fas fa-fire text-base mb-1 text-amber-500"></i>
+            <span class="text-[10px] font-medium leading-none">Challenge</span>
+        </button>
+        <button id="mobile-tab-creator" onclick="switchTab('creator')" class="hidden flex-1 flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-white transition-colors" title="Workout Creator">
+            <i class="fas fa-plus-circle text-base mb-1"></i>
+            <span class="text-[10px] font-medium leading-none">Creator</span>
+        </button>
+    </nav>
+
+    <!-- Chatbot UI (Positioned above mobile bottom bar on small screens) -->
+    <div id="chatbot-container" class="fixed bottom-20 sm:bottom-6 right-3 sm:right-6 z-50 flex flex-col items-end">
         <!-- Chat Window -->
         <div id="chat-window" class="hidden w-80 sm:w-96 bg-card border border-subtle rounded-lg shadow-xl mb-4 flex flex-col overflow-hidden transition-all duration-300 transform origin-bottom-right">
             <!-- Header -->
@@ -594,8 +624,8 @@
         </div>
         
         <!-- Floating Button -->
-        <button onclick="toggleChat()" class="w-14 h-14 bg-amber-500 hover:bg-amber-400 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105">
-            <i class="fas fa-comments text-2xl"></i>
+        <button onclick="toggleChat()" class="w-13 h-13 sm:w-14 sm:h-14 bg-amber-500 hover:bg-amber-400 text-white rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105">
+            <i class="fas fa-comments text-xl sm:text-2xl"></i>
         </button>
     </div>
 
@@ -2235,10 +2265,13 @@
                 `;
                 
                 tabDashboard.classList.remove('hidden');
+                document.getElementById('mobile-tab-dashboard')?.classList.remove('hidden');
 
                 if (isAdmin) {
                     tabCreator.classList.remove('hidden');
                     tabChallenge.classList.remove('hidden');
+                    document.getElementById('mobile-tab-creator')?.classList.remove('hidden');
+                    document.getElementById('mobile-tab-challenge')?.classList.remove('hidden');
                     adminClientSelector.classList.remove('hidden');
                     document.getElementById('dashboard-admin-selector')?.classList.remove('hidden');
                     document.getElementById('challenge-admin-selector')?.classList.remove('hidden');
@@ -2348,9 +2381,11 @@
                     unsubscribeChallengeConfig = onSnapshot(doc(db, 'users', userEmail), (docSnap) => {
                         if (docSnap.exists() && docSnap.data().challenge && docSnap.data().challenge.enabled) {
                             tabChallenge.classList.remove('hidden');
+                            document.getElementById('mobile-tab-challenge')?.classList.remove('hidden');
                             selectChallengeClient(userEmail);
                         } else {
                             tabChallenge.classList.add('hidden');
+                            document.getElementById('mobile-tab-challenge')?.classList.add('hidden');
                         }
                     }, (err) => {
                         handleFirestoreError(err, OperationType.GET, 'users/' + userEmail);
@@ -2364,6 +2399,9 @@
                 tabCreator.classList.add('hidden');
                 tabDashboard.classList.add('hidden');
                 tabChallenge.classList.add('hidden');
+                document.getElementById('mobile-tab-dashboard')?.classList.add('hidden');
+                document.getElementById('mobile-tab-creator')?.classList.add('hidden');
+                document.getElementById('mobile-tab-challenge')?.classList.add('hidden');
                 adminClientSelector.classList.add('hidden');
                 document.getElementById('dashboard-admin-selector')?.classList.add('hidden');
                 document.getElementById('challenge-admin-selector')?.classList.add('hidden');
@@ -2892,6 +2930,26 @@
             });
         }
 
+        // Mobile Bottom Nav Sync
+        window.updateMobileNavState = (activeTab) => {
+            const tabs = ['dashboard', 'workouts', 'challenge', 'creator'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`mobile-tab-${t}`);
+                if (!btn) return;
+                const icon = btn.querySelector('i');
+                const span = btn.querySelector('span');
+                if (t === activeTab) {
+                    btn.className = 'flex-1 flex flex-col items-center justify-center py-1.5 text-amber-400 transition-colors';
+                    if (span) span.className = 'text-[10px] font-bold leading-none text-white';
+                    if (icon && t === 'challenge') icon.className = 'fas fa-fire text-base mb-1 text-amber-400';
+                } else {
+                    btn.className = 'flex-1 flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-white transition-colors';
+                    if (span) span.className = 'text-[10px] font-medium leading-none text-gray-400';
+                    if (icon && t === 'challenge') icon.className = 'fas fa-fire text-base mb-1 text-amber-500/70';
+                }
+            });
+        };
+
         // Tab Switching
         window.switchTab = (tab) => {
             viewWorkouts.classList.add('hidden');
@@ -2903,6 +2961,7 @@
             tabCreator.classList.replace('tab-active', 'tab-inactive');
             tabDashboard.classList.replace('tab-active', 'tab-inactive');
             if (tabChallenge) tabChallenge.classList.replace('tab-active', 'tab-inactive');
+            updateMobileNavState(tab);
 
             if (tab === 'workouts') {
                 viewWorkouts.classList.remove('hidden');
@@ -3951,38 +4010,38 @@
 
                     html += `
                         <div class="relative mb-${marginBottom} exercise-card" data-name="${ex.name.replace(/"/g, '&quot;').toLowerCase()}">
-                            <div class="bg-card border border-subtle rounded-md p-3 shadow-sm ${isGroupContainer ? 'bg-[#0a0510]' : ''}">
-                                <div class="flex justify-between items-start">
-                                    <h3 class="font-bold text-white text-sm leading-tight pr-4">
-                                        ${ex.label ? `<span class="text-gray-400 mr-1">${ex.label})</span>` : ''}${ex.name}
+                            <div class="bg-card border border-subtle rounded-xl p-3 sm:p-4 shadow-sm ${isGroupContainer ? 'bg-[#0a0510]' : ''}">
+                                <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-1.5 pb-1">
+                                    <h3 class="font-bold text-white text-sm leading-tight min-w-0 flex-1">
+                                        ${ex.label ? `<span class="text-amber-400/90 mr-1.5 font-mono font-bold">${ex.label})</span>` : ''}${ex.name}
                                     </h3>
-                                    <div class="flex gap-3 text-gray-500 text-sm shrink-0">
-                                        <button onclick="askAboutExercise('${ex.name.replace(/'/g, "\\'")}')" class="hover:text-amber-400 transition-colors" title="Ask AI Coach">
+                                    <div class="flex items-center gap-2.5 text-gray-400 text-xs shrink-0 self-end sm:self-auto pt-0.5">
+                                        <button onclick="askAboutExercise('${ex.name.replace(/'/g, "\\'")}')" class="p-1 hover:text-amber-400 transition-colors" title="Ask AI Coach">
                                             <i class="fas fa-robot"></i>
                                         </button>
-                                        <button onclick="showExerciseHistory('${ex.name.replace(/'/g, "\\'")}')" class="hover:text-white transition-colors" title="History">
+                                        <button onclick="showExerciseHistory('${ex.name.replace(/'/g, "\\'")}')" class="p-1 hover:text-white transition-colors" title="History">
                                             <i class="fas fa-history"></i>
                                         </button>
-                                        <button onclick="showExerciseGif('${ex.name.replace(/'/g, "\\'")}')" class="text-amber-500 hover:text-amber-400 transition-colors flex items-center gap-1" title="Watch Demo">
-                                            <i class="fas fa-play-circle"></i> <span class="text-xs underline">Watch Demo</span>
+                                        <button onclick="showExerciseGif('${ex.name.replace(/'/g, "\\'")}')" class="text-amber-500 hover:text-amber-400 transition-colors flex items-center gap-1 p-1" title="Watch Demo">
+                                            <i class="fas fa-play-circle"></i> <span class="text-xs underline sm:inline">Demo</span>
                                         </button>
                                     </div>
                                 </div>
-                                <p class="text-xs text-subtle mt-2 mb-3 leading-relaxed">${ex.prescription}</p>
+                                <p class="text-xs text-subtle mt-1 mb-3 leading-relaxed">${ex.prescription}</p>
                                 
                                 <!-- Set Logger -->
                                 <div class="space-y-2">
                                     ${sets.map((s, setIdx) => `
                                         <div class="flex items-center gap-2 animate-in slide-in-from-left-2 duration-200">
-                                            <span class="text-[10px] font-bold text-gray-500 w-4">${setIdx + 1}</span>
+                                            <span class="text-xs font-bold text-gray-500 w-5 min-w-[20px] text-center">${setIdx + 1}</span>
                                             <div class="flex-1 grid grid-cols-2 gap-2">
                                                 <div class="relative">
-                                                    <input type="number" placeholder="kg" value="${s.weight}" onchange="updateSet('${ex.id}', ${setIdx}, 'weight', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border border-subtle rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
-                                                    <span class="absolute right-2 top-1.5 text-[9px] text-gray-600">kg</span>
+                                                    <input type="number" placeholder="kg" value="${s.weight}" onchange="updateSet('${ex.id}', ${setIdx}, 'weight', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border border-subtle rounded-lg pl-3 pr-8 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
+                                                    <span class="absolute right-2.5 top-2 text-[10px] text-gray-500 pointer-events-none font-medium">kg</span>
                                                 </div>
                                                 <div class="relative">
-                                                    <input type="number" placeholder="reps" value="${s.reps}" onchange="updateSet('${ex.id}', ${setIdx}, 'reps', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border border-subtle rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
-                                                    <span class="absolute right-2 top-1.5 text-[9px] text-gray-600">reps</span>
+                                                    <input type="number" placeholder="reps" value="${s.reps}" onchange="updateSet('${ex.id}', ${setIdx}, 'reps', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border border-subtle rounded-lg pl-3 pr-9 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
+                                                    <span class="absolute right-2.5 top-2 text-[10px] text-gray-500 pointer-events-none font-medium">reps</span>
                                                 </div>
                                             </div>
                                             ${!w.completed ? `
@@ -4663,34 +4722,34 @@
                 const yogaDone = !!tasksCompleted['task_yoga'];
                 if (isMonday) {
                     yogaBanner.classList.remove('hidden');
-                    yogaBanner.className = 'bg-gradient-to-r from-purple-950/80 to-[#220d3d] border-2 border-purple-500/60 rounded-2xl p-4 shadow-lg flex items-center justify-between gap-3 animate-pulse-subtle';
+                    yogaBanner.className = 'bg-gradient-to-r from-purple-950/80 to-[#220d3d] border-2 border-purple-500/60 rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-pulse-subtle';
                     if (yogaBadge) {
                         yogaBadge.innerText = '⭐ MONDAY SPECIAL - REQUIRED';
-                        yogaBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 border border-purple-400';
+                        yogaBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-200 border border-purple-400 shrink-0';
                     }
                     if (yogaDesc) yogaDesc.innerText = 'Weekly recovery & flow session. Required to complete Day ' + (dayDiff > 0 ? dayDiff : 1) + '!';
                     
                     if (yogaDone) {
-                        yogaBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 shadow-sm';
+                        yogaBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-400 shadow-sm self-end sm:self-auto';
                         yogaBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Completed';
                     } else {
-                        yogaBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-purple-400 shadow-sm';
+                        yogaBtn.className = 'px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 bg-purple-600 hover:bg-purple-500 text-white border-purple-400 shadow-sm self-end sm:self-auto';
                         yogaBtn.innerText = 'Mark Done';
                     }
                 } else {
                     // Non-Monday
-                    yogaBanner.className = 'bg-gradient-to-r from-purple-950/30 to-[#150a26] border border-purple-900/40 rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3 opacity-80';
+                    yogaBanner.className = 'bg-gradient-to-r from-purple-950/30 to-[#150a26] border border-purple-900/40 rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 opacity-80';
                     if (yogaBadge) {
                         yogaBadge.innerText = 'MONDAYS ONLY';
-                        yogaBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-purple-300 border border-white/10';
+                        yogaBadge.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full bg-white/10 text-purple-300 border border-white/10 shrink-0';
                     }
                     if (yogaDesc) yogaDesc.innerText = 'Scheduled weekly for Mondays. (Next session: ' + getNextMondayDateStr(currDateObj) + ')';
                     
                     if (yogaDone) {
-                        yogaBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 bg-emerald-600 text-white border-emerald-400';
+                        yogaBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold transition-all border shrink-0 bg-emerald-600 text-white border-emerald-400 self-end sm:self-auto';
                         yogaBtn.innerHTML = '<i class="fas fa-check mr-1"></i> Done Early';
                     } else {
-                        yogaBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shrink-0 bg-white/5 hover:bg-white/10 text-gray-400 border-subtle';
+                        yogaBtn.className = 'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shrink-0 bg-white/5 hover:bg-white/10 text-gray-400 border-subtle self-end sm:self-auto';
                         yogaBtn.innerText = 'Rest / Optional';
                     }
                 }
@@ -4719,15 +4778,15 @@
                     }
 
                     if (task.id === 'task_2km') {
-                        extraBadge = `<span class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full ${loggedKm >= targetKm ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 text-gray-400'}">${loggedKm.toFixed(1)} / ${targetKm.toFixed(1)} KM</span>`;
+                        extraBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${loggedKm >= targetKm ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-white/10 text-gray-400'}">${loggedKm.toFixed(1)} / ${targetKm.toFixed(1)} KM</span>`;
                     } else if (task.id === 'task_yoga') {
                         if (isMonday) {
-                            extraBadge = `<span class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-300 border border-purple-500/40">MONDAY SPECIAL</span>`;
+                            extraBadge = `<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/30 text-purple-300 border border-purple-500/40 shrink-0">MONDAY SPECIAL</span>`;
                         } else {
-                            extraBadge = `<span class="ml-2 text-[10px] font-normal text-gray-500">(Mondays Only)</span>`;
+                            extraBadge = `<span class="text-[10px] font-normal text-gray-500 shrink-0">(Mondays Only)</span>`;
                         }
                     } else if (task.optional) {
-                        extraBadge = `<span class="ml-2 text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">Optional</span>`;
+                        extraBadge = `<span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10 shrink-0">Optional</span>`;
                     }
 
                     // Checkbox button styling matching reference image (circular border or solid red with checkmark)
@@ -4739,11 +4798,11 @@
                            </button>`;
 
                     return `
-                        <div class="p-3.5 sm:p-4 flex items-center justify-between gap-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.03] last:border-b-0">
-                            <div class="flex items-center gap-3.5 flex-1 min-w-0">
+                        <div class="p-3.5 sm:p-4 flex items-center justify-between gap-2.5 sm:gap-3 hover:bg-white/[0.02] transition-colors border-b border-white/[0.03] last:border-b-0">
+                            <div class="flex items-center gap-3 flex-1 min-w-0">
                                 ${checkBtn}
                                 <div class="min-w-0 flex-1">
-                                    <div class="flex items-center flex-wrap gap-1">
+                                    <div class="flex items-center flex-wrap gap-1.5">
                                         <span class="text-sm font-semibold ${isDone ? 'text-gray-400 line-through' : 'text-white'} transition-colors inline-flex items-center gap-1 flex-wrap">
                                             <i class="${task.icon} mr-1 text-xs"></i>
                                             ${cameraIndicator}
@@ -4751,13 +4810,13 @@
                                         </span>
                                         ${extraBadge}
                                     </div>
-                                    <div class="mt-0.5 flex items-center gap-3">
+                                    <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
                                         <button onclick="openTaskReminderModal('${task.id}', '${task.title.replace(/'/g, "\\'")}')" class="text-[11px] text-gray-500 hover:text-amber-400 transition-colors inline-flex items-center gap-1">
                                             <i class="far fa-clock text-[10px]"></i>
                                             ${reminderNote ? `<span class="text-amber-400/90 font-medium">${reminderNote}</span>` : 'Add Reminder'}
                                         </button>
                                         ${task.hasCamera ? (currentLog.progressPicture ? `
-                                            <div class="flex items-center gap-2">
+                                            <div class="flex flex-wrap items-center gap-1.5">
                                                 <button onclick="openPhotoViewerModal('${selectedChallengeDate}')" class="text-[11px] text-purple-300 hover:text-white font-medium inline-flex items-center gap-1 bg-purple-500/15 hover:bg-purple-500/25 px-2 py-0.5 rounded border border-purple-500/30 transition-colors">
                                                     <i class="fas fa-eye text-[10px]"></i> View Photo
                                                 </button>
@@ -4778,7 +4837,7 @@
                                 </div>
                             </div>
                             ${task.hasCamera && currentLog.progressPicture ? `
-                                <div class="shrink-0 pl-2">
+                                <div class="shrink-0 pl-1.5">
                                     <img src="${currentLog.progressPicture}" onclick="openPhotoViewerModal('${selectedChallengeDate}')" class="w-10 h-10 rounded-xl object-cover border border-purple-400/40 cursor-pointer hover:scale-105 hover:border-purple-300 transition-all shadow-md" title="Click to view full photo">
                                 </div>
                             ` : ''}
