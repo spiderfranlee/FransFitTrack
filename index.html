@@ -1254,10 +1254,15 @@
                 <!-- Templates list injected here -->
             </div>
 
-            <div class="p-4 border-t border-subtle flex justify-between items-center bg-[#1a0f2e]">
-                <button onclick="createNewBlankTemplate()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
-                    <i class="fas fa-plus text-amber-400"></i> New Blank Workout
-                </button>
+            <div class="p-4 border-t border-subtle flex flex-wrap justify-between items-center gap-2 bg-[#1a0f2e]">
+                <div class="flex items-center gap-2">
+                    <button onclick="createNewBlankTemplate()" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5">
+                        <i class="fas fa-plus text-amber-400"></i> New Blank Workout
+                    </button>
+                    <button id="btn-import-sarah-templates" onclick="importSarahLaveryTemplates()" class="px-3 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm" title="Import Sarah Lavery's 41 workouts into the database">
+                        <i class="fas fa-file-import text-purple-300"></i> Import Sarah Lavery Library (41 Workouts)
+                    </button>
+                </div>
                 <button onclick="closeManageTemplatesModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors">
                     Done
                 </button>
@@ -1427,13 +1432,15 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, limit, getDocFromServer } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, limit, getDocFromServer, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { GoogleGenAI } from "@google/genai";
         import firebaseConfig from "./firebase-applet-config.json" with { type: "json" };
+        import { SARAH_LAVERY_TEMPLATES } from "./src/sarahTemplates.js";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+        window.SARAH_LAVERY_TEMPLATES = SARAH_LAVERY_TEMPLATES;
 
         const OperationType = {
             CREATE: 'create',
@@ -2792,10 +2799,15 @@
 
             if (templates.length === 0) {
                 listEl.innerHTML = `
-                    <div class="text-center py-10 text-gray-400">
-                        <i class="fas fa-layer-group text-3xl mb-3 text-gray-600 block"></i>
-                        <p class="text-sm font-medium text-white mb-1">No templates in database</p>
-                        <p class="text-xs text-subtle max-w-xs mx-auto">Create a workout in the Creator view and click "Save New Template" to build your database library.</p>
+                    <div class="text-center py-8 text-gray-400 space-y-3">
+                        <i class="fas fa-layer-group text-3xl mb-2 text-gray-600 block"></i>
+                        <p class="text-sm font-medium text-white mb-1">No templates in database yet</p>
+                        <p class="text-xs text-subtle max-w-sm mx-auto">Create a workout in the Creator view, or import all 41 programmed Sarah Lavery workouts into your database library with 1 click.</p>
+                        <div class="pt-2">
+                            <button onclick="importSarahLaveryTemplates()" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg inline-flex items-center gap-2">
+                                <i class="fas fa-file-import text-sm"></i> 1-Click Import Sarah Lavery Library (41 Workouts)
+                            </button>
+                        </div>
                     </div>
                 `;
                 return;
@@ -2857,6 +2869,67 @@
             unlinkLoadedTemplate();
             closeManageTemplatesModal();
             switchTab('creator');
+        };
+
+        window.importSarahLaveryTemplates = async () => {
+            if (!isAdmin) {
+                alert('Only the coach can import templates into the database.');
+                return;
+            }
+            if (!SARAH_LAVERY_TEMPLATES || SARAH_LAVERY_TEMPLATES.length === 0) {
+                alert('No templates found in the library.');
+                return;
+            }
+
+            const btn = document.getElementById('btn-import-sarah-templates');
+            const originalText = btn ? btn.innerHTML : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing 41 Workouts...';
+            }
+
+            try {
+                const batch = writeBatch(db);
+                let count = 0;
+
+                for (const t of SARAH_LAVERY_TEMPLATES) {
+                    const normTitle = (t.title || '').trim().toLowerCase();
+                    const existing = (templates || []).find(ext => (ext.title || '').trim().toLowerCase() === normTitle);
+                    const templateId = existing ? existing.id : uuid();
+
+                    const templateData = {
+                        title: t.title,
+                        notes: t.notes || '',
+                        warmup: t.warmup || '',
+                        cooldown: '',
+                        date: new Date().toISOString(),
+                        exercises: (t.exercises || []).map(ex => ({
+                            id: uuid(),
+                            label: ex.label || '',
+                            name: ex.name || '',
+                            prescription: ex.prescription || ''
+                        }))
+                    };
+
+                    const templateRef = doc(db, 'workoutTemplates', templateId);
+                    batch.set(templateRef, templateData, { merge: true });
+                    count++;
+                }
+
+                await batch.commit();
+                alert(`Successfully imported all ${count} Sarah Lavery workout templates to the database! You can now load and assign them from the Workout Creator.`);
+                renderManageTemplatesList();
+                renderTemplateDropdown();
+            } catch (err) {
+                console.error("Error importing Sarah Lavery templates:", err);
+                alert("Failed to import templates: " + (err.message || err));
+                handleFirestoreError(err, OperationType.WRITE, 'workoutTemplates');
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            }
         };
 
         window.openRenameModal = (id, event) => {
