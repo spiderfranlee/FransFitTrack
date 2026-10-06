@@ -155,19 +155,18 @@
                     <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fas fa-user-shield"></i> Coach Mode: Client Dashboard
                     </span>
-                    <button onclick="switchTab('creator')" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
-                        <i class="fas fa-plus-circle"></i> Add / Assign Workout
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="switchTab('creator')" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
+                            <i class="fas fa-plus-circle"></i> Add / Assign Workout
+                        </button>
+                        <button onclick="openManageClientsModal()" class="px-2.5 py-1 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-subtle text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5">
+                            <i class="fas fa-users-cog text-amber-400"></i> Manage Clients
+                        </button>
+                    </div>
                 </div>
                 <select id="dashboard-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client to view their dashboard...</option>
                 </select>
-                <div id="no-clients-banner-dash" class="hidden p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs flex flex-wrap justify-between items-center gap-2">
-                    <span class="text-purple-200"><i class="fas fa-info-circle mr-1 text-purple-400"></i> No client accounts in database yet.</span>
-                    <button onclick="restoreDefaultClients()" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] transition-colors flex items-center gap-1 shadow-sm">
-                        <i class="fas fa-magic text-purple-300"></i> Restore Emma &amp; Alli
-                    </button>
-                </div>
             </div>
 
             <!-- Dashboard Header -->
@@ -325,17 +324,14 @@
                         <button onclick="openAddClientModal()" class="text-xs text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
                             <i class="fas fa-user-plus"></i> Add Client
                         </button>
+                        <button onclick="openManageClientsModal()" class="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1 ml-1">
+                            <i class="fas fa-users-cog text-amber-400"></i> Manage Clients
+                        </button>
                     </div>
                 </div>
                 <select id="w-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client...</option>
                 </select>
-                <div id="no-clients-banner-workouts" class="hidden p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs flex flex-wrap justify-between items-center gap-2">
-                    <span class="text-purple-200"><i class="fas fa-info-circle mr-1 text-purple-400"></i> No client accounts in database yet.</span>
-                    <button onclick="restoreDefaultClients()" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] transition-colors flex items-center gap-1 shadow-sm">
-                        <i class="fas fa-magic text-purple-300"></i> Restore Emma &amp; Alli
-                    </button>
-                </div>
             </div>
             <div id="workouts-list" class="space-y-4"></div>
             
@@ -452,19 +448,18 @@
                     <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fas fa-user-shield"></i> Coach Mode: Select Client
                     </span>
-                    <button onclick="openClientChallengeModal()" class="text-xs text-gray-300 hover:text-white transition-colors flex items-center gap-1">
-                        <i class="fas fa-sliders-h text-amber-400"></i> Settings
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openManageClientsModal()" class="text-xs text-gray-300 hover:text-white transition-colors flex items-center gap-1">
+                            <i class="fas fa-users-cog text-amber-400"></i> Clients
+                        </button>
+                        <button onclick="openClientChallengeModal()" class="text-xs text-gray-300 hover:text-white transition-colors flex items-center gap-1">
+                            <i class="fas fa-sliders-h text-amber-400"></i> Settings
+                        </button>
+                    </div>
                 </div>
                 <select id="challenge-client-select" onchange="selectChallengeClient(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client to view their challenge...</option>
                 </select>
-                <div id="no-clients-banner-challenge" class="hidden p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs flex flex-wrap justify-between items-center gap-2 mt-2">
-                    <span class="text-purple-200"><i class="fas fa-info-circle mr-1 text-purple-400"></i> No client accounts in database yet.</span>
-                    <button onclick="restoreDefaultClients()" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] transition-colors flex items-center gap-1 shadow-sm">
-                        <i class="fas fa-magic text-purple-300"></i> Restore Emma &amp; Alli
-                    </button>
-                </div>
             </div>
 
             <!-- Empty / No Challenge Prompt -->
@@ -885,21 +880,6 @@
                 </button>
             </div>
             <div class="p-4 flex-1 space-y-4">
-                <!-- Quick Restore Profiles -->
-                <div class="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-between">
-                    <div>
-                        <span class="text-xs font-bold text-purple-300 block">Quick Restore Clients</span>
-                        <span class="text-[11px] text-gray-400 block">Click to auto-populate fields</span>
-                    </div>
-                    <div class="flex gap-1.5">
-                        <button type="button" onclick="quickFillClient('Alli Leech', 'alli.leech@gmail.com')" class="px-2.5 py-1 rounded bg-purple-600/40 hover:bg-purple-600/60 text-purple-200 text-xs font-semibold border border-purple-400/30 transition-colors">
-                            Alli
-                        </button>
-                        <button type="button" onclick="quickFillClient('Emma', 'emma@gmail.com')" class="px-2.5 py-1 rounded bg-purple-600/40 hover:bg-purple-600/60 text-purple-200 text-xs font-semibold border border-purple-400/30 transition-colors">
-                            Emma
-                        </button>
-                    </div>
-                </div>
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">Client Email</label>
                     <input type="email" id="new-client-email" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" placeholder="client@example.com">
@@ -918,14 +898,43 @@
                     </label>
                 </div>
             </div>
-            <div class="p-4 border-t border-subtle flex flex-wrap justify-between items-center gap-2 bg-[#1a0f2e]">
-                <button type="button" onclick="restoreDefaultClients()" class="px-3 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded text-xs font-semibold transition-colors flex items-center gap-1.5" title="Restore Emma and Alli into the database with active challenges">
-                    <i class="fas fa-magic text-purple-300"></i> Restore Both (Emma & Alli)
-                </button>
-                <div class="flex gap-2">
-                    <button onclick="closeAddClientModal()" class="px-3.5 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
-                    <button onclick="addClient()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded text-sm font-medium transition-colors">Add Client</button>
+            <div class="p-4 border-t border-subtle flex justify-end gap-3 bg-[#1a0f2e]">
+                <button onclick="closeAddClientModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button onclick="addClient()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded text-sm font-medium transition-colors">Add Client</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Manage Clients Modal (Delete / Edit / Add Clients) -->
+    <div id="manage-clients-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fas fa-users-cog text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-base">Manage Clients</h3>
+                        <p class="text-xs text-subtle">Delete unwanted users, fix emails, or add new clients</p>
+                    </div>
                 </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openAddClientModal()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-user-plus"></i> Add Client
+                    </button>
+                    <button onclick="closeManageClientsModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="p-4 overflow-y-auto space-y-3 flex-1" id="manage-clients-list">
+                <!-- Dynamically populated client rows -->
+            </div>
+            
+            <div class="p-3 border-t border-subtle bg-[#1a0f2e] flex justify-between items-center text-xs text-gray-400">
+                <span id="manage-clients-count">0 clients</span>
+                <button onclick="closeManageClientsModal()" class="px-3.5 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-colors font-medium">Close</button>
             </div>
         </div>
     </div>
@@ -1292,15 +1301,10 @@
                 <!-- Templates list injected here -->
             </div>
 
-            <div class="p-4 border-t border-subtle flex flex-wrap justify-between items-center gap-2 bg-[#1a0f2e]">
-                <div class="flex items-center gap-2">
-                    <button onclick="createNewBlankTemplate()" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5">
-                        <i class="fas fa-plus text-amber-400"></i> New Blank Workout
-                    </button>
-                    <button id="btn-import-sarah-templates" onclick="importSarahLaveryTemplates()" class="px-3 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm" title="Import Sarah Lavery's 41 workouts into the database">
-                        <i class="fas fa-file-import text-purple-300"></i> Import Sarah Lavery Library (41 Workouts)
-                    </button>
-                </div>
+            <div class="p-4 border-t border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <button onclick="createNewBlankTemplate()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-plus text-amber-400"></i> New Blank Workout
+                </button>
                 <button onclick="closeManageTemplatesModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors">
                     Done
                 </button>
@@ -1470,15 +1474,13 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, limit, getDocFromServer, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, limit, getDocFromServer, getDocs } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
         import { GoogleGenAI } from "@google/genai";
         import firebaseConfig from "./firebase-applet-config.json" with { type: "json" };
-        import { SARAH_LAVERY_TEMPLATES } from "./src/sarahTemplates.js";
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-        window.SARAH_LAVERY_TEMPLATES = SARAH_LAVERY_TEMPLATES;
 
         const OperationType = {
             CREATE: 'create',
@@ -1710,17 +1712,9 @@
             } catch (error) {
                 console.error("Google sign-in error:", error);
                 if (errEl) {
-                    if (error.code === 'auth/unauthorized-domain') {
-                        const host = window.location.hostname || 'spiderfranlee.github.io';
-                        errEl.innerHTML = `<strong>Domain Not Authorized in Firebase:</strong><br>` +
-                            `The domain <code class="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono text-[11px]">${host}</code> is not yet on your Firebase Authorized Domains list.<br><br>` +
-                            `<strong>Quick Fix (1 min):</strong><br>` +
-                            `1. Open <a href="https://console.firebase.google.com/project/portfolio-499720/authentication/settings" target="_blank" class="underline text-amber-300 hover:text-white font-semibold">Firebase Console &gt; Auth Settings &gt; Authorized domains</a>.<br>` +
-                            `2. Click <strong>"Add domain"</strong> and enter <code class="bg-black/40 px-1 py-0.5 rounded text-amber-300 font-mono text-[11px]">${host}</code>.<br>` +
-                            `3. Return here and tap <strong>Continue with Google</strong> again!`;
-                    } else {
-                        errEl.innerText = error.message || "Google Sign-In failed.";
-                    }
+                    errEl.innerText = error.code === 'auth/unauthorized-domain'
+                        ? "This domain is not yet authorized in Firebase Console. Please add spiderfranlee.github.io to Firebase Authentication > Settings > Authorized Domains."
+                        : (error.message || "Google Sign-In failed.");
                     errEl.classList.remove('hidden');
                 } else {
                     alert("Login failed: " + error.message);
@@ -2401,8 +2395,24 @@
                     
                     // Fetch all users for admin dropdowns
                     onSnapshot(collection(db, 'users'), (snapshot) => {
-                        allUsers = snapshot.docs.map(doc => doc.data());
+                        allUsers = snapshot.docs.map(docSnap => {
+                            const data = docSnap.data() || {};
+                            const email = (data.email || docSnap.id || '').toLowerCase();
+                            const name = data.name || data.displayName || email;
+                            return { ...data, email, name, id: docSnap.id };
+                        });
                         renderClientDropdowns();
+                        if (document.getElementById('manage-clients-modal') && !document.getElementById('manage-clients-modal').classList.contains('hidden')) {
+                            renderManageClientsList();
+                        }
+
+                        // If coach hasn't selected a client yet, auto-select the first client so coach's empty profile is not shown
+                        if (isAdmin && !currentViewUid && allUsers.length > 0) {
+                            const firstClient = allUsers.find(u => u.email && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
+                            if (firstClient) {
+                                selectClientWorkouts(firstClient.email);
+                            }
+                        }
 
                         // Automatically sync client challenges so Log 2KM and Monday Yoga are the required tasks,
                         // and Water, Clean Diet, and Progress Picture (with camera indicator) are available as optional tasks
@@ -2571,18 +2581,9 @@
             const chSelect = document.getElementById('challenge-client-select');
             const dSelect = document.getElementById('dashboard-client-select');
             
-            const clients = allUsers.filter(u => u.email !== ADMIN_EMAIL);
-            const hasNoClients = clients.length === 0;
-            ['no-clients-banner-dash', 'no-clients-banner-workouts', 'no-clients-banner-challenge'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    if (hasNoClients) el.classList.remove('hidden');
-                    else el.classList.add('hidden');
-                }
-            });
-
+            const clientList = allUsers.filter(u => u.email && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
             const options = `<option value="">Select a client...</option>` + 
-                clients.map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
+                clientList.map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
                 
             const wVal = wSelect ? wSelect.value : '';
             const cVal = cSelect ? cSelect.value : '';
@@ -2855,15 +2856,10 @@
 
             if (templates.length === 0) {
                 listEl.innerHTML = `
-                    <div class="text-center py-8 text-gray-400 space-y-3">
-                        <i class="fas fa-layer-group text-3xl mb-2 text-gray-600 block"></i>
-                        <p class="text-sm font-medium text-white mb-1">No templates in database yet</p>
-                        <p class="text-xs text-subtle max-w-sm mx-auto">Create a workout in the Creator view, or import all 41 programmed Sarah Lavery workouts into your database library with 1 click.</p>
-                        <div class="pt-2">
-                            <button onclick="importSarahLaveryTemplates()" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition-all shadow-lg inline-flex items-center gap-2">
-                                <i class="fas fa-file-import text-sm"></i> 1-Click Import Sarah Lavery Library (41 Workouts)
-                            </button>
-                        </div>
+                    <div class="text-center py-10 text-gray-400">
+                        <i class="fas fa-layer-group text-3xl mb-3 text-gray-600 block"></i>
+                        <p class="text-sm font-medium text-white mb-1">No templates in database</p>
+                        <p class="text-xs text-subtle max-w-xs mx-auto">Create a workout in the Creator view and click "Save New Template" to build your database library.</p>
                     </div>
                 `;
                 return;
@@ -2925,67 +2921,6 @@
             unlinkLoadedTemplate();
             closeManageTemplatesModal();
             switchTab('creator');
-        };
-
-        window.importSarahLaveryTemplates = async () => {
-            if (!isAdmin) {
-                alert('Only the coach can import templates into the database.');
-                return;
-            }
-            if (!SARAH_LAVERY_TEMPLATES || SARAH_LAVERY_TEMPLATES.length === 0) {
-                alert('No templates found in the library.');
-                return;
-            }
-
-            const btn = document.getElementById('btn-import-sarah-templates');
-            const originalText = btn ? btn.innerHTML : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Importing 41 Workouts...';
-            }
-
-            try {
-                const batch = writeBatch(db);
-                let count = 0;
-
-                for (const t of SARAH_LAVERY_TEMPLATES) {
-                    const normTitle = (t.title || '').trim().toLowerCase();
-                    const existing = (templates || []).find(ext => (ext.title || '').trim().toLowerCase() === normTitle);
-                    const templateId = existing ? existing.id : uuid();
-
-                    const templateData = {
-                        title: t.title,
-                        notes: t.notes || '',
-                        warmup: t.warmup || '',
-                        cooldown: '',
-                        date: new Date().toISOString(),
-                        exercises: (t.exercises || []).map(ex => ({
-                            id: uuid(),
-                            label: ex.label || '',
-                            name: ex.name || '',
-                            prescription: ex.prescription || ''
-                        }))
-                    };
-
-                    const templateRef = doc(db, 'workoutTemplates', templateId);
-                    batch.set(templateRef, templateData, { merge: true });
-                    count++;
-                }
-
-                await batch.commit();
-                alert(`Successfully imported all ${count} Sarah Lavery workout templates to the database! You can now load and assign them from the Workout Creator.`);
-                renderManageTemplatesList();
-                renderTemplateDropdown();
-            } catch (err) {
-                console.error("Error importing Sarah Lavery templates:", err);
-                alert("Failed to import templates: " + (err.message || err));
-                handleFirestoreError(err, OperationType.WRITE, 'workoutTemplates');
-            } finally {
-                if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
-                }
-            }
         };
 
         window.openRenameModal = (id, event) => {
@@ -3168,7 +3103,7 @@
                     if (!isAdmin && currentUser) {
                         selectClientWorkouts(currentUser.email.toLowerCase());
                     } else if (isAdmin && allUsers.length > 0) {
-                        const firstClient = allUsers.find(u => u.email !== ADMIN_EMAIL);
+                        const firstClient = allUsers.find(u => u.email && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
                         if (firstClient) selectClientWorkouts(firstClient.email);
                     }
                 } else {
@@ -3184,7 +3119,7 @@
                     } else if (!isAdmin && currentUser) {
                         selectChallengeClient(currentUser.email.toLowerCase());
                     } else if (isAdmin && allUsers.length > 0) {
-                        const firstClient = allUsers.find(u => u.email !== ADMIN_EMAIL);
+                        const firstClient = allUsers.find(u => u.email && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
                         if (firstClient) selectChallengeClient(firstClient.email);
                         else renderChallengeView();
                     } else {
@@ -3255,45 +3190,224 @@
             }
         };
 
-        window.quickFillClient = (name, email) => {
-            const emailInput = document.getElementById('new-client-email');
-            const nameInput = document.getElementById('new-client-name');
-            if (emailInput) emailInput.value = email;
-            if (nameInput) nameInput.value = name;
+        window.openManageClientsModal = () => {
+            if (!isAdmin) return;
+            renderManageClientsList();
+            document.getElementById('manage-clients-modal')?.classList.remove('hidden');
         };
 
-        window.restoreDefaultClients = async () => {
-            if (!isAdmin) {
-                alert('Only the coach can restore clients.');
+        window.closeManageClientsModal = () => {
+            document.getElementById('manage-clients-modal')?.classList.add('hidden');
+        };
+
+        window.renderManageClientsList = () => {
+            const listEl = document.getElementById('manage-clients-list');
+            const countEl = document.getElementById('manage-clients-count');
+            if (!listEl) return;
+
+            const clientList = allUsers.filter(u => u.email && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
+            if (countEl) countEl.innerText = `${clientList.length} client${clientList.length === 1 ? '' : 's'}`;
+
+            if (clientList.length === 0) {
+                listEl.innerHTML = `
+                    <div class="py-8 text-center text-subtle text-sm">
+                        <i class="fas fa-users text-2xl text-gray-600 mb-2 block"></i>
+                        No clients registered yet. Click "Add Client" to add one.
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = clientList.map(client => {
+                const isSelected = currentViewUid === client.email;
+                const hasChallenge = client.challenge && client.challenge.enabled;
+                const isMistakenEmma = client.email.toLowerCase() === 'emma@gmail.com';
+                const avatarInitial = (client.name || client.email || 'C')[0].toUpperCase();
+
+                return `
+                    <div class="p-3.5 rounded-xl bg-card border ${isSelected ? 'border-amber-500/50 bg-amber-500/5' : 'border-subtle'} flex flex-col gap-2.5 transition-colors">
+                        <div class="flex items-center justify-between gap-3">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-9 h-9 rounded-full bg-amber-500/20 text-amber-400 font-bold text-sm flex items-center justify-center shrink-0">
+                                    ${avatarInitial}
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="text-sm font-semibold text-white flex items-center gap-2 truncate">
+                                        <span>${client.name || 'Unnamed Client'}</span>
+                                        ${isSelected ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400 font-medium">Active</span>' : ''}
+                                    </div>
+                                    <div class="text-xs text-subtle truncate">${client.email}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button onclick="selectClientWorkouts('${client.email}'); closeManageClientsModal();" class="px-2.5 py-1 text-xs rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-subtle transition-colors" title="View in Dashboard & Workouts">
+                                    Select
+                                </button>
+                                <button onclick="renameClientEmailPrompt('${client.email}')" class="px-2.5 py-1 text-xs rounded-lg bg-white/5 hover:bg-amber-500/20 text-gray-300 hover:text-amber-400 border border-subtle transition-colors" title="Change or fix client email">
+                                    <i class="fas fa-pencil-alt text-[10px]"></i> Edit
+                                </button>
+                                <button onclick="deleteClientPrompt('${client.email}')" class="px-2.5 py-1 text-xs rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-colors" title="Delete client from Firebase">
+                                    <i class="fas fa-trash text-[10px]"></i> Delete
+                                </button>
+                            </div>
+                        </div>
+
+                        ${isMistakenEmma ? `
+                            <div class="mt-1 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20 flex flex-wrap items-center justify-between gap-2">
+                                <div class="text-[11px] text-amber-200">
+                                    <i class="fas fa-info-circle text-amber-400 mr-1"></i>
+                                    <strong>Mistaken email?</strong> Move challenge to <strong>emmasmyth16@gmail.com</strong>
+                                </div>
+                                <button onclick="quickMigrateEmma()" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-white rounded text-[11px] font-semibold shrink-0 transition-colors shadow-sm">
+                                    Fix to emmasmyth16
+                                </button>
+                            </div>
+                        ` : ''}
+
+                        <div class="flex items-center justify-between text-[11px] text-gray-500 pt-1 border-t border-white/5">
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-trophy ${hasChallenge ? 'text-amber-400' : 'text-gray-600'}"></i>
+                                ${hasChallenge ? 'October Challenge Active' : 'No Active Challenge'}
+                            </span>
+                            <span>${client.lastLogin ? `Last login: ${new Date(client.lastLogin).toLocaleDateString()}` : 'Never logged in'}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        };
+
+        window.deleteClientPrompt = async (clientEmail) => {
+            if (!isAdmin || !clientEmail) return;
+            const target = clientEmail.toLowerCase();
+            if (target === ADMIN_EMAIL.toLowerCase()) {
+                alert("You cannot delete the coach administrator account.");
+                return;
+            }
+
+            const client = allUsers.find(u => u.email === target);
+            const clientName = client ? (client.name || client.email) : target;
+
+            if (!confirm(`Are you sure you want to permanently delete client ${clientName} (${target}) from Firebase?\n\nThis will remove their profile and all associated data.`)) {
+                return;
+            }
+
+            try {
+                // Delete user document
+                await deleteDoc(doc(db, 'users', target));
+
+                // Also delete any subcollections if present
+                try {
+                    const wSnap = await getDocs(collection(db, 'users', target, 'workouts'));
+                    await Promise.all(wSnap.docs.map(d => deleteDoc(d.ref)));
+                    const cSnap = await getDocs(collection(db, 'users', target, 'challengeLogs'));
+                    await Promise.all(cSnap.docs.map(d => deleteDoc(d.ref)));
+                    const aSnap = await getDocs(collection(db, 'users', target, 'activityLogs'));
+                    await Promise.all(aSnap.docs.map(d => deleteDoc(d.ref)));
+                } catch (subErr) {
+                    console.warn("Subcollection cleanup notice:", subErr);
+                }
+
+                // If currently viewing this client, switch to remaining or clear
+                if (currentViewUid === target) {
+                    currentViewUid = null;
+                    const remaining = allUsers.filter(u => u.email !== target && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
+                    if (remaining.length > 0) {
+                        selectClientWorkouts(remaining[0].email);
+                    } else {
+                        selectClientWorkouts('');
+                    }
+                }
+
+                renderManageClientsList();
+                renderClientDropdowns();
+                alert(`Client ${target} was successfully deleted from Firebase.`);
+            } catch (err) {
+                console.error("Error deleting client:", err);
+                alert("Failed to delete client: " + err.message);
+            }
+        };
+
+        window.renameClientEmailPrompt = async (oldEmail) => {
+            if (!isAdmin || !oldEmail) return;
+            const targetOld = oldEmail.toLowerCase();
+            const client = allUsers.find(u => u.email === targetOld);
+            const currentName = client ? client.name : '';
+
+            const newEmailInput = prompt(`Enter the new email address for this client:`, targetOld === 'emma@gmail.com' ? 'emmasmyth16@gmail.com' : targetOld);
+            if (!newEmailInput) return;
+            const targetNew = newEmailInput.trim().toLowerCase();
+            if (!targetNew || !targetNew.includes('@')) {
+                alert("Please enter a valid email address.");
+                return;
+            }
+            if (targetNew === targetOld) return;
+
+            const newNameInput = prompt(`Enter client name (or leave as current):`, currentName || targetNew);
+            const targetName = (newNameInput && newNameInput.trim()) ? newNameInput.trim() : (currentName || targetNew);
+
+            try {
+                const oldDocRef = doc(db, 'users', targetOld);
+                const oldDocSnap = await getDocFromServer(oldDocRef);
+                const data = oldDocSnap.exists() ? oldDocSnap.data() : {};
+
+                data.email = targetNew;
+                data.name = targetName;
+
+                // 1. Save new document
+                await setDoc(doc(db, 'users', targetNew), data, { merge: true });
+
+                // 2. Move subcollections
+                try {
+                    const wSnap = await getDocs(collection(db, 'users', targetOld, 'workouts'));
+                    for (const d of wSnap.docs) {
+                        await setDoc(doc(db, 'users', targetNew, 'workouts', d.id), d.data());
+                        await deleteDoc(d.ref);
+                    }
+                    const cSnap = await getDocs(collection(db, 'users', targetOld, 'challengeLogs'));
+                    for (const d of cSnap.docs) {
+                        await setDoc(doc(db, 'users', targetNew, 'challengeLogs', d.id), d.data());
+                        await deleteDoc(d.ref);
+                    }
+                } catch (subErr) {
+                    console.warn("Subcollections move note:", subErr);
+                }
+
+                // 3. Delete old document
+                await deleteDoc(oldDocRef);
+
+                selectClientWorkouts(targetNew);
+                renderManageClientsList();
+                renderClientDropdowns();
+                alert(`Client successfully updated to ${targetNew}!`);
+            } catch (err) {
+                console.error("Error updating client email:", err);
+                alert("Failed to update client email: " + err.message);
+            }
+        };
+
+        window.quickMigrateEmma = async () => {
+            if (!confirm("This will migrate the existing Emma client profile and challenge settings to emmasmyth16@gmail.com, and delete emma@gmail.com. Proceed?")) {
                 return;
             }
             try {
-                // Restore Alli Leech with October Challenge
-                const alliEmail = 'alli.leech@gmail.com';
-                const alliData = {
-                    email: alliEmail,
-                    name: 'Alli Leech',
-                    lastLogin: null,
-                    challenge: getDefaultOctoberChallengeConfig()
-                };
-                await setDoc(doc(db, 'users', alliEmail), alliData, { merge: true });
+                const oldDocRef = doc(db, 'users', 'emma@gmail.com');
+                const oldDocSnap = await getDocFromServer(oldDocRef);
+                const data = oldDocSnap.exists() ? oldDocSnap.data() : {};
 
-                // Restore Emma with October Challenge
-                const emmaEmail = 'emma@gmail.com';
-                const emmaData = {
-                    email: emmaEmail,
-                    name: 'Emma',
-                    lastLogin: null,
-                    challenge: getDefaultOctoberChallengeConfig()
-                };
-                await setDoc(doc(db, 'users', emmaEmail), emmaData, { merge: true });
+                data.email = 'emmasmyth16@gmail.com';
+                data.name = 'Emma Smyth';
 
-                closeAddClientModal();
-                alert('Successfully restored client profiles for Alli Leech (alli.leech@gmail.com) and Emma (emma@gmail.com) with the October Challenge enabled!');
+                await setDoc(doc(db, 'users', 'emmasmyth16@gmail.com'), data, { merge: true });
+                await deleteDoc(oldDocRef);
+
+                selectClientWorkouts('emmasmyth16@gmail.com');
+                renderManageClientsList();
+                renderClientDropdowns();
+                alert("Successfully moved profile and challenge to emmasmyth16@gmail.com!");
             } catch (err) {
-                console.error("Error restoring clients:", err);
-                alert("Failed to restore clients: " + (err.message || err));
-                handleFirestoreError(err, OperationType.WRITE, 'users/restore');
+                console.error("Error migrating Emma:", err);
+                alert("Failed: " + err.message);
             }
         };
 
