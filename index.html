@@ -162,6 +162,12 @@
                 <select id="dashboard-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client to view their dashboard...</option>
                 </select>
+                <div id="no-clients-banner-dash" class="hidden p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs flex flex-wrap justify-between items-center gap-2">
+                    <span class="text-purple-200"><i class="fas fa-info-circle mr-1 text-purple-400"></i> No client accounts in database yet.</span>
+                    <button onclick="restoreDefaultClients()" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] transition-colors flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-magic text-purple-300"></i> Restore Emma &amp; Alli
+                    </button>
+                </div>
             </div>
 
             <!-- Dashboard Header -->
@@ -324,6 +330,12 @@
                 <select id="w-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client...</option>
                 </select>
+                <div id="no-clients-banner-workouts" class="hidden p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs flex flex-wrap justify-between items-center gap-2">
+                    <span class="text-purple-200"><i class="fas fa-info-circle mr-1 text-purple-400"></i> No client accounts in database yet.</span>
+                    <button onclick="restoreDefaultClients()" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] transition-colors flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-magic text-purple-300"></i> Restore Emma &amp; Alli
+                    </button>
+                </div>
             </div>
             <div id="workouts-list" class="space-y-4"></div>
             
@@ -447,6 +459,12 @@
                 <select id="challenge-client-select" onchange="selectChallengeClient(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client to view their challenge...</option>
                 </select>
+                <div id="no-clients-banner-challenge" class="hidden p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/20 text-xs flex flex-wrap justify-between items-center gap-2 mt-2">
+                    <span class="text-purple-200"><i class="fas fa-info-circle mr-1 text-purple-400"></i> No client accounts in database yet.</span>
+                    <button onclick="restoreDefaultClients()" class="px-2.5 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white font-bold text-[11px] transition-colors flex items-center gap-1 shadow-sm">
+                        <i class="fas fa-magic text-purple-300"></i> Restore Emma &amp; Alli
+                    </button>
+                </div>
             </div>
 
             <!-- Empty / No Challenge Prompt -->
@@ -867,6 +885,21 @@
                 </button>
             </div>
             <div class="p-4 flex-1 space-y-4">
+                <!-- Quick Restore Profiles -->
+                <div class="p-2.5 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-bold text-purple-300 block">Quick Restore Clients</span>
+                        <span class="text-[11px] text-gray-400 block">Click to auto-populate fields</span>
+                    </div>
+                    <div class="flex gap-1.5">
+                        <button type="button" onclick="quickFillClient('Alli Leech', 'alli.leech@gmail.com')" class="px-2.5 py-1 rounded bg-purple-600/40 hover:bg-purple-600/60 text-purple-200 text-xs font-semibold border border-purple-400/30 transition-colors">
+                            Alli
+                        </button>
+                        <button type="button" onclick="quickFillClient('Emma', 'emma@gmail.com')" class="px-2.5 py-1 rounded bg-purple-600/40 hover:bg-purple-600/60 text-purple-200 text-xs font-semibold border border-purple-400/30 transition-colors">
+                            Emma
+                        </button>
+                    </div>
+                </div>
                 <div>
                     <label class="block text-xs text-gray-400 mb-1">Client Email</label>
                     <input type="email" id="new-client-email" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500" placeholder="client@example.com">
@@ -885,9 +918,14 @@
                     </label>
                 </div>
             </div>
-            <div class="p-4 border-t border-subtle flex justify-end gap-3 bg-[#1a0f2e]">
-                <button onclick="closeAddClientModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
-                <button onclick="addClient()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded text-sm font-medium transition-colors">Add Client</button>
+            <div class="p-4 border-t border-subtle flex flex-wrap justify-between items-center gap-2 bg-[#1a0f2e]">
+                <button type="button" onclick="restoreDefaultClients()" class="px-3 py-2 bg-purple-600/30 hover:bg-purple-600/50 text-purple-200 border border-purple-500/40 rounded text-xs font-semibold transition-colors flex items-center gap-1.5" title="Restore Emma and Alli into the database with active challenges">
+                    <i class="fas fa-magic text-purple-300"></i> Restore Both (Emma & Alli)
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="closeAddClientModal()" class="px-3.5 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+                    <button onclick="addClient()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded text-sm font-medium transition-colors">Add Client</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1672,9 +1710,17 @@
             } catch (error) {
                 console.error("Google sign-in error:", error);
                 if (errEl) {
-                    errEl.innerText = error.code === 'auth/unauthorized-domain'
-                        ? "This domain is not yet authorized in Firebase Console. Please add spiderfranlee.github.io to Firebase Authentication > Settings > Authorized Domains."
-                        : (error.message || "Google Sign-In failed.");
+                    if (error.code === 'auth/unauthorized-domain') {
+                        const host = window.location.hostname || 'spiderfranlee.github.io';
+                        errEl.innerHTML = `<strong>Domain Not Authorized in Firebase:</strong><br>` +
+                            `The domain <code class="bg-black/40 px-1.5 py-0.5 rounded text-amber-300 font-mono text-[11px]">${host}</code> is not yet on your Firebase Authorized Domains list.<br><br>` +
+                            `<strong>Quick Fix (1 min):</strong><br>` +
+                            `1. Open <a href="https://console.firebase.google.com/project/portfolio-499720/authentication/settings" target="_blank" class="underline text-amber-300 hover:text-white font-semibold">Firebase Console &gt; Auth Settings &gt; Authorized domains</a>.<br>` +
+                            `2. Click <strong>"Add domain"</strong> and enter <code class="bg-black/40 px-1 py-0.5 rounded text-amber-300 font-mono text-[11px]">${host}</code>.<br>` +
+                            `3. Return here and tap <strong>Continue with Google</strong> again!`;
+                    } else {
+                        errEl.innerText = error.message || "Google Sign-In failed.";
+                    }
                     errEl.classList.remove('hidden');
                 } else {
                     alert("Login failed: " + error.message);
@@ -2525,8 +2571,18 @@
             const chSelect = document.getElementById('challenge-client-select');
             const dSelect = document.getElementById('dashboard-client-select');
             
+            const clients = allUsers.filter(u => u.email !== ADMIN_EMAIL);
+            const hasNoClients = clients.length === 0;
+            ['no-clients-banner-dash', 'no-clients-banner-workouts', 'no-clients-banner-challenge'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (hasNoClients) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                }
+            });
+
             const options = `<option value="">Select a client...</option>` + 
-                allUsers.filter(u => u.email !== ADMIN_EMAIL).map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
+                clients.map(u => `<option value="${u.email}">${u.name} (${u.email})</option>`).join('');
                 
             const wVal = wSelect ? wSelect.value : '';
             const cVal = cSelect ? cSelect.value : '';
@@ -3196,6 +3252,48 @@
                 alert(assignChallenge ? 'Client added with October 2KM & Monday Yoga Challenge!' : 'Client added successfully!');
             } catch (error) {
                 handleFirestoreError(error, OperationType.WRITE, `users/${email}`);
+            }
+        };
+
+        window.quickFillClient = (name, email) => {
+            const emailInput = document.getElementById('new-client-email');
+            const nameInput = document.getElementById('new-client-name');
+            if (emailInput) emailInput.value = email;
+            if (nameInput) nameInput.value = name;
+        };
+
+        window.restoreDefaultClients = async () => {
+            if (!isAdmin) {
+                alert('Only the coach can restore clients.');
+                return;
+            }
+            try {
+                // Restore Alli Leech with October Challenge
+                const alliEmail = 'alli.leech@gmail.com';
+                const alliData = {
+                    email: alliEmail,
+                    name: 'Alli Leech',
+                    lastLogin: null,
+                    challenge: getDefaultOctoberChallengeConfig()
+                };
+                await setDoc(doc(db, 'users', alliEmail), alliData, { merge: true });
+
+                // Restore Emma with October Challenge
+                const emmaEmail = 'emma@gmail.com';
+                const emmaData = {
+                    email: emmaEmail,
+                    name: 'Emma',
+                    lastLogin: null,
+                    challenge: getDefaultOctoberChallengeConfig()
+                };
+                await setDoc(doc(db, 'users', emmaEmail), emmaData, { merge: true });
+
+                closeAddClientModal();
+                alert('Successfully restored client profiles for Alli Leech (alli.leech@gmail.com) and Emma (emma@gmail.com) with the October Challenge enabled!');
+            } catch (err) {
+                console.error("Error restoring clients:", err);
+                alert("Failed to restore clients: " + (err.message || err));
+                handleFirestoreError(err, OperationType.WRITE, 'users/restore');
             }
         };
 
