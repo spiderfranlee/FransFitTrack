@@ -136,6 +136,9 @@
                 <button id="tab-workouts" class="px-3 py-1.5 rounded-xl font-medium text-xs transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap">
                     <i class="fas fa-dumbbell text-xs"></i> <span>Workouts</span>
                 </button>
+                <button id="tab-history" class="hidden px-3 py-1.5 rounded-xl font-medium text-xs transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap">
+                    <i class="fas fa-history text-xs"></i> <span>History</span>
+                </button>
                 <button id="tab-challenge" class="hidden px-3 py-1.5 rounded-xl font-medium text-xs transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap">
                     <i class="fas fa-fire text-amber-500 text-xs"></i> <span>Challenge</span>
                 </button>
@@ -412,6 +415,97 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- History View: Past Completed Workout Sessions -->
+        <div id="history-view" class="hidden space-y-6 animate-in fade-in duration-300">
+            <!-- Header Banner -->
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold text-white tracking-tight flex items-center gap-2">
+                        <i class="fas fa-history text-amber-400"></i> Workout History
+                    </h2>
+                    <p class="text-xs text-subtle mt-0.5">Past completed sessions, exercise volume, and performance logs</p>
+                </div>
+                <button onclick="switchTab('workouts')" class="px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-sm">
+                    <i class="fas fa-dumbbell"></i> Active Workouts
+                </button>
+            </div>
+
+            <!-- Admin Client Switcher for History if Coach is logged in -->
+            <div id="history-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm space-y-2.5">
+                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-1">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fas fa-user-clock text-amber-400"></i> View Client Workout History
+                    </label>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openManageClientsModal()" class="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1">
+                            <i class="fas fa-users-cog text-amber-400"></i> Manage Clients
+                        </button>
+                    </div>
+                </div>
+                <select id="history-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
+                    <option value="">Select a client...</option>
+                </select>
+            </div>
+
+            <!-- History Summary Stats Cards -->
+            <div id="history-summary-cards" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-card border border-subtle rounded-xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-gray-400 text-xs mb-1">
+                        <span>Sessions</span>
+                        <i class="fas fa-check-circle text-emerald-400"></i>
+                    </div>
+                    <div id="history-stat-sessions" class="text-2xl font-bold text-white font-mono">0</div>
+                    <div class="text-[10px] text-subtle mt-0.5">Completed workouts</div>
+                </div>
+
+                <div class="bg-card border border-subtle rounded-xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-gray-400 text-xs mb-1">
+                        <span>Total Volume</span>
+                        <i class="fas fa-weight-hanging text-amber-400"></i>
+                    </div>
+                    <div id="history-stat-volume" class="text-2xl font-bold text-amber-400 font-mono">0 kg</div>
+                    <div class="text-[10px] text-subtle mt-0.5">Weight lifted</div>
+                </div>
+
+                <div class="bg-card border border-subtle rounded-xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-gray-400 text-xs mb-1">
+                        <span>Sets Logged</span>
+                        <i class="fas fa-layer-group text-purple-400"></i>
+                    </div>
+                    <div id="history-stat-sets" class="text-2xl font-bold text-purple-300 font-mono">0</div>
+                    <div class="text-[10px] text-subtle mt-0.5">Completed sets</div>
+                </div>
+
+                <div class="bg-card border border-subtle rounded-xl p-3.5 shadow-sm flex flex-col justify-between">
+                    <div class="flex items-center justify-between text-gray-400 text-xs mb-1">
+                        <span>Total Reps</span>
+                        <i class="fas fa-redo text-cyan-400"></i>
+                    </div>
+                    <div id="history-stat-reps" class="text-2xl font-bold text-cyan-300 font-mono">0</div>
+                    <div class="text-[10px] text-subtle mt-0.5">Repetitions done</div>
+                </div>
+            </div>
+
+            <!-- Search & Sort Controls -->
+            <div class="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
+                <div class="relative flex-1">
+                    <input type="text" id="history-search-input" placeholder="Search sessions by workout name or exercise..." oninput="filterHistoryList(this.value)" class="w-full bg-input border border-subtle rounded-full px-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-amber-500 transition-colors pl-9">
+                    <i class="fas fa-search absolute left-3 top-2.5 text-gray-500 text-xs"></i>
+                </div>
+                <div class="flex items-center gap-2">
+                    <select id="history-sort-select" onchange="renderHistoryView()" class="bg-card border border-subtle rounded-xl px-3 py-2 text-xs text-gray-300 focus:outline-none focus:border-amber-500 transition-colors">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="volume">Highest Volume</option>
+                        <option value="exercises">Most Exercises</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Completed Workout Sessions List -->
+            <div id="history-sessions-list" class="space-y-4"></div>
         </div>
 
         <!-- Creator View -->
@@ -697,6 +791,10 @@
         <button id="mobile-tab-workouts" onclick="switchTab('workouts')" class="flex-1 flex flex-col items-center justify-center py-1.5 text-amber-400 transition-colors" title="Workouts">
             <i class="fas fa-dumbbell text-base mb-1"></i>
             <span class="text-[10px] font-semibold leading-none">Workouts</span>
+        </button>
+        <button id="mobile-tab-history" onclick="switchTab('history')" class="hidden flex-1 flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-white transition-colors" title="History">
+            <i class="fas fa-history text-base mb-1"></i>
+            <span class="text-[10px] font-medium leading-none">History</span>
         </button>
         <button id="mobile-tab-challenge" onclick="switchTab('challenge')" class="hidden flex-1 flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-white transition-colors" title="Daily Challenge">
             <i class="fas fa-fire text-base mb-1 text-amber-500"></i>
@@ -1720,10 +1818,12 @@
 
         // DOM Elements
         const viewWorkouts = document.getElementById('workouts-view');
+        const viewHistory = document.getElementById('history-view');
         const viewCreator = document.getElementById('creator-view');
         const viewDashboard = document.getElementById('dashboard-view');
         const viewChallenge = document.getElementById('challenge-view');
         const tabWorkouts = document.getElementById('tab-workouts');
+        const tabHistory = document.getElementById('tab-history');
         const tabCreator = document.getElementById('tab-creator');
         const tabDashboard = document.getElementById('tab-dashboard');
         const tabChallenge = document.getElementById('tab-challenge');
@@ -2518,7 +2618,9 @@
                 `;
                 
                 tabDashboard.classList.remove('hidden');
+                tabHistory.classList.remove('hidden');
                 document.getElementById('mobile-tab-dashboard')?.classList.remove('hidden');
+                document.getElementById('mobile-tab-history')?.classList.remove('hidden');
 
                 if (isAdmin) {
                     document.getElementById('header-role-badge')?.classList.remove('hidden');
@@ -2528,6 +2630,7 @@
                     document.getElementById('mobile-tab-challenge')?.classList.remove('hidden');
                     adminClientSelector.classList.remove('hidden');
                     document.getElementById('dashboard-admin-selector')?.classList.remove('hidden');
+                    document.getElementById('history-admin-selector')?.classList.remove('hidden');
                     document.getElementById('challenge-admin-selector')?.classList.remove('hidden');
                     btnDeleteWorkout.classList.remove('hidden');
                     btnEditWorkout.classList.remove('hidden');
@@ -2669,12 +2772,15 @@
                 document.getElementById('header-role-badge')?.classList.add('hidden');
                 tabCreator.classList.add('hidden');
                 tabDashboard.classList.add('hidden');
+                tabHistory.classList.add('hidden');
                 tabChallenge.classList.add('hidden');
                 document.getElementById('mobile-tab-dashboard')?.classList.add('hidden');
+                document.getElementById('mobile-tab-history')?.classList.add('hidden');
                 document.getElementById('mobile-tab-creator')?.classList.add('hidden');
                 document.getElementById('mobile-tab-challenge')?.classList.add('hidden');
                 adminClientSelector.classList.add('hidden');
                 document.getElementById('dashboard-admin-selector')?.classList.add('hidden');
+                document.getElementById('history-admin-selector')?.classList.add('hidden');
                 document.getElementById('challenge-admin-selector')?.classList.add('hidden');
                 btnDeleteWorkout.classList.add('hidden');
                 btnEditWorkout.classList.add('hidden');
@@ -2723,6 +2829,7 @@
             const cSelect = document.getElementById('c-client-select');
             const chSelect = document.getElementById('challenge-client-select');
             const dSelect = document.getElementById('dashboard-client-select');
+            const hSelect = document.getElementById('history-client-select');
             
             const clientList = allUsers.filter(u => u.email && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
             const options = `<option value="">Select a client...</option>` + 
@@ -2732,11 +2839,13 @@
             const cVal = cSelect ? cSelect.value : '';
             const chVal = chSelect ? chSelect.value : '';
             const dVal = dSelect ? dSelect.value : '';
+            const hVal = hSelect ? hSelect.value : '';
             
             if (wSelect) wSelect.innerHTML = options;
             if (cSelect) cSelect.innerHTML = options.replace('Select a client...', 'Assign to Client...');
             if (chSelect) chSelect.innerHTML = options.replace('Select a client...', 'Select client for challenge...');
             if (dSelect) dSelect.innerHTML = options.replace('Select a client...', 'Select client for dashboard...');
+            if (hSelect) hSelect.innerHTML = options.replace('Select a client...', 'Select client for history...');
             
             if (wSelect && wVal) wSelect.value = wVal;
             if (cSelect && cVal) cSelect.value = cVal;
@@ -2747,6 +2856,10 @@
             if (dSelect) {
                 if (dVal) dSelect.value = dVal;
                 else if (currentViewUid) dSelect.value = currentViewUid;
+            }
+            if (hSelect) {
+                if (hVal) hSelect.value = hVal;
+                else if (currentViewUid) hSelect.value = currentViewUid;
             }
         };
 
@@ -3635,9 +3748,11 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
             const wSelect = document.getElementById('w-client-select');
             const dSelect = document.getElementById('dashboard-client-select');
             const chSelect = document.getElementById('challenge-client-select');
+            const hSelect = document.getElementById('history-client-select');
             if (wSelect && wSelect.value !== email) wSelect.value = email;
             if (dSelect && dSelect.value !== email) dSelect.value = email;
             if (chSelect && chSelect.value !== email) chSelect.value = email;
+            if (hSelect && hSelect.value !== email) hSelect.value = email;
 
             if (email) {
                 subscribeToWorkouts(email);
@@ -3707,6 +3822,8 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
                     }
                 } else if (!document.getElementById('dashboard-view').classList.contains('hidden')) {
                     renderDashboard();
+                } else if (document.getElementById('history-view') && !document.getElementById('history-view').classList.contains('hidden')) {
+                    renderHistoryView();
                 } else {
                     renderWorkoutsList();
                 }
@@ -3719,7 +3836,7 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
 
         // Mobile Bottom Nav Sync
         window.updateMobileNavState = (activeTab) => {
-            const tabs = ['dashboard', 'workouts', 'challenge', 'creator'];
+            const tabs = ['dashboard', 'workouts', 'history', 'challenge', 'creator'];
             tabs.forEach(t => {
                 const btn = document.getElementById(`mobile-tab-${t}`);
                 if (!btn) return;
@@ -3744,11 +3861,13 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
             }
 
             viewWorkouts.classList.add('hidden');
+            if (viewHistory) viewHistory.classList.add('hidden');
             viewCreator.classList.add('hidden');
             viewDashboard.classList.add('hidden');
             if (viewChallenge) viewChallenge.classList.add('hidden');
             
             tabWorkouts.classList.replace('tab-active', 'tab-inactive');
+            if (tabHistory) tabHistory.classList.replace('tab-active', 'tab-inactive');
             tabCreator.classList.replace('tab-active', 'tab-inactive');
             tabDashboard.classList.replace('tab-active', 'tab-inactive');
             if (tabChallenge) tabChallenge.classList.replace('tab-active', 'tab-inactive');
@@ -3758,6 +3877,18 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
                 viewWorkouts.classList.remove('hidden');
                 tabWorkouts.classList.replace('tab-inactive', 'tab-active');
                 renderWorkoutsList();
+            } else if (tab === 'history') {
+                if (viewHistory) viewHistory.classList.remove('hidden');
+                if (tabHistory) tabHistory.classList.replace('tab-inactive', 'tab-active');
+                if (!currentViewUid) {
+                    if (!isAdmin && currentUser) {
+                        selectClientWorkouts(currentUser.email.toLowerCase());
+                    } else if (isAdmin && allUsers.length > 0) {
+                        const firstClient = allUsers.find(u => u.email && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
+                        if (firstClient) selectClientWorkouts(firstClient.email);
+                    }
+                }
+                renderHistoryView();
             } else if (tab === 'dashboard') {
                 viewDashboard.classList.remove('hidden');
                 tabDashboard.classList.replace('tab-inactive', 'tab-active');
@@ -3802,6 +3933,7 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
         };
 
         tabWorkouts.onclick = () => switchTab('workouts');
+        if (tabHistory) tabHistory.onclick = () => switchTab('history');
         tabCreator.onclick = () => switchTab('creator');
         tabDashboard.onclick = () => switchTab('dashboard');
         if (tabChallenge) tabChallenge.onclick = () => switchTab('challenge');
@@ -4975,6 +5107,341 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
                 </div>
             `}).join('');
         }
+
+        // --- History Tab: Workout History & Quick Stats Logic ---
+        window.calculateWorkoutStats = (workout) => {
+            const exercises = workout.exercises || [];
+            let totalSets = 0;
+            let completedSets = 0;
+            let totalReps = 0;
+            let totalVolumeKg = 0;
+            let maxWeightKg = 0;
+            let topLiftExercise = '';
+
+            exercises.forEach(ex => {
+                const resultVal = workout.results ? workout.results[ex.id] : null;
+                if (Array.isArray(resultVal) && resultVal.length > 0) {
+                    resultVal.forEach(s => {
+                        const wNum = parseFloat(s.weight) || 0;
+                        const rNum = parseInt(s.reps, 10) || 0;
+                        totalSets++;
+                        if (s.completed || (wNum > 0 && rNum > 0)) {
+                            completedSets++;
+                        }
+                        if (rNum > 0) totalReps += rNum;
+                        if (wNum > 0 && rNum > 0) totalVolumeKg += (wNum * rNum);
+                        if (wNum > maxWeightKg) {
+                            maxWeightKg = wNum;
+                            topLiftExercise = ex.name || 'Exercise';
+                        }
+                    });
+                } else if (typeof resultVal === 'string' && resultVal.trim().length > 0) {
+                    totalSets++;
+                    completedSets++;
+                } else {
+                    // Estimate prescribed sets if not logged
+                    totalSets += 3;
+                }
+            });
+
+            return {
+                totalExercises: exercises.length,
+                totalSets,
+                completedSets,
+                totalReps,
+                totalVolumeKg: Math.round(totalVolumeKg),
+                maxWeightKg,
+                topLiftExercise
+            };
+        };
+
+        function formatHistoryDate(dateStr) {
+            if (!dateStr) return 'Date not specified';
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toLocaleDateString(undefined, {
+                weekday: 'short',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        window.renderHistoryView = () => {
+            const container = document.getElementById('history-sessions-list');
+            if (!container) return;
+
+            if (!currentUser) {
+                container.innerHTML = `
+                    <div class="text-center py-16 bg-card border border-subtle rounded-xl shadow-sm">
+                        <i class="fas fa-lock text-4xl text-[#3d2b5e] mb-4"></i>
+                        <p class="text-white font-medium">Please login</p>
+                        <p class="text-sm text-subtle mt-1">Sign in to view your completed workout session history.</p>
+                        <button onclick="openAuthModal('login')" class="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold transition-colors">
+                            Log In
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            // Sync client selector in history view if admin
+            if (isAdmin) {
+                const hAdminSelector = document.getElementById('history-admin-selector');
+                if (hAdminSelector) hAdminSelector.classList.remove('hidden');
+                const hSelect = document.getElementById('history-client-select');
+                if (hSelect && currentViewUid && hSelect.value !== currentViewUid) {
+                    hSelect.value = currentViewUid;
+                }
+            }
+
+            // Completed workouts only
+            const completedWorkouts = workouts.filter(w => w.completed === true);
+
+            // Calculate overall history summary
+            let overallVolume = 0;
+            let overallSets = 0;
+            let overallReps = 0;
+
+            const workoutsWithStats = completedWorkouts.map(w => {
+                const stats = calculateWorkoutStats(w);
+                overallVolume += stats.totalVolumeKg;
+                overallSets += stats.totalSets;
+                overallReps += stats.totalReps;
+                return { ...w, stats };
+            });
+
+            // Update top summary cards
+            const statSessionsEl = document.getElementById('history-stat-sessions');
+            const statVolumeEl = document.getElementById('history-stat-volume');
+            const statSetsEl = document.getElementById('history-stat-sets');
+            const statRepsEl = document.getElementById('history-stat-reps');
+
+            if (statSessionsEl) statSessionsEl.textContent = completedWorkouts.length;
+            if (statVolumeEl) statVolumeEl.textContent = `${overallVolume.toLocaleString()} kg`;
+            if (statSetsEl) statSetsEl.textContent = overallSets.toLocaleString();
+            if (statRepsEl) statRepsEl.textContent = overallReps.toLocaleString();
+
+            if (workoutsWithStats.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-14 bg-card border border-subtle rounded-xl shadow-sm p-6">
+                        <div class="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-3xl mx-auto mb-3 border border-amber-500/20 shadow-inner">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <h3 class="text-white font-bold text-base mb-1">No Completed Sessions Yet</h3>
+                        <p class="text-xs text-subtle max-w-sm mx-auto leading-relaxed">
+                            Complete your workouts and tap "Finish Workout" in the logger to log your completed training history, volume, and sets here.
+                        </p>
+                        <button onclick="switchTab('workouts')" class="mt-4 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold transition-colors shadow-md inline-flex items-center gap-1.5">
+                            <i class="fas fa-dumbbell"></i> View Workouts
+                        </button>
+                    </div>`;
+                return;
+            }
+
+            // Sort
+            const sortVal = document.getElementById('history-sort-select')?.value || 'newest';
+            workoutsWithStats.sort((a, b) => {
+                if (sortVal === 'oldest') {
+                    return new Date(a.date).getTime() - new Date(b.date).getTime();
+                } else if (sortVal === 'volume') {
+                    return b.stats.totalVolumeKg - a.stats.totalVolumeKg;
+                } else if (sortVal === 'exercises') {
+                    return b.stats.totalExercises - a.stats.totalExercises;
+                } else {
+                    return new Date(b.date).getTime() - new Date(a.date).getTime();
+                }
+            });
+
+            // Render session cards
+            container.innerHTML = workoutsWithStats.map(w => {
+                const dateFormatted = formatHistoryDate(w.date);
+                const s = w.stats;
+
+                return `
+                <div class="history-session-card bg-card border border-subtle hover:border-amber-500/50 rounded-xl p-4 transition-all shadow-sm group" data-title="${(w.title || '').toLowerCase()}" data-exercises="${(w.exercises || []).map(e => e.name || '').join(' ').toLowerCase()}">
+                    <!-- Session Header -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-subtle/70">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs font-mono font-bold text-amber-400 flex items-center gap-1.5">
+                                    <i class="far fa-calendar-alt"></i> ${dateFormatted}
+                                </span>
+                                <span class="bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 shadow-xs">
+                                    <i class="fas fa-check-circle"></i> Completed
+                                </span>
+                            </div>
+                            <h3 class="text-white font-bold text-base mt-1 group-hover:text-amber-300 transition-colors">
+                                ${w.title || 'Workout Session'}
+                            </h3>
+                        </div>
+
+                        <!-- Top Lift Trophy if available -->
+                        ${s.maxWeightKg > 0 ? `
+                        <div class="self-start sm:self-auto bg-[#1a0f2e] border border-amber-500/30 px-2.5 py-1 rounded-lg flex items-center gap-2 text-xs shadow-inner">
+                            <i class="fas fa-trophy text-amber-400 text-sm"></i>
+                            <div>
+                                <span class="text-[9px] text-gray-400 uppercase font-semibold block leading-none">Top Lift</span>
+                                <span class="text-white font-mono font-bold text-xs truncate max-w-[140px] block">${s.topLiftExercise}: ${s.maxWeightKg} kg</span>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Quick Stats Grid -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 my-3 py-2 px-3 bg-[#130826]/60 border border-subtle rounded-lg text-xs">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 shrink-0">
+                                <i class="fas fa-dumbbell text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 uppercase font-semibold">Exercises</div>
+                                <div class="font-mono font-bold text-white">${s.totalExercises}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
+                                <i class="fas fa-weight-hanging text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 uppercase font-semibold">Volume</div>
+                                <div class="font-mono font-bold text-amber-400">${s.totalVolumeKg.toLocaleString()} kg</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-purple-500/10 flex items-center justify-center text-purple-400 shrink-0">
+                                <i class="fas fa-layer-group text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 uppercase font-semibold">Sets Logged</div>
+                                <div class="font-mono font-bold text-purple-300">${s.totalSets}</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 shrink-0">
+                                <i class="fas fa-redo text-xs"></i>
+                            </div>
+                            <div>
+                                <div class="text-[10px] text-gray-500 uppercase font-semibold">Total Reps</div>
+                                <div class="font-mono font-bold text-cyan-300">${s.totalReps}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Expand/Collapse Details Accordion -->
+                    <div id="history-details-${w.id}" class="hidden mt-3 pt-3 border-t border-subtle space-y-3 animate-in fade-in duration-200">
+                        ${w.warmup ? `
+                            <div class="bg-[#1a0f2e] border border-subtle rounded-lg p-2.5 text-xs text-subtle">
+                                <span class="font-bold text-orange-400 uppercase text-[10px] block mb-0.5"><i class="fas fa-fire mr-1"></i> Warm-up</span>
+                                <div class="whitespace-pre-wrap">${w.warmup}</div>
+                            </div>
+                        ` : ''}
+
+                        <!-- Exercises Breakdown -->
+                        <div class="space-y-2">
+                            <div class="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-list-check text-amber-400"></i> Exercise Breakdown & Logged Sets
+                            </div>
+                            ${(w.exercises || []).map((ex) => {
+                                const resultVal = w.results ? w.results[ex.id] : null;
+                                const sets = Array.isArray(resultVal) ? resultVal : [];
+                                return `
+                                    <div class="bg-[#170a2c] border border-subtle rounded-lg p-2.5 text-xs">
+                                        <div class="flex items-center justify-between font-bold text-white mb-1.5">
+                                            <span>${ex.label ? `<span class="text-amber-400 mr-1.5 font-mono">${ex.label})</span>` : ''}${ex.name}</span>
+                                            <span class="text-[10px] text-gray-400 font-normal truncate max-w-[200px]">${ex.prescription || ''}</span>
+                                        </div>
+
+                                        ${sets.length > 0 ? `
+                                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5 mt-1.5">
+                                                ${sets.map((set, sIdx) => `
+                                                    <div class="bg-black/40 border border-white/5 rounded px-2 py-1 text-[11px] flex items-center justify-between font-mono">
+                                                        <span class="text-gray-500 font-semibold">S${sIdx + 1}</span>
+                                                        <span class="text-amber-300 font-bold">${set.weight ? set.weight + 'kg' : '-'} × ${set.reps ? set.reps + 'r' : '-'}</span>
+                                                        ${set.completed ? '<i class="fas fa-check text-emerald-400 text-[10px]"></i>' : ''}
+                                                    </div>
+                                                `).join('')}
+                                            </div>
+                                        ` : (typeof resultVal === 'string' && resultVal.trim().length > 0 ? `
+                                            <div class="text-[11px] text-yellow-500/70 italic">${resultVal}</div>
+                                        ` : `
+                                            <div class="text-[11px] text-gray-500 italic">No sets logged</div>
+                                        `)}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        ${w.cooldown ? `
+                            <div class="bg-[#1a0f2e] border border-subtle rounded-lg p-2.5 text-xs text-subtle">
+                                <span class="font-bold text-blue-400 uppercase text-[10px] block mb-0.5"><i class="fas fa-snowflake mr-1"></i> Cooldown</span>
+                                <div class="whitespace-pre-wrap">${w.cooldown}</div>
+                            </div>
+                        ` : ''}
+
+                        ${w.notes ? `
+                            <div class="bg-[#1a0f2e] border border-subtle rounded-lg p-2.5 text-xs text-subtle">
+                                <span class="font-bold text-amber-400 uppercase text-[10px] block mb-0.5"><i class="fas fa-info-circle mr-1"></i> Coach's Notes</span>
+                                <div class="whitespace-pre-wrap">${w.notes}</div>
+                            </div>
+                        ` : ''}
+                    </div>
+
+                    <!-- Session Footer Controls -->
+                    <div class="flex items-center justify-between pt-2">
+                        <button onclick="toggleHistoryDetails('${w.id}')" class="text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1.5 py-1">
+                            <span id="history-toggle-text-${w.id}">Show Details</span>
+                            <i id="history-toggle-icon-${w.id}" class="fas fa-chevron-down text-[10px]"></i>
+                        </button>
+
+                        <button onclick="openWorkoutFromHistory('${w.id}')" class="px-3 py-1 bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white rounded-lg text-xs font-medium border border-subtle transition-colors flex items-center gap-1.5 shadow-xs" title="Open full workout in logger">
+                            <i class="fas fa-eye text-amber-400"></i> Open in Logger
+                        </button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        };
+
+        window.toggleHistoryDetails = (id) => {
+            const details = document.getElementById(`history-details-${id}`);
+            const text = document.getElementById(`history-toggle-text-${id}`);
+            const icon = document.getElementById(`history-toggle-icon-${id}`);
+            if (!details) return;
+
+            if (details.classList.contains('hidden')) {
+                details.classList.remove('hidden');
+                if (text) text.textContent = 'Hide Details';
+                if (icon) icon.className = 'fas fa-chevron-up text-[10px]';
+            } else {
+                details.classList.add('hidden');
+                if (text) text.textContent = 'Show Details';
+                if (icon) icon.className = 'fas fa-chevron-down text-[10px]';
+            }
+        };
+
+        window.openWorkoutFromHistory = (workoutId) => {
+            switchTab('workouts');
+            if (typeof openWorkout === 'function') {
+                openWorkout(workoutId);
+            }
+        };
+
+        window.filterHistoryList = (query) => {
+            const q = (query || '').toLowerCase().trim();
+            const cards = document.querySelectorAll('.history-session-card');
+            cards.forEach(card => {
+                const title = card.getAttribute('data-title') || '';
+                const exercises = card.getAttribute('data-exercises') || '';
+                if (!q || title.includes(q) || exercises.includes(q)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        };
 
         window.deleteActiveWorkout = async () => {
             if (!activeWorkoutId || !currentViewUid) return;
