@@ -39,8 +39,22 @@
         }
         .border-subtle { border-color: rgba(255, 255, 255, 0.05); }
         .text-subtle { color: #a1a1aa; }
-        .tab-active { color: #ffffff; border-bottom: 2px solid #8B5CF6; }
-        .tab-inactive { color: #71717a; }
+        .tab-active { 
+            color: #ffffff !important; 
+            background: rgba(139, 92, 246, 0.25) !important; 
+            border: 1px solid rgba(139, 92, 246, 0.5) !important;
+            box-shadow: 0 0 12px rgba(139, 92, 246, 0.25) !important;
+        }
+        .tab-inactive { 
+            color: #9ca3af !important; 
+            background: rgba(255, 255, 255, 0.03) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        }
+        .tab-inactive:hover {
+            color: #ffffff !important;
+            background: rgba(255, 255, 255, 0.08) !important;
+            border-color: rgba(255, 255, 255, 0.15) !important;
+        }
         .hidden { display: none !important; }
         
         /* Custom scrollbar for dark theme */
@@ -96,24 +110,39 @@
     </style>
 </head>
 <body class="pb-28 sm:pb-16 min-h-screen">
-    <header class="bg-[#1b0a33]/80 backdrop-blur-md border-b border-subtle sticky top-0 z-30 shadow-md">
-        <div class="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-            <h1 class="text-xl font-bold text-white tracking-tight shrink-0">FitTrack</h1>
-            <div class="flex gap-2 sm:gap-3 h-full items-center">
-                <!-- Notifications Bell for Admin / Coach -->
-                <button id="btn-notifications" onclick="toggleNotificationsDrawer()" class="hidden relative p-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Client Activity Notifications">
-                    <i class="fas fa-bell text-base"></i>
-                    <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full ring-2 ring-[#1b0a33] animate-pulse">0</span>
-                </button>
-                <div id="auth-container" class="mr-1"></div>
-                <!-- Desktop Tab Navigation (Hidden on mobile to eliminate header text collisions) -->
-                <div id="desktop-tabs" class="hidden sm:flex h-full items-center gap-1">
-                    <button id="tab-dashboard" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Dashboard</button>
-                    <button id="tab-workouts" class="h-full px-2 tab-active font-medium text-sm transition-colors">Workouts</button>
-                    <button id="tab-challenge" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors flex items-center gap-1.5"><i class="fas fa-fire text-amber-500"></i> Challenge</button>
-                    <button id="tab-creator" class="hidden h-full px-2 tab-inactive font-medium text-sm transition-colors">Creator</button>
+    <header class="bg-[#1b0a33]/90 backdrop-blur-md border-b border-subtle sticky top-0 z-30 shadow-md">
+        <div class="max-w-2xl mx-auto px-4">
+            <!-- Header Top Bar: Logo, Coach Badge & User Controls -->
+            <div class="h-14 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <h1 class="text-xl font-black text-white tracking-tight shrink-0">FitTrack</h1>
+                    <span id="header-role-badge" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 uppercase tracking-wider">Coach</span>
+                </div>
+                <div class="flex gap-2 sm:gap-3 h-full items-center">
+                    <!-- Notifications Bell for Admin / Coach -->
+                    <button id="btn-notifications" onclick="toggleNotificationsDrawer()" class="hidden relative p-2 text-gray-300 hover:text-white hover:bg-white/5 rounded-xl transition-all" title="Client Activity Notifications">
+                        <i class="fas fa-bell text-base"></i>
+                        <span id="notif-badge" class="hidden absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-black px-1.5 py-0.2 rounded-full ring-2 ring-[#1b0a33] animate-pulse">0</span>
+                    </button>
+                    <div id="auth-container" class="mr-1"></div>
                 </div>
             </div>
+
+            <!-- Universal Top Navigation: Always visible across all screen widths -->
+            <nav id="top-nav-bar" class="flex items-center gap-1.5 pb-2.5 pt-0.5 border-t border-white/5 overflow-x-auto no-scrollbar">
+                <button id="tab-dashboard" class="hidden px-3 py-1.5 rounded-xl font-medium text-xs transition-all flex items-center gap-1.5 tab-active whitespace-nowrap shadow-sm">
+                    <i class="fas fa-chart-line text-xs"></i> <span>Dashboard</span>
+                </button>
+                <button id="tab-workouts" class="px-3 py-1.5 rounded-xl font-medium text-xs transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap">
+                    <i class="fas fa-dumbbell text-xs"></i> <span>Workouts</span>
+                </button>
+                <button id="tab-challenge" class="hidden px-3 py-1.5 rounded-xl font-medium text-xs transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap">
+                    <i class="fas fa-fire text-amber-500 text-xs"></i> <span>Challenge</span>
+                </button>
+                <button id="tab-creator" class="hidden px-3.5 py-1.5 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 tab-inactive whitespace-nowrap border-amber-500/40 text-amber-300 hover:text-white shadow-sm">
+                    <i class="fas fa-plus-circle text-xs text-amber-400"></i> <span>+ Workout Creator</span>
+                </button>
+            </nav>
         </div>
     </header>
 
@@ -121,12 +150,14 @@
         <!-- Dashboard View -->
         <div id="dashboard-view" class="hidden space-y-6 animate-in fade-in duration-300">
             <!-- Admin Client Switcher for Dashboard if Coach is logged in -->
-            <div id="dashboard-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm">
-                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-1.5">
+            <div id="dashboard-admin-selector" class="hidden bg-card border border-subtle rounded-xl p-3 shadow-sm space-y-2.5">
+                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-0.5">
                     <span class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
                         <i class="fas fa-user-shield"></i> Coach Mode: Client Dashboard
                     </span>
-                    <span id="dashboard-client-badge" class="text-xs text-subtle">Viewing client</span>
+                    <button onclick="switchTab('creator')" class="px-3 py-1 bg-amber-500 hover:bg-amber-400 text-white text-xs font-semibold rounded-lg transition-all flex items-center gap-1.5 shadow-sm">
+                        <i class="fas fa-plus-circle"></i> Add / Assign Workout
+                    </button>
                 </div>
                 <select id="dashboard-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client to view their dashboard...</option>
@@ -156,9 +187,16 @@
                             <p class="text-xs text-subtle">Track daily walking, running & steps progression</p>
                         </div>
                     </div>
-                    <button onclick="openLogActivityModal()" class="text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1">
-                        <i class="fas fa-edit"></i> Log Activity
-                    </button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="syncGoogleFitSteps()" id="btn-sync-google-fit" class="text-xs bg-white/5 hover:bg-white/10 text-white border border-subtle px-2.5 py-1.5 rounded-lg font-medium transition-colors flex items-center gap-1.5 shadow-sm" title="Sync steps from Google Fit / Health Connect">
+                            <i class="fab fa-google text-blue-400"></i>
+                            <span class="hidden sm:inline">Sync Google Fit</span>
+                            <span class="sm:hidden">Sync</span>
+                        </button>
+                        <button onclick="openLogActivityModal()" class="text-xs text-amber-400 hover:text-amber-300 font-medium transition-colors flex items-center gap-1">
+                            <i class="fas fa-edit"></i> Log Activity
+                        </button>
+                    </div>
                 </div>
 
                 <!-- 3 Metric Cards Grid -->
@@ -271,10 +309,17 @@
 
         <!-- Workouts List / Logger View -->
         <div id="workouts-view" class="space-y-6 animate-in fade-in duration-300">
-            <div id="admin-client-selector" class="hidden bg-card border border-subtle rounded-lg p-4 shadow-sm">
-                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-2">
+            <div id="admin-client-selector" class="hidden bg-card border border-subtle rounded-lg p-4 shadow-sm space-y-2.5">
+                <div class="flex flex-wrap justify-between items-center gap-1.5 mb-1">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider">View Client Workouts</label>
-                    <button onclick="openAddClientModal()" class="text-xs text-amber-400 hover:text-amber-300 transition-colors"><i class="fas fa-plus"></i> Add Client</button>
+                    <div class="flex items-center gap-2">
+                        <button onclick="switchTab('creator')" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1 shadow-sm">
+                            <i class="fas fa-plus"></i> New Workout
+                        </button>
+                        <button onclick="openAddClientModal()" class="text-xs text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1">
+                            <i class="fas fa-user-plus"></i> Add Client
+                        </button>
+                    </div>
                 </div>
                 <select id="w-client-select" onchange="selectClientWorkouts(this.value)" class="w-full bg-input border border-subtle rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-500 transition-colors">
                     <option value="">Select a client...</option>
@@ -510,6 +555,9 @@
                         </div>
                         <button onclick="quickAddKm(0.5)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors shrink-0">+0.5</button>
                         <button onclick="quickAddKm(1.0)" class="px-2.5 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-xs text-gray-300 border border-subtle transition-colors shrink-0">+1.0</button>
+                        <button onclick="syncGoogleFitSteps(selectedChallengeDate)" class="px-2.5 py-2 bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-semibold transition-colors shrink-0 flex items-center gap-1" title="Sync 2KM progress from Google Fit / Health Connect">
+                            <i class="fab fa-google text-[11px]"></i> Sync Fit
+                        </button>
                         <button onclick="saveKmLogged()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-xs font-bold transition-colors shadow-sm whitespace-nowrap shrink-0">
                             Log KM
                         </button>
@@ -746,6 +794,16 @@
                 </button>
             </div>
             <div class="p-5 space-y-4">
+                <!-- 1-Tap Google Fit Sync Button -->
+                <div class="p-3 rounded-xl bg-gradient-to-r from-blue-950/40 to-indigo-950/40 border border-blue-500/30">
+                    <button type="button" id="modal-btn-sync-google-fit" onclick="syncGoogleFitSteps()" class="w-full py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-2 shadow-sm">
+                        <i class="fab fa-google text-white text-xs"></i> Sync from Google Fit / Health
+                    </button>
+                    <p class="text-[10px] text-blue-200/80 text-center mt-1.5 leading-snug">
+                        <span class="font-semibold text-blue-300">Samsung users:</span> Syncs steps via Google Fit or Health Connect enabled in Samsung Health settings.
+                    </p>
+                </div>
+
                 <!-- Date selector -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Date</label>
@@ -1593,11 +1651,16 @@
 
         window.signInWithGoogle = async () => {
             const provider = new GoogleAuthProvider();
+            provider.addScope('https://www.googleapis.com/auth/fitness.activity.read');
             const errEl = document.getElementById('auth-error-msg');
             if (errEl) errEl.classList.add('hidden');
 
             try {
-                await signInWithPopup(auth, provider);
+                const result = await signInWithPopup(auth, provider);
+                const credential = GoogleAuthProvider.credentialFromResult(result);
+                if (credential?.accessToken) {
+                    cachedGoogleFitToken = credential.accessToken;
+                }
                 closeAuthModal();
             } catch (error) {
                 console.error("Google sign-in error:", error);
@@ -2268,6 +2331,7 @@
                 document.getElementById('mobile-tab-dashboard')?.classList.remove('hidden');
 
                 if (isAdmin) {
+                    document.getElementById('header-role-badge')?.classList.remove('hidden');
                     tabCreator.classList.remove('hidden');
                     tabChallenge.classList.remove('hidden');
                     document.getElementById('mobile-tab-creator')?.classList.remove('hidden');
@@ -2396,6 +2460,7 @@
             } else {
                 isAdmin = false;
                 currentViewUid = null;
+                document.getElementById('header-role-badge')?.classList.add('hidden');
                 tabCreator.classList.add('hidden');
                 tabDashboard.classList.add('hidden');
                 tabChallenge.classList.add('hidden');
@@ -3745,6 +3810,175 @@
                 console.error("Error saving daily activity:", err);
                 alert("Failed to save activity: " + err.message);
                 handleFirestoreError(err, OperationType.WRITE, `users/${targetEmail}/challengeLogs/${dateKey}`);
+            }
+        };
+
+        // --- Google Fit / Health Connect Steps & Distance Integration ---
+        let cachedGoogleFitToken = null;
+
+        window.syncGoogleFitSteps = async (targetDateStr = null) => {
+            const dateInput = document.getElementById('activity-input-date');
+            const dateToSync = targetDateStr || (dateInput ? dateInput.value : null) || formatDateString(new Date());
+
+            if (!currentUser) {
+                openAuthModal('login');
+                return;
+            }
+
+            const syncBtn = document.getElementById('btn-sync-google-fit');
+            const modalSyncBtn = document.getElementById('modal-btn-sync-google-fit');
+            const origSyncHtml = syncBtn ? syncBtn.innerHTML : '';
+            const origModalHtml = modalSyncBtn ? modalSyncBtn.innerHTML : '';
+
+            const setSyncLoading = (loading) => {
+                if (syncBtn) {
+                    syncBtn.disabled = loading;
+                    syncBtn.innerHTML = loading ? '<i class="fas fa-spinner fa-spin text-amber-400"></i> <span class="hidden sm:inline">Syncing...</span><span class="sm:hidden">...</span>' : origSyncHtml;
+                }
+                if (modalSyncBtn) {
+                    modalSyncBtn.disabled = loading;
+                    modalSyncBtn.innerHTML = loading ? '<i class="fas fa-spinner fa-spin text-white"></i> Fetching from Google Fit...' : origModalHtml;
+                }
+            };
+
+            setSyncLoading(true);
+
+            try {
+                let token = cachedGoogleFitToken;
+                if (!token) {
+                    const provider = new GoogleAuthProvider();
+                    provider.addScope('https://www.googleapis.com/auth/fitness.activity.read');
+                    const result = await signInWithPopup(auth, provider);
+                    const credential = GoogleAuthProvider.credentialFromResult(result);
+                    token = credential?.accessToken;
+                    if (token) {
+                        cachedGoogleFitToken = token;
+                    }
+                }
+
+                if (!token) {
+                    throw new Error("Could not obtain Google Fit authorization. Please allow activity permissions.");
+                }
+
+                const dateParts = dateToSync.split('-');
+                const targetDateObj = new Date(parseInt(dateParts[0], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[2], 10));
+                const startTimeMillis = new Date(targetDateObj.getFullYear(), targetDateObj.getMonth(), targetDateObj.getDate(), 0, 0, 0, 0).getTime();
+                const endTimeMillis = new Date(targetDateObj.getFullYear(), targetDateObj.getMonth(), targetDateObj.getDate(), 23, 59, 59, 999).getTime();
+
+                const response = await fetch('https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        aggregateBy: [
+                            { dataTypeName: 'com.google.step_count.delta' },
+                            { dataTypeName: 'com.google.distance.delta' }
+                        ],
+                        bucketByTime: { durationMillis: 86400000 },
+                        startTimeMillis: startTimeMillis,
+                        endTimeMillis: endTimeMillis
+                    })
+                });
+
+                if (response.status === 401) {
+                    cachedGoogleFitToken = null;
+                    throw new Error("Google session expired. Tap Sync again to re-authenticate.");
+                }
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || `Google Fit API returned error (${response.status})`);
+                }
+
+                const fitData = await response.json();
+                let totalSteps = 0;
+                let totalDistanceMeters = 0;
+
+                if (fitData.bucket && fitData.bucket.length > 0) {
+                    for (const b of fitData.bucket) {
+                        if (b.dataset) {
+                            for (const ds of b.dataset) {
+                                for (const pt of (ds.point || [])) {
+                                    if (pt.value) {
+                                        for (const val of pt.value) {
+                                            if (val.intVal !== undefined) {
+                                                totalSteps += val.intVal;
+                                            } else if (val.fpVal !== undefined) {
+                                                if (ds.dataSourceId && ds.dataSourceId.includes('distance')) {
+                                                    totalDistanceMeters += val.fpVal;
+                                                } else {
+                                                    totalSteps += Math.round(val.fpVal);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                let calculatedKm = 0;
+                if (totalDistanceMeters > 0) {
+                    calculatedKm = +(totalDistanceMeters / 1000).toFixed(2);
+                } else if (totalSteps > 0) {
+                    calculatedKm = +(totalSteps / 1350).toFixed(2);
+                }
+
+                // Populate modal inputs if open
+                const stepsInput = document.getElementById('activity-input-steps');
+                const kmInput = document.getElementById('activity-input-km');
+                if (stepsInput) stepsInput.value = totalSteps > 0 ? totalSteps : '';
+                if (kmInput) kmInput.value = calculatedKm > 0 ? calculatedKm : '';
+
+                const targetEmail = (isAdmin && currentViewUid ? currentViewUid : (currentUser ? currentUser.email : '')).toLowerCase();
+                if (targetEmail) {
+                    const existing = (activityLogs && activityLogs[dateToSync]) || (challengeLogs && challengeLogs[dateToSync]) || {};
+                    const existingTasks = { ...(existing.tasksCompleted || {}) };
+                    
+                    const kmGoal = (clientChallengeConfig && clientChallengeConfig.dailyKmTarget) ? clientChallengeConfig.dailyKmTarget : 2.0;
+                    if (calculatedKm >= kmGoal) {
+                        existingTasks.task_2km = true;
+                    }
+
+                    const dObj = parseDateString(dateToSync);
+                    const isMon = dObj.getDay() === 1;
+                    const isDayComplete = existingTasks.task_2km === true && (!isMon || existingTasks.task_yoga === true);
+
+                    const updatedData = {
+                        ...existing,
+                        date: dateToSync,
+                        steps: totalSteps,
+                        km: calculatedKm,
+                        kmLogged: calculatedKm,
+                        tasksCompleted: existingTasks,
+                        completed: isDayComplete,
+                        source: 'Google Fit / Health',
+                        updatedAt: new Date().toISOString()
+                    };
+
+                    activityLogs[dateToSync] = updatedData;
+                    if (currentChallengeEmail === targetEmail) {
+                        challengeLogs[dateToSync] = updatedData;
+                    }
+
+                    await setDoc(doc(db, 'users', targetEmail, 'challengeLogs', dateToSync), updatedData, { merge: true });
+
+                    renderDashboard();
+                    if (viewChallenge && !viewChallenge.classList.contains('hidden')) {
+                        renderChallengeView();
+                    }
+
+                    // Alert confirmation
+                    alert(`✅ Google Fit Synced Successfully!\n\nDate: ${dateToSync}\nSteps: ${totalSteps.toLocaleString()}\nDistance: ${calculatedKm} KM\n\nYour activity and 2KM goal have been updated!`);
+                }
+            } catch (err) {
+                console.error("Google Fit sync failed:", err);
+                alert(`Google Fit Sync Notice: ${err.message}\n\nTip for Samsung users: Confirm that Samsung Health has 'Health Connect' or 'Google Fit' enabled in Settings.`);
+            } finally {
+                setSyncLoading(false);
             }
         };
 
