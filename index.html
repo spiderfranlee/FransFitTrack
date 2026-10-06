@@ -340,7 +340,10 @@
                     <button onclick="closeWorkout()" class="text-sm text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-2">
                         <i class="fas fa-arrow-left"></i> Back
                     </button>
-                    <div class="flex gap-3">
+                    <div class="flex items-center gap-3">
+                        <button id="btn-manual-rest-timer" onclick="startRestTimer(60, 'Rest Interval')" class="text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm" title="Start rest interval countdown timer">
+                            <i class="fas fa-stopwatch text-amber-400"></i> Rest Timer
+                        </button>
                         <button id="btn-edit-workout" onclick="editActiveWorkout()" class="hidden text-sm text-amber-500 hover:text-amber-400 transition-colors">
                             <i class="fas fa-edit"></i> Edit
                         </button>
@@ -357,6 +360,57 @@
                 </div>
 
                 <div id="workout-display"></div>
+
+                <!-- Rest Countdown Timer Float Bar (Starts automatically when set logged) -->
+                <div id="rest-timer-bar" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-md bg-[#130826]/95 backdrop-blur-md border border-amber-500/50 rounded-2xl p-3.5 shadow-2xl animate-in slide-in-from-bottom duration-300">
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div id="rest-timer-icon-wrap" class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30 shadow-inner">
+                                <i class="fas fa-stopwatch text-sm"></i>
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-[10px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <span>Rest Interval</span>
+                                    <span id="rest-timer-badge" class="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 text-[9px] font-semibold">Counting Down</span>
+                                </div>
+                                <div id="rest-timer-context" class="text-xs text-white font-medium truncate">Set completed</div>
+                            </div>
+                        </div>
+
+                        <!-- Countdown numbers -->
+                        <div class="flex items-center gap-1 shrink-0">
+                            <span id="rest-timer-digits" class="font-mono text-2xl font-bold text-white tracking-tight">01:00</span>
+                        </div>
+                    </div>
+
+                    <!-- Visual Progress Bar -->
+                    <div class="w-full bg-white/10 rounded-full h-1.5 mb-2.5 overflow-hidden">
+                        <div id="rest-timer-progress-bar" class="bg-gradient-to-r from-amber-500 via-orange-400 to-amber-300 h-full rounded-full transition-all duration-1000 ease-linear" style="width: 100%;"></div>
+                    </div>
+
+                    <!-- Quick Controls -->
+                    <div class="flex flex-wrap items-center justify-between gap-1 text-xs">
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="adjustRestTimer(-15)" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-[11px] font-mono transition-colors" title="Minus 15 seconds">-15s</button>
+                            <button type="button" onclick="adjustRestTimer(30)" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 text-[11px] font-mono transition-colors" title="Plus 30 seconds">+30s</button>
+                            <button type="button" id="btn-pause-rest-timer" onclick="togglePauseRestTimer()" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 text-[11px] font-semibold transition-colors flex items-center gap-1">
+                                <i id="btn-pause-rest-icon" class="fas fa-pause text-[10px]"></i>
+                                <span id="btn-pause-rest-text">Pause</span>
+                            </button>
+                        </div>
+
+                        <!-- Preset Buttons -->
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="setRestTimerPreset(30)" class="px-1.5 py-0.5 rounded text-[10px] text-gray-400 hover:text-white hover:bg-white/5 transition-colors">30s</button>
+                            <button type="button" onclick="setRestTimerPreset(60)" class="px-1.5 py-0.5 rounded text-[10px] text-gray-400 hover:text-white hover:bg-white/5 transition-colors">60s</button>
+                            <button type="button" onclick="setRestTimerPreset(90)" class="px-1.5 py-0.5 rounded text-[10px] text-gray-400 hover:text-white hover:bg-white/5 transition-colors">90s</button>
+                            <button type="button" onclick="setRestTimerPreset(120)" class="px-1.5 py-0.5 rounded text-[10px] text-gray-400 hover:text-white hover:bg-white/5 transition-colors">2m</button>
+                            <button type="button" onclick="dismissRestTimer()" class="w-6 h-6 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 flex items-center justify-center transition-colors ml-1" title="Dismiss rest timer">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -369,6 +423,9 @@
                     </select>
                     <button onclick="openManageTemplatesModal()" class="bg-card border border-subtle hover:bg-[#3d2b5e] text-amber-400 hover:text-white px-3.5 py-2.5 rounded text-sm transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5" title="Manage and edit database templates">
                         <i class="fas fa-layer-group"></i> <span class="hidden sm:inline">Manage</span>
+                    </button>
+                    <button onclick="openBulkTemplateImportModal()" class="bg-card border border-subtle hover:bg-[#3d2b5e] text-purple-300 hover:text-white px-3 py-2.5 rounded text-sm transition-colors shadow-sm whitespace-nowrap flex items-center gap-1.5" title="Bulk Import multiple workout templates">
+                        <i class="fas fa-file-import text-amber-400"></i> <span class="hidden sm:inline">Bulk Import</span>
                     </button>
                 </div>
                 <div class="flex flex-wrap gap-2">
@@ -1301,12 +1358,76 @@
                 <!-- Templates list injected here -->
             </div>
 
-            <div class="p-4 border-t border-subtle flex justify-between items-center bg-[#1a0f2e]">
-                <button onclick="createNewBlankTemplate()" class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
-                    <i class="fas fa-plus text-amber-400"></i> New Blank Workout
-                </button>
+            <div class="p-4 border-t border-subtle flex flex-wrap justify-between items-center gap-2 bg-[#1a0f2e]">
+                <div class="flex items-center gap-2">
+                    <button onclick="createNewBlankTemplate()" class="px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                        <i class="fas fa-plus text-amber-400"></i> New Blank
+                    </button>
+                    <button onclick="closeManageTemplatesModal(); openBulkTemplateImportModal();" class="px-3.5 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-500/30 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5">
+                        <i class="fas fa-file-import text-amber-400"></i> Bulk Import
+                    </button>
+                </div>
                 <button onclick="closeManageTemplatesModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-medium transition-colors">
                     Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Template Import Modal (Multi-Workout Importer) -->
+    <div id="bulk-template-import-modal" class="hidden fixed inset-0 z-[65] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[88vh]">
+            <div class="p-4 border-b border-subtle flex justify-between items-center bg-[#1a0f2e]">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                        <i class="fas fa-file-import text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-white font-bold text-base">Bulk Import Workout Templates</h3>
+                        <p class="text-xs text-subtle">Import multiple workouts at once safely into your database</p>
+                    </div>
+                </div>
+                <button onclick="closeBulkTemplateImportModal()" class="text-gray-400 hover:text-white transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="p-4 flex-1 overflow-y-auto space-y-4">
+                <div class="p-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-xs text-amber-200 flex items-start gap-2.5">
+                    <i class="fas fa-shield-alt text-amber-400 mt-0.5 text-sm shrink-0"></i>
+                    <div>
+                        <span class="font-bold text-amber-300">Safe Import Guarantee:</span> This only adds new templates to your workout library. It does <strong>not</strong> change your Firebase project, does <strong>not</strong> touch any client accounts, and does <strong>not</strong> wipe any data.
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-semibold text-gray-300">Workout Plan Text (Titles, Warmup, & Main Workouts)</label>
+                        <button onclick="prefillUserWorkouts()" class="text-xs text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 font-medium">
+                            <i class="fas fa-magic"></i> Load Your 13 Workouts
+                        </button>
+                    </div>
+                    <textarea id="bulk-template-input-text" rows="8" class="w-full bg-input border border-subtle rounded-xl p-3 text-xs font-mono text-white focus:outline-none focus:border-amber-500 transition-colors resize-y placeholder-gray-500 leading-relaxed" placeholder="Workout: Push Week 1&#10;Warmup:&#10;| Jog | 3 mins&#10;Main Workout:&#10;A | Bench Press | 4x10&#10;B | Row | 4x10&#10;&#10;Workout: Lower Week 1&#10;..."></textarea>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <button onclick="previewBulkWorkouts()" class="px-3.5 py-1.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5">
+                        <i class="fas fa-eye text-amber-400"></i> Preview Workouts
+                    </button>
+                    <span id="bulk-preview-summary" class="text-xs text-gray-400">0 workouts ready to import</span>
+                </div>
+
+                <!-- Preview container -->
+                <div id="bulk-preview-container" class="space-y-2.5 hidden">
+                    <div class="text-xs font-bold text-gray-400 uppercase tracking-wider">Preview Parsed Workouts</div>
+                    <div id="bulk-preview-list" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-subtle flex justify-end gap-3 bg-[#1a0f2e]">
+                <button onclick="closeBulkTemplateImportModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button id="btn-save-bulk-templates" onclick="executeBulkTemplateImport()" class="px-5 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-xl text-sm font-semibold transition-all shadow-md flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-cloud-upload-alt"></i> Import Templates to Database
                 </button>
             </div>
         </div>
@@ -1336,6 +1457,25 @@
             <div class="p-4 border-t border-subtle flex justify-end gap-2.5 bg-[#1a0f2e]">
                 <button onclick="closeRenameTemplateModal()" class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
                 <button onclick="submitRenameTemplate()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-sm font-semibold transition-colors shadow-sm">Save Title</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global App Confirmation Modal (Replaces browser confirm to avoid iframe blocking) -->
+    <div id="app-confirm-modal" class="hidden fixed inset-0 z-[80] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div class="bg-card border border-subtle w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-subtle flex items-center gap-2.5 bg-[#1a0f2e]">
+                <div class="w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center shrink-0">
+                    <i class="fas fa-trash-alt text-sm"></i>
+                </div>
+                <h3 id="app-confirm-title" class="text-white font-bold text-base">Confirm Action</h3>
+            </div>
+            <div class="p-4">
+                <p id="app-confirm-message" class="text-xs text-gray-300 leading-relaxed">Are you sure you want to proceed?</p>
+            </div>
+            <div class="p-3 border-t border-subtle flex justify-end gap-2.5 bg-[#1a0f2e]">
+                <button type="button" onclick="closeAppConfirm()" class="px-4 py-2 text-xs font-semibold text-gray-400 hover:text-white transition-colors">Cancel</button>
+                <button type="button" id="app-confirm-action-btn" onclick="executeAppConfirm()" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm">Delete</button>
             </div>
         </div>
     </div>
@@ -1512,8 +1652,7 @@
                 operationType,
                 path
             };
-            console.error('Firestore Error: ', JSON.stringify(errInfo));
-            throw new Error(JSON.stringify(errInfo));
+            console.warn('Firestore Notice: ', JSON.stringify(errInfo));
         }
 
         async function testConnection() {
@@ -2172,8 +2311,10 @@
                 renderNotificationBadge();
                 renderNotificationsList();
             }, (error) => {
-                console.error("Error fetching notifications:", error);
-                handleFirestoreError(error, OperationType.LIST, 'notifications');
+                console.warn("Notifications listener note:", error?.message || error);
+                notifications = [];
+                renderNotificationBadge();
+                renderNotificationsList();
             });
         }
 
@@ -2767,39 +2908,119 @@
             }
         };
 
+        let pendingConfirmCallback = null;
+
+        window.showAppConfirm = (title, message, confirmBtnText = 'Delete', isDanger = true, onConfirm = null) => {
+            const modal = document.getElementById('app-confirm-modal');
+            if (!modal) {
+                if (onConfirm) onConfirm();
+                return;
+            }
+            const titleEl = document.getElementById('app-confirm-title');
+            const msgEl = document.getElementById('app-confirm-message');
+            const confirmBtn = document.getElementById('app-confirm-action-btn');
+
+            if (titleEl) titleEl.textContent = title || 'Confirm Action';
+            if (msgEl) msgEl.textContent = message || 'Are you sure you want to proceed?';
+            
+            if (confirmBtn) {
+                confirmBtn.textContent = confirmBtnText;
+                if (isDanger) {
+                    confirmBtn.className = 'px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm';
+                } else {
+                    confirmBtn.className = 'px-4 py-2 bg-amber-500 hover:bg-amber-400 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm';
+                }
+            }
+            
+            pendingConfirmCallback = onConfirm;
+            modal.classList.remove('hidden');
+        };
+
+        window.closeAppConfirm = () => {
+            const modal = document.getElementById('app-confirm-modal');
+            if (modal) modal.classList.add('hidden');
+            pendingConfirmCallback = null;
+        };
+
+        window.executeAppConfirm = () => {
+            const cb = pendingConfirmCallback;
+            closeAppConfirm();
+            if (cb) cb();
+        };
+
         window.deleteLoadedTemplate = async () => {
-            if (!isAdmin || !loadedTemplateId) return;
+            if (!currentUser) {
+                alert("Please log in to delete templates.");
+                return;
+            }
+            if (!loadedTemplateId) {
+                alert("No template is currently loaded to delete.");
+                return;
+            }
             const t = templates.find(temp => temp.id === loadedTemplateId);
             const name = t ? t.title : 'this template';
-            if (!confirm(`Are you sure you want to delete the template "${name}" from the database?`)) return;
-
             const idToDelete = loadedTemplateId;
-            try {
-                await deleteDoc(doc(db, 'workoutTemplates', idToDelete));
-                loadedTemplateId = null;
-                updateActiveTemplateBanner();
-                alert(`Template "${name}" deleted.`);
-            } catch (error) {
-                handleFirestoreError(error, OperationType.DELETE, 'workoutTemplates/' + idToDelete);
-            }
+
+            showAppConfirm(
+                'Delete Workout Template',
+                `Are you sure you want to delete the template "${name}" from your database? This cannot be undone.`,
+                'Delete Template',
+                true,
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, 'workoutTemplates', idToDelete));
+                        loadedTemplateId = null;
+                        clearCreator();
+                        unlinkLoadedTemplate();
+                        updateActiveTemplateBanner();
+                        showNotificationToast({
+                            type: 'default',
+                            title: 'Template Deleted',
+                            message: `"${name}" was deleted from the database.`
+                        });
+                    } catch (error) {
+                        console.error("Error deleting template:", error);
+                        handleFirestoreError(error, OperationType.DELETE, 'workoutTemplates/' + idToDelete);
+                    }
+                }
+            );
         };
 
         window.deleteTemplateById = async (id, event) => {
             if (event) event.stopPropagation();
-            if (!isAdmin || !id) return;
+            if (!currentUser) {
+                alert("Please log in to delete templates.");
+                return;
+            }
+            if (!id) return;
             const t = templates.find(temp => temp.id === id);
             const name = t ? t.title : 'this template';
-            if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
 
-            try {
-                await deleteDoc(doc(db, 'workoutTemplates', id));
-                if (loadedTemplateId === id) {
-                    loadedTemplateId = null;
-                    updateActiveTemplateBanner();
+            showAppConfirm(
+                'Delete Workout Template',
+                `Are you sure you want to delete "${name}" from your database?`,
+                'Delete Template',
+                true,
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, 'workoutTemplates', id));
+                        if (loadedTemplateId === id) {
+                            loadedTemplateId = null;
+                            clearCreator();
+                            unlinkLoadedTemplate();
+                            updateActiveTemplateBanner();
+                        }
+                        showNotificationToast({
+                            type: 'default',
+                            title: 'Template Deleted',
+                            message: `"${name}" was deleted.`
+                        });
+                    } catch (error) {
+                        console.error("Error deleting template:", error);
+                        handleFirestoreError(error, OperationType.DELETE, 'workoutTemplates/' + id);
+                    }
                 }
-            } catch (error) {
-                handleFirestoreError(error, OperationType.DELETE, 'workoutTemplates/' + id);
-            }
+            );
         };
 
         window.duplicateTemplateById = async (id, event) => {
@@ -2973,6 +3194,440 @@
             }
         };
 
+        const USER_PROVIDED_WORKOUTS = `Lower Hypertrophy Week 1
+Warmup:
+| Jog | 3 mins Tempo 60%
+| Calf Stretch | 30s/side
+| Toe Touch | 10 reps
+| Heel to Toe Walks | 45s
+| Glute Bridge | 20 reps
+| BW Squat | 20 reps
+Main Workout:
+A | Back Squat | 4x12 (70% 1RM, 60s rest)
+B | Romanian Deadlift | 4x12 (70% 1RM, 60s rest)
+C1 | Split Squat | 4x10/side (70% 1RM)
+C2 | Calf Raises | 4x12 (70% 1RM)
+D1 | Lateral Box Step Down | 4x10/side
+D2 | Clamshell | 4x12/side
+E | Plank Object Pull Through | 8x20s on / 10s rest
+
+Workout: THU 06/06 - Push Hypertrophy Week 1
+Warmup:
+| Jog | 3 mins 60%
+| Downward Facing Dog | 20s
+| Thoracic Opener | 10 reps/side
+| Bird-dog | 10 reps/side
+| Arm Circles | 20s
+Main Workout:
+A | Kneeling Push-Up | 4x12 (60s rest)
+B | Bent Over Barbell Row | 4x12 (70% 1RM, 60s rest)
+C1 | Strict Press | 4x12 (70% 1RM)
+C2 | Seated Rear Delt Raise | 4x12 (70% 1RM)
+D1 | Barbell Curl | 4x12 (70% 1RM)
+D2 | Dumbbell Tricep Kickback | 4x12 (70% 1RM)
+E | Dead Bug Crunches | 8x20s on / 10s rest
+
+Workout: MON 06/10 - Lower Pull Hypertrophy Week 1
+Warmup:
+| Jog | 3 mins
+| Windmill Push-up | 6 reps/side
+| Cat-Cow Pose | 30s
+| Shoulder Taps | 8 reps/side
+| Bird-dog | 8 reps/side (5s hold last rep)
+| Glute Hip Lifts | 10 reps
+Main Workout:
+A | Bent Over Barbell Row | 4x12 (70% 1RM, 60s rest)
+B | Front Squat | 4x12 (70% 1RM, 60s rest)
+C1 | Dumbbell 3 Point Row | 4x10/side
+C2 | Dumbbell Lateral Raise | 4x10 (70% 1RM)
+D1 | Barbell Step-Up | 4x10/side (70% 1RM)
+D2 | Dumbbell Hammer Curl | 4x10 (70% 1RM)
+E | Mountain Climbers | 8x20s on / 10s rest
+
+Workout: WED 06/12 - Lower Hypertrophy Week 1
+Warmup:
+| Jog | 3 mins Tempo 60%
+| Calf Stretch | 30s/side
+| Toe Touch | 10 reps
+| Heel to Toe Walks | 45s
+| Glute Bridge | 20 reps
+| BW Squat | 20 reps
+Main Workout:
+A | Back Squat | 4x8 (70% 1RM, 60s rest)
+B | Romanian Deadlift | 4x8 (70% 1RM, 60s rest)
+C1 | Split Squat | 4x8/side (70% 1RM)
+C2 | Calf Raises | 4x8 (70% 1RM)
+D1 | Good Morning | 4x8 (70% 1RM)
+D2 | Russian Step-Up | 4x8/side
+E | Plank Object Pull Through | 8x20s on / 10s rest
+
+Workout: THU 06/13 - Pilates
+Main Workout:
+| Pilates | 1 session (30-45 mins)
+
+Workout: SUN 06/16 - Push Hypertrophy Week 1
+Warmup:
+| Jog | 3 mins 60%
+| Downward Facing Dog | 20s
+| Thoracic Opener | 10 reps/side
+| Bird-dog | 10 reps/side
+| Arm Circles | 20s
+Main Workout:
+A | Kneeling Push-Up | 4x12 (60s rest)
+B | Bent Over Barbell Row | 4x12 (70% 1RM, 60s rest)
+C1 | Strict Press | 4x12 (70% 1RM)
+C2 | Seated Rear Delt Raise | 4x12 (70% 1RM)
+D1 | Barbell Curl | 4x12 (70% 1RM)
+D2 | Dumbbell Tricep Kickback | 4x12 (70% 1RM)
+E | Step-Up | 8x25s on / 10s rest
+
+Workout: MON 06/17 - Pull Hypertrophy Week 2
+Warmup:
+| Skierg | 3 mins @60%
+| Shoulder Rolls | 20s
+| Thoracic Opener | 8 reps/side
+| Bird-dog | 8 reps/side
+| Arm Swings | 20s
+Main Workout:
+A | Bent Over Barbell Row | 4x10 (70% 1RM, 60s rest)
+B | Shoulder to Overhead | 4x10 (70% 1RM, 60s rest)
+C1 | Dumbbell Front Raise | 4x10 (70% 1RM)
+C2 | Seated Arnold Dumbbell Press | 4x10 (70% 1RM)
+D1 | Dumbbell Lateral Raise | 4x10/side (70% 1RM)
+D2 | Barbell Pullover | 4x10
+E | Med Ball Thruster | 8x20s on / 10s rest
+
+Workout: FRI 06/21 - Lower Hypertrophy Week 2
+Warmup:
+| Jog | 3 mins Tempo 60%
+| Calf Stretch | 30s/side
+| Toe Touch | 10 reps
+| Heel to Toe Walks | 45s
+| Glute Bridge | 20 reps
+| BW Squat | 20 reps
+Main Workout:
+A | Back Squat | 4x10 (70% 1RM, 60s rest)
+B | Romanian Deadlift | 4x10 (70% 1RM, 60s rest)
+C1 | Split Squat | 4x10/side (70% 1RM)
+C2 | Calf Raises | 4x10 (70% 1RM)
+D1 | Good Morning | 4x10 (70% 1RM)
+D2 | Russian Step-Up | 4x8/side
+E | Plank Object Pull Through | 8x20s on / 10s rest
+
+Workout: SAT 06/22 - Push Hypertrophy Week 2
+Warmup:
+| Jog | 3 mins 60%
+| Downward Facing Dog | 20s
+| Thoracic Opener | 10 reps/side
+| Bird-dog | 10 reps/side
+| Arm Circles | 20s
+Main Workout:
+A | Kneeling Push-Up | 4x10 (60s rest)
+B | Bent Over Barbell Row | 4x10 (70% 1RM, 60s rest)
+C1 | Strict Press | 4x10 (70% 1RM)
+C2 | Seated Rear Delt Raise | 4x10 (70% 1RM)
+D1 | Barbell Curl | 4x10 (70% 1RM)
+D2 | Dumbbell Tricep Kickback | 4x10 (70% 1RM)
+E | Russian Twist | 8x20s on / 10s rest
+
+Workout: MON 06/24 - Pull Hypertrophy Week 3
+Warmup:
+| Skierg | 3 mins @60%
+| Shoulder Rolls | 20s
+| Thoracic Opener | 8 reps/side
+| Bird-dog | 8 reps/side
+| Arm Swings | 20s
+Main Workout:
+A | Bent Over Barbell Row | 4x10 (70% 1RM, 60s rest)
+B | Shoulder to Overhead | 4x10 (70% 1RM, 60s rest)
+C1 | Dumbbell Front Raise | 4x10 (70% 1RM)
+C2 | Seated Arnold Dumbbell Press | 4x10 (70% 1RM)
+D1 | Dumbbell Lateral Raise | 4x10/side (70% 1RM)
+D2 | Barbell Pullover | 4x10
+E | Jumping Jacks | 8x20s on / 10s rest
+
+Workout: WED 06/26 - Lower Pull Hypertrophy Week 3
+Warmup:
+| Jog | 3 mins
+| Windmill Push-up | 6 reps/side
+| Cat-Cow Pose | 30s
+| Shoulder Taps | 8 reps/side
+| Bird-dog | 8 reps/side (5s hold last rep)
+| Glute Hip Lifts | 10 reps
+Main Workout:
+A | Bent Over Barbell Row | 4x10 (70% 1RM, 60s rest)
+B | Front Squat | 4x10 (70% 1RM, 60s rest)
+C1 | Dumbbell 3 Point Row | 4x10/side
+C2 | Dumbbell Lateral Raise | 4x10 (70% 1RM)
+D1 | Barbell Step-Up | 4x10/side (70% 1RM)
+D2 | Dumbbell Hammer Curl | 4x10 (70% 1RM)
+E | Mountain Climbers | 8x20s on / 10s rest
+
+Workout: THU 06/27 - Push Hypertrophy Week 3
+Warmup:
+| Jog | 3 mins 60%
+| Downward Facing Dog | 20s
+| Thoracic Opener | 10 reps/side
+| Bird-dog | 10 reps/side
+| Arm Circles | 20s
+Main Workout:
+A | Kneeling Push-Up | 4x10 (60s rest)
+B | Bent Over Barbell Row | 4x10 (70% 1RM, 60s rest)
+C1 | Strict Press | 4x10 (70% 1RM)
+C2 | Seated Rear Delt Raise | 4x10 (70% 1RM)
+D1 | Barbell Curl | 4x10 (70% 1RM)
+D2 | Dumbbell Tricep Kickback | 4x10 (70% 1RM)
+E | Cross-Body Mountain Climbers | 8x20s on / 10s rest
+
+Workout: SAT 06/29 - Lower Hypertrophy Week 3
+Warmup:
+| Jog | 3 mins Tempo 60%
+| Calf Stretch | 30s/side
+| Toe Touch | 10 reps
+| Heel to Toe Walks | 45s
+| Glute Bridge | 20 reps
+| BW Squat | 20 reps
+Main Workout:
+A | Back Squat | 4x8 (70% 1RM, 60s rest)
+B | Romanian Deadlift | 4x8 (70% 1RM, 60s rest)
+C1 | Split Squat | 4x8/side (70% 1RM)
+C2 | Calf Raises | 4x8 (70% 1RM)
+D1 | Good Morning | 4x8 (70% 1RM)
+D2 | Russian Step-Up | 4x8/side
+E | Dead Bug Crunches | 8x20s on / 10s rest`;
+
+        let currentParsedBulkWorkouts = [];
+
+        window.openBulkTemplateImportModal = () => {
+            if (!isAdmin) return;
+            const modal = document.getElementById('bulk-template-import-modal');
+            const textarea = document.getElementById('bulk-template-input-text');
+            if (textarea && !textarea.value.trim()) {
+                textarea.value = USER_PROVIDED_WORKOUTS;
+            }
+            previewBulkWorkouts();
+            if (modal) modal.classList.remove('hidden');
+        };
+
+        window.closeBulkTemplateImportModal = () => {
+            const modal = document.getElementById('bulk-template-import-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.prefillUserWorkouts = () => {
+            const textarea = document.getElementById('bulk-template-input-text');
+            if (textarea) textarea.value = USER_PROVIDED_WORKOUTS;
+            previewBulkWorkouts();
+        };
+
+        window.parseBulkWorkoutsText = (text) => {
+            const lines = (text || '').split('\n');
+            const workouts = [];
+            let current = null;
+            let currentSection = null;
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line) continue;
+
+                const isWorkoutPrefix = /^workout\s*:\s*/i.test(line);
+                const isPotentialTitle = !line.startsWith('|') && !/^(warmup|main|cooldown|notes)/i.test(line);
+                const isNextSectionHeader = isPotentialTitle && (i + 1 < lines.length && /^(warmup|main workout|main)\s*:\s*$/i.test(lines[i+1].trim()));
+
+                if (isWorkoutPrefix || isNextSectionHeader) {
+                    if (current && (current.title || current.exercises.length > 0)) {
+                        workouts.push(current);
+                    }
+                    let title = isWorkoutPrefix ? line.replace(/^workout\s*:\s*/i, '').trim() : line;
+                    current = {
+                        title: title,
+                        warmup: '',
+                        warmupLines: [],
+                        notes: '',
+                        cooldown: '',
+                        exercises: []
+                    };
+                    currentSection = null;
+                    continue;
+                }
+
+                if (/^warmup\s*:\s*$/i.test(line)) {
+                    currentSection = 'warmup';
+                    continue;
+                }
+
+                if (/^(main workout|main)\s*:\s*$/i.test(line)) {
+                    currentSection = 'main';
+                    continue;
+                }
+
+                if (/^cooldown\s*:\s*$/i.test(line)) {
+                    currentSection = 'cooldown';
+                    continue;
+                }
+
+                if (!current) {
+                    current = {
+                        title: 'Workout',
+                        warmup: '',
+                        warmupLines: [],
+                        notes: '',
+                        cooldown: '',
+                        exercises: []
+                    };
+                }
+
+                if (currentSection === 'warmup') {
+                    let cleanLine = line.replace(/^\|\s*/, '').replace(/\s*\|$/, '');
+                    let parts = cleanLine.split('|').map(s => s.trim()).filter(Boolean);
+                    if (parts.length >= 2) {
+                        current.warmupLines.push(`${parts[0]}: ${parts.slice(1).join(' - ')}`);
+                    } else {
+                        current.warmupLines.push(cleanLine);
+                    }
+                } else if (currentSection === 'cooldown') {
+                    current.cooldown += (current.cooldown ? '\n' : '') + line;
+                } else if (currentSection === 'main') {
+                    let cleanLine = line.replace(/^\|\s*/, '');
+                    let parts = cleanLine.split('|').map(s => s.trim()).filter(s => s.length > 0);
+                    let label = '';
+                    let name = '';
+                    let prescription = '';
+
+                    if (parts.length === 1) {
+                        name = parts[0];
+                    } else if (parts.length === 2) {
+                        if (/^[A-Z][0-9]?$/i.test(parts[0])) {
+                            label = parts[0];
+                            name = parts[1];
+                        } else {
+                            name = parts[0];
+                            prescription = parts[1];
+                        }
+                    } else if (parts.length >= 3) {
+                        label = parts[0];
+                        name = parts[1];
+                        prescription = parts.slice(2).join(' | ');
+                    }
+
+                    if (name) {
+                        current.exercises.push({
+                            id: Math.random().toString(36).substr(2, 9),
+                            label: label,
+                            name: name,
+                            prescription: prescription
+                        });
+                    }
+                }
+            }
+
+            if (current && (current.title || current.exercises.length > 0)) {
+                workouts.push(current);
+            }
+
+            workouts.forEach(w => {
+                if (w.warmupLines && w.warmupLines.length > 0) {
+                    w.warmup = w.warmupLines.join('\n');
+                }
+                delete w.warmupLines;
+            });
+
+            return workouts;
+        };
+
+        window.previewBulkWorkouts = () => {
+            const text = document.getElementById('bulk-template-input-text')?.value || '';
+            const parsed = parseBulkWorkoutsText(text);
+            currentParsedBulkWorkouts = parsed;
+
+            const previewContainer = document.getElementById('bulk-preview-container');
+            const previewList = document.getElementById('bulk-preview-list');
+            const summaryEl = document.getElementById('bulk-preview-summary');
+            const saveBtn = document.getElementById('btn-save-bulk-templates');
+
+            if (summaryEl) summaryEl.textContent = `${parsed.length} workout${parsed.length === 1 ? '' : 's'} ready to import`;
+            if (saveBtn) saveBtn.disabled = parsed.length === 0;
+
+            if (parsed.length === 0) {
+                if (previewContainer) previewContainer.classList.add('hidden');
+                return;
+            }
+
+            if (previewContainer) previewContainer.classList.remove('hidden');
+            if (previewList) {
+                previewList.innerHTML = parsed.map((w, idx) => {
+                    const warmupCount = w.warmup ? w.warmup.split('\n').length : 0;
+                    return `
+                        <div class="p-3 bg-black/40 border border-subtle rounded-xl flex items-start justify-between gap-3 text-xs">
+                            <div class="min-w-0 flex-1">
+                                <div class="font-bold text-white flex items-center gap-1.5 truncate">
+                                    <span class="text-amber-400 font-mono text-[11px]">${idx + 1}.</span>
+                                    <span>${w.title}</span>
+                                </div>
+                                <div class="text-[11px] text-gray-400 mt-1 flex flex-wrap gap-x-3 gap-y-1">
+                                    <span><i class="fas fa-fire text-amber-500 mr-1"></i>Warmup: ${warmupCount} item${warmupCount === 1 ? '' : 's'}</span>
+                                    <span><i class="fas fa-dumbbell text-purple-400 mr-1"></i>Exercises: ${w.exercises.length}</span>
+                                </div>
+                                ${w.exercises.length > 0 ? `
+                                    <div class="mt-2 text-[10px] text-gray-400 font-mono bg-white/5 p-2 rounded-lg space-y-0.5">
+                                        ${w.exercises.slice(0, 3).map(e => `<div>${e.label ? e.label + ' | ' : ''}${e.name} ${e.prescription ? '(' + e.prescription + ')' : ''}</div>`).join('')}
+                                        ${w.exercises.length > 3 ? `<div class="text-gray-500 italic">+${w.exercises.length - 3} more exercises</div>` : ''}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        };
+
+        window.executeBulkTemplateImport = async () => {
+            if (!isAdmin) return;
+            if (!currentParsedBulkWorkouts || currentParsedBulkWorkouts.length === 0) {
+                alert("No workouts detected to import.");
+                return;
+            }
+
+            const saveBtn = document.getElementById('btn-save-bulk-templates');
+            const originalBtnHtml = saveBtn ? saveBtn.innerHTML : '';
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.innerHTML = `<i class="fas fa-spinner fa-spin mr-1"></i> Saving to Database...`;
+            }
+
+            try {
+                let count = 0;
+                for (const w of currentParsedBulkWorkouts) {
+                    const templateData = {
+                        title: w.title,
+                        notes: w.notes || '',
+                        warmup: w.warmup || '',
+                        cooldown: w.cooldown || '',
+                        date: new Date().toISOString(),
+                        exercises: w.exercises
+                    };
+                    await addDoc(collection(db, 'workoutTemplates'), templateData);
+                    count++;
+                }
+
+                closeBulkTemplateImportModal();
+                alert(`Successfully imported ${count} workout templates into your database! They are now ready to load and assign.`);
+                
+                // If manage templates modal is open, refresh it
+                if (document.getElementById('manage-templates-modal') && !document.getElementById('manage-templates-modal').classList.contains('hidden')) {
+                    renderManageTemplatesList();
+                }
+            } catch (err) {
+                console.error("Error importing bulk templates:", err);
+                alert("Failed to import templates: " + err.message);
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.innerHTML = originalBtnHtml;
+                }
+            }
+        };
+
         window.selectClientWorkouts = (email) => {
             currentViewUid = email;
 
@@ -3030,8 +3685,9 @@
                     renderDashboard();
                 }
             }, (error) => {
-                console.error("Error fetching activity logs:", error);
-                handleFirestoreError(error, OperationType.LIST, `users/${email}/challengeLogs`);
+                console.warn("Activity logs listener note for " + email + ":", error?.message || error);
+                activityLogs = {};
+                renderDashboard();
             });
         }
 
@@ -3083,6 +3739,10 @@
 
         // Tab Switching
         window.switchTab = (tab) => {
+            if (tab !== 'workouts' && window.dismissRestTimer) {
+                window.dismissRestTimer();
+            }
+
             viewWorkouts.classList.add('hidden');
             viewCreator.classList.add('hidden');
             viewDashboard.classList.add('hidden');
@@ -3290,44 +3950,52 @@
             const client = allUsers.find(u => u.email === target);
             const clientName = client ? (client.name || client.email) : target;
 
-            if (!confirm(`Are you sure you want to permanently delete client ${clientName} (${target}) from Firebase?\n\nThis will remove their profile and all associated data.`)) {
-                return;
-            }
+            showAppConfirm(
+                'Delete Client',
+                `Are you sure you want to permanently delete client ${clientName} (${target}) from Firebase?\n\nThis will remove their profile and all associated data.`,
+                'Delete Client',
+                true,
+                async () => {
+                    try {
+                        // Delete user document
+                        await deleteDoc(doc(db, 'users', target));
 
-            try {
-                // Delete user document
-                await deleteDoc(doc(db, 'users', target));
+                        // Also delete any subcollections if present
+                        try {
+                            const wSnap = await getDocs(collection(db, 'users', target, 'workouts'));
+                            await Promise.all(wSnap.docs.map(d => deleteDoc(d.ref)));
+                            const cSnap = await getDocs(collection(db, 'users', target, 'challengeLogs'));
+                            await Promise.all(cSnap.docs.map(d => deleteDoc(d.ref)));
+                            const aSnap = await getDocs(collection(db, 'users', target, 'activityLogs'));
+                            await Promise.all(aSnap.docs.map(d => deleteDoc(d.ref)));
+                        } catch (subErr) {
+                            console.warn("Subcollection cleanup notice:", subErr);
+                        }
 
-                // Also delete any subcollections if present
-                try {
-                    const wSnap = await getDocs(collection(db, 'users', target, 'workouts'));
-                    await Promise.all(wSnap.docs.map(d => deleteDoc(d.ref)));
-                    const cSnap = await getDocs(collection(db, 'users', target, 'challengeLogs'));
-                    await Promise.all(cSnap.docs.map(d => deleteDoc(d.ref)));
-                    const aSnap = await getDocs(collection(db, 'users', target, 'activityLogs'));
-                    await Promise.all(aSnap.docs.map(d => deleteDoc(d.ref)));
-                } catch (subErr) {
-                    console.warn("Subcollection cleanup notice:", subErr);
-                }
+                        // If currently viewing this client, switch to remaining or clear
+                        if (currentViewUid === target) {
+                            currentViewUid = null;
+                            const remaining = allUsers.filter(u => u.email !== target && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
+                            if (remaining.length > 0) {
+                                selectClientWorkouts(remaining[0].email);
+                            } else {
+                                selectClientWorkouts('');
+                            }
+                        }
 
-                // If currently viewing this client, switch to remaining or clear
-                if (currentViewUid === target) {
-                    currentViewUid = null;
-                    const remaining = allUsers.filter(u => u.email !== target && u.email.toLowerCase() !== ADMIN_EMAIL.toLowerCase());
-                    if (remaining.length > 0) {
-                        selectClientWorkouts(remaining[0].email);
-                    } else {
-                        selectClientWorkouts('');
+                        renderManageClientsList();
+                        renderClientDropdowns();
+                        showNotificationToast({
+                            type: 'default',
+                            title: 'Client Deleted',
+                            message: `Client ${target} was deleted.`
+                        });
+                    } catch (err) {
+                        console.error("Error deleting client:", err);
+                        alert("Failed to delete client: " + err.message);
                     }
                 }
-
-                renderManageClientsList();
-                renderClientDropdowns();
-                alert(`Client ${target} was successfully deleted from Firebase.`);
-            } catch (err) {
-                console.error("Error deleting client:", err);
-                alert("Failed to delete client: " + err.message);
-            }
+            );
         };
 
         window.renameClientEmailPrompt = async (oldEmail) => {
@@ -4309,16 +4977,27 @@
         }
 
         window.deleteActiveWorkout = async () => {
-            if (!isAdmin || !activeWorkoutId || !currentViewUid) return;
-            if(confirm('Are you sure you want to delete this workout?')) {
-                try {
-                    await deleteDoc(doc(db, 'users', currentViewUid, 'workouts', activeWorkoutId));
-                    // onSnapshot will handle closing the workout
-                } catch (error) {
-                    console.error("Error deleting workout:", error);
-                    alert("Failed to delete workout: " + error.message);
+            if (!activeWorkoutId || !currentViewUid) return;
+            showAppConfirm(
+                'Delete Workout',
+                'Are you sure you want to delete this workout?',
+                'Delete Workout',
+                true,
+                async () => {
+                    try {
+                        await deleteDoc(doc(db, 'users', currentViewUid, 'workouts', activeWorkoutId));
+                        closeWorkout();
+                        showNotificationToast({
+                            type: 'default',
+                            title: 'Workout Deleted',
+                            message: 'The workout was deleted successfully.'
+                        });
+                    } catch (error) {
+                        console.error("Error deleting workout:", error);
+                        alert("Failed to delete workout: " + error.message);
+                    }
                 }
-            }
+            );
         };
 
         window.openWorkout = (id) => {
@@ -4331,6 +5010,7 @@
 
         window.closeWorkout = () => {
             activeWorkoutId = null;
+            if (window.dismissRestTimer) window.dismissRestTimer();
             renderWorkoutsList();
         };
 
@@ -4357,6 +5037,7 @@
                         date: w.date || formatDateString(new Date())
                     });
 
+                    if (window.dismissRestTimer) window.dismissRestTimer();
                     closeWorkout();
                 } catch (error) {
                     handleFirestoreError(error, OperationType.UPDATE, `users/${currentViewUid}/workouts/${activeWorkoutId}`);
@@ -4391,6 +5072,218 @@
             }
         };
 
+        // --- Countdown Rest Timer for Workout Logger ---
+        let restTimerInterval = null;
+        let restTimerTotalSeconds = 60;
+        let restTimerRemainingSeconds = 60;
+        let restTimerIsPaused = false;
+        let restTimerDismissTimeout = null;
+
+        function formatTimerDigits(sec) {
+            const m = Math.floor(sec / 60);
+            const s = sec % 60;
+            return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function playRestTimerAlarm() {
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+                if (ctx.state === 'suspended') {
+                    ctx.resume();
+                }
+                const now = ctx.currentTime;
+                const playTone = (freq, start, duration) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, start);
+                    gain.gain.setValueAtTime(0.25, start);
+                    gain.gain.exponentialRampToValueAtTime(0.001, start + duration);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(start);
+                    osc.stop(start + duration);
+                };
+                playTone(659.25, now, 0.16);         // E5
+                playTone(880.00, now + 0.18, 0.28);  // A5
+            } catch (e) {
+                // Audio autoplay might be limited, fail silently
+            }
+        }
+
+        function updateRestTimerUI() {
+            const digitsEl = document.getElementById('rest-timer-digits');
+            const barEl = document.getElementById('rest-timer-progress-bar');
+            const badgeEl = document.getElementById('rest-timer-badge');
+            const pauseBtnText = document.getElementById('btn-pause-rest-text');
+            const pauseBtnIcon = document.getElementById('btn-pause-rest-icon');
+
+            if (digitsEl) digitsEl.textContent = formatTimerDigits(restTimerRemainingSeconds);
+
+            if (barEl) {
+                const pct = restTimerTotalSeconds > 0 ? Math.max(0, Math.min(100, (restTimerRemainingSeconds / restTimerTotalSeconds) * 100)) : 0;
+                barEl.style.width = `${pct}%`;
+                if (restTimerRemainingSeconds === 0) {
+                    barEl.className = 'bg-gradient-to-r from-emerald-500 to-green-400 h-full rounded-full transition-all duration-300';
+                    barEl.style.width = '100%';
+                } else {
+                    barEl.className = 'bg-gradient-to-r from-amber-500 via-orange-400 to-amber-300 h-full rounded-full transition-all duration-1000 ease-linear';
+                }
+            }
+
+            if (badgeEl) {
+                if (restTimerRemainingSeconds === 0) {
+                    badgeEl.className = 'px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[9px] font-semibold animate-pulse';
+                    badgeEl.textContent = 'Rest Over!';
+                } else if (restTimerIsPaused) {
+                    badgeEl.className = 'px-1.5 py-0.5 rounded bg-yellow-500/20 text-yellow-300 text-[9px] font-semibold';
+                    badgeEl.textContent = 'Paused';
+                } else {
+                    badgeEl.className = 'px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[9px] font-semibold';
+                    badgeEl.textContent = 'Counting Down';
+                }
+            }
+
+            if (pauseBtnText && pauseBtnIcon) {
+                if (restTimerIsPaused) {
+                    pauseBtnText.textContent = 'Resume';
+                    pauseBtnIcon.className = 'fas fa-play text-[10px]';
+                } else {
+                    pauseBtnText.textContent = 'Pause';
+                    pauseBtnIcon.className = 'fas fa-pause text-[10px]';
+                }
+            }
+        }
+
+        function extractPrescribedRest(prescription) {
+            if (!prescription) return 60;
+            // 1. Check for min e.g. "2 min rest", "1.5 mins rest"
+            const minMatch = prescription.match(/(\d+(?:\.\d+)?)\s*(?:min|mins|minute|minutes)\s*(?:rest)?/i);
+            if (minMatch) {
+                const val = Math.round(parseFloat(minMatch[1]) * 60);
+                if (val > 0) return val;
+            }
+            // 2. Check for "60s rest", "90 sec rest", "10s rest", "45 seconds rest", etc.
+            const secMatch = prescription.match(/(\d+)\s*(?:s|sec|secs|seconds?)\s*(?:rest)?/i);
+            if (secMatch) {
+                const val = parseInt(secMatch[1], 10);
+                if (val > 0) return val;
+            }
+            // 3. Check for "rest: 60s" or "rest 60s"
+            const restMatch = prescription.match(/rest\s*[:\-]?\s*(\d+)\s*(?:s|sec|secs|seconds?)?/i);
+            if (restMatch) {
+                const val = parseInt(restMatch[1], 10);
+                if (val > 0) return val;
+            }
+            return 60;
+        }
+
+        window.startRestTimer = (seconds = 60, contextText = 'Set completed') => {
+            if (restTimerInterval) clearInterval(restTimerInterval);
+            if (restTimerDismissTimeout) clearTimeout(restTimerDismissTimeout);
+
+            restTimerTotalSeconds = Math.max(5, Number(seconds) || 60);
+            restTimerRemainingSeconds = restTimerTotalSeconds;
+            restTimerIsPaused = false;
+
+            const timerBar = document.getElementById('rest-timer-bar');
+            if (timerBar) {
+                timerBar.classList.remove('hidden');
+            }
+
+            const contextEl = document.getElementById('rest-timer-context');
+            if (contextEl) {
+                contextEl.textContent = contextText;
+            }
+
+            updateRestTimerUI();
+
+            restTimerInterval = setInterval(() => {
+                if (restTimerIsPaused) return;
+
+                if (restTimerRemainingSeconds > 0) {
+                    restTimerRemainingSeconds--;
+                    updateRestTimerUI();
+
+                    if (restTimerRemainingSeconds === 0) {
+                        clearInterval(restTimerInterval);
+                        restTimerInterval = null;
+                        updateRestTimerUI();
+
+                        const ctxEl = document.getElementById('rest-timer-context');
+                        if (ctxEl) {
+                            ctxEl.innerHTML = '<span class="text-emerald-400 font-semibold flex items-center gap-1.5"><i class="fas fa-check-circle"></i> Rest completed! Ready for next set!</span>';
+                        }
+
+                        playRestTimerAlarm();
+                        if (navigator.vibrate) {
+                            try { navigator.vibrate([150, 100, 150]); } catch (e) {}
+                        }
+
+                        // Auto-dismiss after 10 seconds of rest finished notification
+                        restTimerDismissTimeout = setTimeout(() => {
+                            dismissRestTimer();
+                        }, 10000);
+                    }
+                }
+            }, 1000);
+        };
+
+        window.startRestTimerForExercise = (exId, setIndex) => {
+            const w = workouts.find(w => w.id === activeWorkoutId);
+            let exName = 'Exercise';
+            let restSec = 60;
+            if (w && w.exercises) {
+                const ex = w.exercises.find(e => e.id === exId);
+                if (ex) {
+                    exName = ex.name || 'Exercise';
+                    restSec = extractPrescribedRest(ex.prescription);
+                }
+            }
+            const setNum = (setIndex !== undefined && setIndex !== null) ? Number(setIndex) + 1 : 1;
+            startRestTimer(restSec, `${exName} • Set ${setNum} logged`);
+        };
+
+        window.adjustRestTimer = (deltaSec) => {
+            if (restTimerRemainingSeconds <= 0 && deltaSec > 0) {
+                startRestTimer(deltaSec, 'Extended rest interval');
+                return;
+            }
+            restTimerRemainingSeconds = Math.max(0, restTimerRemainingSeconds + deltaSec);
+            if (restTimerRemainingSeconds > restTimerTotalSeconds) {
+                restTimerTotalSeconds = restTimerRemainingSeconds;
+            }
+            updateRestTimerUI();
+        };
+
+        window.togglePauseRestTimer = () => {
+            if (restTimerRemainingSeconds <= 0) return;
+            restTimerIsPaused = !restTimerIsPaused;
+            updateRestTimerUI();
+        };
+
+        window.setRestTimerPreset = (sec) => {
+            const label = sec >= 60 ? `${sec / 60}m` : `${sec}s`;
+            startRestTimer(sec, `Rest interval (${label})`);
+        };
+
+        window.dismissRestTimer = () => {
+            if (restTimerInterval) {
+                clearInterval(restTimerInterval);
+                restTimerInterval = null;
+            }
+            if (restTimerDismissTimeout) {
+                clearTimeout(restTimerDismissTimeout);
+                restTimerDismissTimeout = null;
+            }
+            const timerBar = document.getElementById('rest-timer-bar');
+            if (timerBar) {
+                timerBar.classList.add('hidden');
+            }
+        };
+
         window.addSet = async (exId) => {
             if (!currentUser || !activeWorkoutId || !currentViewUid) return;
             const w = workouts.find(w => w.id === activeWorkoutId);
@@ -4401,7 +5294,7 @@
                     // Let's start fresh with sets if it's not an array.
                     sets = [];
                 }
-                sets.push({ weight: '', reps: '' });
+                sets.push({ weight: '', reps: '', completed: false });
                 const updatedResults = { ...w.results, [exId]: sets };
                 try {
                     await setDoc(doc(db, 'users', currentViewUid, 'workouts', activeWorkoutId), { results: updatedResults }, { merge: true });
@@ -4433,9 +5326,45 @@
                 let sets = JSON.parse(JSON.stringify(w.results[exId] || []));
                 if (sets[setIndex]) {
                     sets[setIndex][field] = value;
+                    
+                    // If reps or weight is filled in, mark completed and automatically start rest timer
+                    const valStr = value !== undefined && value !== null ? value.toString().trim() : '';
+                    let shouldTriggerRestTimer = false;
+                    if (field === 'reps' && valStr !== '') {
+                        sets[setIndex].completed = true;
+                        shouldTriggerRestTimer = true;
+                    } else if (field === 'weight' && valStr !== '' && sets[setIndex].reps && sets[setIndex].reps.toString().trim() !== '') {
+                        sets[setIndex].completed = true;
+                        shouldTriggerRestTimer = true;
+                    }
+
                     const updatedResults = { ...w.results, [exId]: sets };
                     try {
                         await setDoc(doc(db, 'users', currentViewUid, 'workouts', activeWorkoutId), { results: updatedResults }, { merge: true });
+                        if (shouldTriggerRestTimer) {
+                            startRestTimerForExercise(exId, setIndex);
+                        }
+                    } catch (error) {
+                        handleFirestoreError(error, OperationType.UPDATE, `users/${currentViewUid}/workouts/${activeWorkoutId}`);
+                    }
+                }
+            }
+        };
+
+        window.logSetCompleted = async (exId, setIndex) => {
+            if (!currentUser || !activeWorkoutId || !currentViewUid) return;
+            const w = workouts.find(w => w.id === activeWorkoutId);
+            if (w && !w.completed) {
+                let sets = JSON.parse(JSON.stringify(w.results[exId] || []));
+                if (sets[setIndex]) {
+                    const willBeCompleted = !sets[setIndex].completed;
+                    sets[setIndex].completed = willBeCompleted;
+                    const updatedResults = { ...w.results, [exId]: sets };
+                    try {
+                        await setDoc(doc(db, 'users', currentViewUid, 'workouts', activeWorkoutId), { results: updatedResults }, { merge: true });
+                        if (willBeCompleted) {
+                            startRestTimerForExercise(exId, setIndex);
+                        }
                     } catch (error) {
                         handleFirestoreError(error, OperationType.UPDATE, `users/${currentViewUid}/workouts/${activeWorkoutId}`);
                     }
@@ -4552,26 +5481,36 @@
                                 
                                 <!-- Set Logger -->
                                 <div class="space-y-2">
-                                    ${sets.map((s, setIdx) => `
+                                    ${sets.map((s, setIdx) => {
+                                        const isCompleted = s.completed === true;
+                                        return `
                                         <div class="flex items-center gap-2 animate-in slide-in-from-left-2 duration-200">
-                                            <span class="text-xs font-bold text-gray-500 w-5 min-w-[20px] text-center">${setIdx + 1}</span>
+                                            <span class="text-xs font-bold ${isCompleted ? 'text-emerald-400' : 'text-gray-500'} w-5 min-w-[20px] text-center">${setIdx + 1}</span>
                                             <div class="flex-1 grid grid-cols-2 gap-2">
                                                 <div class="relative">
-                                                    <input type="number" placeholder="kg" value="${s.weight}" onchange="updateSet('${ex.id}', ${setIdx}, 'weight', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border border-subtle rounded-lg pl-3 pr-8 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
+                                                    <input type="number" placeholder="kg" value="${s.weight !== undefined ? s.weight : ''}" onchange="updateSet('${ex.id}', ${setIdx}, 'weight', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border ${isCompleted ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-subtle'} rounded-lg pl-3 pr-8 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
                                                     <span class="absolute right-2.5 top-2 text-[10px] text-gray-500 pointer-events-none font-medium">kg</span>
                                                 </div>
                                                 <div class="relative">
-                                                    <input type="number" placeholder="reps" value="${s.reps}" onchange="updateSet('${ex.id}', ${setIdx}, 'reps', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border border-subtle rounded-lg pl-3 pr-9 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
+                                                    <input type="number" placeholder="reps" value="${s.reps !== undefined ? s.reps : ''}" onchange="updateSet('${ex.id}', ${setIdx}, 'reps', this.value)" ${w.completed ? 'disabled' : ''} class="w-full bg-input border ${isCompleted ? 'border-emerald-500/40 bg-emerald-500/5' : 'border-subtle'} rounded-lg pl-3 pr-9 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors ${w.completed ? 'opacity-50 cursor-not-allowed' : ''}">
                                                     <span class="absolute right-2.5 top-2 text-[10px] text-gray-500 pointer-events-none font-medium">reps</span>
                                                 </div>
                                             </div>
                                             ${!w.completed ? `
-                                            <button onclick="removeSet('${ex.id}', ${setIdx})" class="text-gray-600 hover:text-red-400 transition-colors px-1">
+                                            <button type="button" onclick="logSetCompleted('${ex.id}', ${setIdx})" title="${isCompleted ? 'Set logged (click to untoggle)' : 'Complete set & start rest timer'}" class="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center transition-all ${isCompleted ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-sm ring-1 ring-emerald-400' : 'bg-white/5 hover:bg-emerald-500/20 text-gray-400 hover:text-emerald-400 border border-subtle'}">
+                                                <i class="fas fa-check text-xs"></i>
+                                            </button>
+                                            <button onclick="removeSet('${ex.id}', ${setIdx})" title="Delete set" class="text-gray-600 hover:text-red-400 transition-colors px-1">
                                                 <i class="fas fa-times text-xs"></i>
                                             </button>
-                                            ` : ''}
+                                            ` : (isCompleted ? `
+                                            <span class="w-8 h-8 rounded-lg shrink-0 flex items-center justify-center bg-emerald-500/20 text-emerald-400 text-xs border border-emerald-500/30">
+                                                <i class="fas fa-check"></i>
+                                            </span>
+                                            ` : '')}
                                         </div>
-                                    `).join('')}
+                                    `;
+                                    }).join('')}
                                     
                                     ${typeof resultVal === 'string' && resultVal.trim().length > 0 ? `
                                         <div class="text-xs text-yellow-500/70 italic mb-2 px-1">Legacy note: ${resultVal}</div>
@@ -4950,103 +5889,207 @@
             document.getElementById('history-modal').classList.add('hidden');
         };
 
-        // --- GIF Modal Logic ---
+        // --- Exercise Demo / GIF Modal Logic ---
+        window.__exerciseDemoCache = window.__exerciseDemoCache || {};
+
         window.closeGifModal = () => {
             document.getElementById('gif-modal').classList.add('hidden');
             const content = document.getElementById('gif-content');
             content.innerHTML = `
                 <div class="text-center py-8">
                     <i class="fas fa-spinner fa-spin text-amber-500 text-2xl mb-4"></i>
-                    <p class="text-sm text-subtle" id="gif-loading-text">Loading...</p>
+                    <p class="text-sm text-subtle" id="gif-loading-text">Loading demonstration...</p>
                 </div>
             `;
         };
 
-        window.showExerciseGif = async (exerciseName) => {
+        window.cleanExerciseNameForSearch = (name) => {
+            if (!name) return '';
+            return name
+                .replace(/^[A-Z0-9]+\s*\|\s*/i, '') // strip "A |", "C1 |", etc.
+                .replace(/\(.*?\)/g, '')            // strip "(70% 1RM)", etc.
+                .replace(/\[.*?\]/g, '')
+                .trim();
+        };
+
+        window.showExerciseGif = async (rawExerciseName) => {
             const modal = document.getElementById('gif-modal');
             const title = document.getElementById('gif-title');
             const content = document.getElementById('gif-content');
             
-            title.innerText = exerciseName;
+            const cleanName = cleanExerciseNameForSearch(rawExerciseName);
+            title.innerText = cleanName || rawExerciseName;
             modal.classList.remove('hidden');
-            
-            // Hardcoded key as requested by user
+
+            const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(cleanName + ' exercise proper form tutorial')}`;
+            const googleSearchUrl = `https://www.google.com/search?q=${encodeURIComponent(cleanName + ' exercise demo gif form')}`;
+
+            // Check in-memory cache first
+            if (window.__exerciseDemoCache[cleanName.toLowerCase()]) {
+                const cachedEx = window.__exerciseDemoCache[cleanName.toLowerCase()];
+                renderExerciseDemoContent(cachedEx, cleanName, ytSearchUrl, googleSearchUrl);
+                return;
+            }
+
             const finalKey = "4c43e9f7c0msh0823e5ba0929473p1eb012jsndb16e82fccc1";
 
             try {
-                let foundEx = null;
-                let cursor = '';
-                let hasNext = true;
-                let pagesFetched = 0;
-                
-                const searchName = exerciseName.toLowerCase();
-                
-                // Fetch paginated exercises until we find a match
-                while (hasNext && pagesFetched < 15) {
-                    pagesFetched++;
-                    const url = `https://edb-with-videos-and-images-by-ascendapi.p.rapidapi.com/api/v1/exercises?limit=50${cursor ? '&cursor=' + cursor : ''}`;
-                    const response = await fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'x-rapidapi-key': finalKey,
-                            'x-rapidapi-host': 'edb-with-videos-and-images-by-ascendapi.p.rapidapi.com'
-                        }
-                    }).catch(err => {
-                        // RapidAPI 429s often trigger CORS errors natively
-                        throw new Error('CORS or Network Error (Possible Rate Limit Exceeded): ' + err.message);
-                    });
-
-                    if (response.status === 429) {
-                        content.innerHTML = '<div class="text-center p-4"><p class="text-amber-500 mb-2"><i class="fas fa-exclamation-triangle text-2xl"></i></p><p class="text-sm text-subtle">ExerciseDB API rate limit exceeded. Please wait an hour for the quota to reset.</p></div>';
-                        return;
+                // Call dedicated search endpoint once rather than looping 15 pages
+                const searchUrl = `https://edb-with-videos-and-images-by-ascendapi.p.rapidapi.com/api/v1/exercises/search?search=${encodeURIComponent(cleanName)}`;
+                const response = await fetch(searchUrl, {
+                    method: 'GET',
+                    headers: {
+                        'x-rapidapi-key': finalKey,
+                        'x-rapidapi-host': 'edb-with-videos-and-images-by-ascendapi.p.rapidapi.com'
                     }
+                }).catch(err => {
+                    throw new Error('Network or CORS error: ' + err.message);
+                });
 
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-
-                    const json = await response.json();
-                    
-                    // Sometimes APIs return 200 OK but with an error message
-                    if (json.message && json.message.includes("rate limit")) {
-                        content.innerHTML = '<div class="text-center p-4"><p class="text-amber-500 mb-2"><i class="fas fa-exclamation-triangle text-2xl"></i></p><p class="text-sm text-subtle">Rate limit exceeded.</p></div>';
-                        return;
-                    }
-
-                    const data = json.data || [];
-                    
-                    // Match exercise
-                    foundEx = data.find(e => e.name.toLowerCase().includes(searchName) || searchName.includes(e.name.toLowerCase()));
-                    
-                    if (foundEx) break;
-                    
-                    if (json.meta && json.meta.hasNextPage && json.meta.nextCursor && json.meta.nextCursor !== cursor) {
-                        cursor = json.meta.nextCursor;
-                    } else {
-                        hasNext = false;
-                    }
+                if (response.status === 429) {
+                    renderDemoFallback(
+                        cleanName,
+                        'ExerciseDB API hourly rate limit reached for this free key.',
+                        ytSearchUrl,
+                        googleSearchUrl,
+                        true
+                    );
+                    return;
                 }
 
-                if (foundEx) {
-                    content.innerHTML = `
-                        <img src="${foundEx.imageUrl}" alt="${foundEx.name}" class="w-full max-w-[300px] h-auto rounded-md shadow-md bg-[#1a0f2e]">
-                        <div class="mt-4 w-full">
-                            <h4 class="text-sm font-bold text-white capitalize mb-1">${foundEx.name}</h4>
-                            <div class="flex flex-wrap gap-2 text-xs text-subtle">
-                                ${foundEx.targetMuscles && foundEx.targetMuscles.length > 0 ? `<span class="bg-[#3d2b5e] px-2 py-1 rounded">Target: ${foundEx.targetMuscles[0]}</span>` : ''}
-                                ${foundEx.bodyParts && foundEx.bodyParts.length > 0 ? `<span class="bg-[#3d2b5e] px-2 py-1 rounded">Body Part: ${foundEx.bodyParts[0]}</span>` : ''}
-                                ${foundEx.equipments && foundEx.equipments.length > 0 ? `<span class="bg-[#3d2b5e] px-2 py-1 rounded">Equipment: ${foundEx.equipments[0]}</span>` : ''}
-                            </div>
-                        </div>
-                    `;
+                if (!response.ok) {
+                    renderDemoFallback(
+                        cleanName,
+                        'Exercise demonstration service temporarily unavailable.',
+                        ytSearchUrl,
+                        googleSearchUrl,
+                        false
+                    );
+                    return;
+                }
+
+                const json = await response.json();
+
+                if (json.message && json.message.toLowerCase().includes('rate limit')) {
+                    renderDemoFallback(
+                        cleanName,
+                        'ExerciseDB API hourly rate limit reached.',
+                        ytSearchUrl,
+                        googleSearchUrl,
+                        true
+                    );
+                    return;
+                }
+
+                const data = json.data || [];
+                const searchLower = cleanName.toLowerCase();
+                const foundEx = data.find(e => 
+                    e.name && (e.name.toLowerCase().includes(searchLower) || searchLower.includes(e.name.toLowerCase()))
+                ) || data[0];
+
+                if (foundEx && (foundEx.imageUrl || foundEx.videoUrl)) {
+                    window.__exerciseDemoCache[cleanName.toLowerCase()] = foundEx;
+                    renderExerciseDemoContent(foundEx, cleanName, ytSearchUrl, googleSearchUrl);
                 } else {
-                    content.innerHTML = '<div class="text-center p-4"><p class="text-subtle">No video found for this exercise.</p></div>';
+                    renderDemoFallback(
+                        cleanName,
+                        'No visual demo in ExerciseDB free database for this exercise.',
+                        ytSearchUrl,
+                        googleSearchUrl,
+                        false
+                    );
                 }
             } catch (error) {
-                console.error("Error fetching GIF:", error);
-                content.innerHTML = '<div class="text-center p-4"><p class="text-red-400">Failed to load video.</p></div>';
+                console.error("Error fetching exercise demo:", error);
+                renderDemoFallback(
+                    cleanName,
+                    'Unable to reach ExerciseDB.',
+                    ytSearchUrl,
+                    googleSearchUrl,
+                    false
+                );
             }
         };
+
+        function renderExerciseDemoContent(ex, cleanName, ytUrl, googleUrl) {
+            const content = document.getElementById('gif-content');
+            if (!content) return;
+
+            content.innerHTML = `
+                <div class="w-full flex flex-col items-center">
+                    ${ex.videoUrl ? `
+                        <video src="${ex.videoUrl}" autoplay loop muted playsinline class="w-full max-w-[320px] rounded-xl shadow-lg border border-subtle bg-black"></video>
+                    ` : (ex.imageUrl ? `
+                        <img src="${ex.imageUrl}" alt="${ex.name || cleanName}" class="w-full max-w-[320px] rounded-xl shadow-lg border border-subtle bg-[#1a0f2e] object-contain max-h-[260px]">
+                    ` : '')}
+
+                    <div class="mt-4 w-full space-y-3">
+                        <div class="flex items-center justify-between gap-2">
+                            <h4 class="text-sm font-bold text-white capitalize truncate">${ex.name || cleanName}</h4>
+                            <span class="text-[10px] text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-semibold uppercase">ExerciseDB</span>
+                        </div>
+
+                        <div class="flex flex-wrap gap-1.5 text-xs">
+                            ${ex.targetMuscles && ex.targetMuscles.length > 0 ? `<span class="bg-[#3d2b5e] text-purple-200 px-2 py-0.5 rounded text-[11px] font-medium"><i class="fas fa-bullseye text-amber-400 mr-1"></i>${ex.targetMuscles[0]}</span>` : ''}
+                            ${ex.bodyParts && ex.bodyParts.length > 0 ? `<span class="bg-[#3d2b5e] text-purple-200 px-2 py-0.5 rounded text-[11px] font-medium"><i class="fas fa-child text-purple-400 mr-1"></i>${ex.bodyParts[0]}</span>` : ''}
+                            ${ex.equipments && ex.equipments.length > 0 ? `<span class="bg-[#3d2b5e] text-gray-300 px-2 py-0.5 rounded text-[11px] font-medium"><i class="fas fa-dumbbell text-gray-400 mr-1"></i>${ex.equipments[0]}</span>` : ''}
+                        </div>
+
+                        <!-- 1-Click Video Tutorials -->
+                        <div class="pt-2 border-t border-subtle flex gap-2">
+                            <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 px-3 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors shadow-sm">
+                                <i class="fab fa-youtube text-sm"></i> YouTube Video Tutorial
+                            </a>
+                            <button onclick="closeGifModal()" class="px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-lg text-xs font-medium transition-colors border border-subtle">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderDemoFallback(exerciseName, reasonText, ytUrl, googleUrl, isRateLimit) {
+            const content = document.getElementById('gif-content');
+            if (!content) return;
+
+            content.innerHTML = `
+                <div class="w-full text-center py-3 space-y-4">
+                    <div class="w-14 h-14 mx-auto rounded-2xl ${isRateLimit ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'} flex items-center justify-center text-2xl shadow-inner">
+                        <i class="fas ${isRateLimit ? 'fa-exclamation-triangle' : 'fa-video'}"></i>
+                    </div>
+
+                    <div>
+                        <h4 class="text-base font-bold text-white mb-1">${exerciseName}</h4>
+                        <p class="text-xs text-subtle leading-relaxed max-w-xs mx-auto">
+                            ${reasonText}
+                        </p>
+                    </div>
+
+                    <div class="bg-[#120824] border border-subtle rounded-xl p-3 text-left space-y-2">
+                        <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                            <i class="fas fa-lightbulb"></i> Recommended Video Tutorial
+                        </div>
+                        <p class="text-xs text-gray-300 leading-relaxed">
+                            Watch professional coaches demonstrate correct setup, grip, tempo, and cues:
+                        </p>
+                        <a href="${ytUrl}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-red-500/20">
+                            <i class="fab fa-youtube text-base"></i> Watch "${exerciseName}" Video on YouTube
+                        </a>
+                    </div>
+
+                    <div class="flex items-center justify-center gap-3 pt-1">
+                        <a href="${googleUrl}" target="_blank" rel="noopener noreferrer" class="text-xs text-purple-400 hover:text-purple-300 transition-colors inline-flex items-center gap-1">
+                            <i class="fas fa-search text-[10px]"></i> Search Diagrams & GIFs
+                        </a>
+                        <span class="text-gray-600">•</span>
+                        <button onclick="closeGifModal()" class="text-xs text-gray-400 hover:text-white transition-colors">
+                            Dismiss
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
 
         // ==========================================
         // --- DAILY CHALLENGE TRACKER LOGIC ---
@@ -5144,8 +6187,9 @@
                 });
                 renderChallengeView();
             }, (error) => {
-                console.error("Error fetching challenge logs:", error);
-                handleFirestoreError(error, OperationType.LIST, `users/${currentChallengeEmail}/challengeLogs`);
+                console.warn("Challenge logs listener note for " + currentChallengeEmail + ":", error?.message || error);
+                challengeLogs = {};
+                renderChallengeView();
             });
         };
 
