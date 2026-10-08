@@ -107,6 +107,17 @@
         .markdown-body ul { list-style-type: disc; margin-left: 1.5em; margin-bottom: 0.5em; }
         .markdown-body ol { list-style-type: decimal; margin-left: 1.5em; margin-bottom: 0.5em; }
         .markdown-body strong { font-weight: 500; color: #fff; }
+
+        /* Audio Wave Equalizer Animations */
+        @keyframes audio-wave-pulse {
+            0%, 100% { height: 6px; }
+            50% { height: 22px; }
+        }
+        .audio-bar-1 { animation: audio-wave-pulse 0.75s ease-in-out infinite 0.1s; }
+        .audio-bar-2 { animation: audio-wave-pulse 0.75s ease-in-out infinite 0.3s; }
+        .audio-bar-3 { animation: audio-wave-pulse 0.75s ease-in-out infinite 0.5s; }
+        .audio-bar-4 { animation: audio-wave-pulse 0.75s ease-in-out infinite 0.2s; }
+        .audio-bar-5 { animation: audio-wave-pulse 0.75s ease-in-out infinite 0.4s; }
     </style>
 </head>
 <body class="pb-28 sm:pb-16 min-h-screen">
@@ -179,7 +190,7 @@
                     <p id="dashboard-user-subtitle" class="text-xs text-subtle">Daily movement, steps, distance & strength</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button onclick="startVoiceAssistantDirectly('Log 8000 steps')" class="px-3 py-2 bg-gradient-to-r from-purple-600/30 to-amber-500/20 hover:from-purple-600/40 hover:to-amber-500/30 text-amber-300 border border-amber-500/30 font-medium text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5" title="Log steps or distance via voice chat">
+                    <button onclick="openVoiceLoggerModal('Log 8000 steps')" class="px-3 py-2 bg-gradient-to-r from-purple-600/30 to-amber-500/20 hover:from-purple-600/40 hover:to-amber-500/30 text-amber-300 border border-amber-500/30 font-medium text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5" title="Audio Voice Logger">
                         <i class="fas fa-microphone text-amber-400"></i> <span class="hidden sm:inline">Voice Log</span>
                     </button>
                     <button onclick="openLogActivityModal()" class="px-3.5 py-2 bg-amber-500 hover:bg-amber-400 text-white font-medium text-xs rounded-xl transition-all shadow-md flex items-center gap-1.5">
@@ -814,27 +825,136 @@
         </button>
     </nav>
 
-    <!-- Chatbot & Voice Assistant UI (Positioned above mobile bottom bar on small screens) -->
+    <!-- Dedicated Simplified Audio Logger Modal -->
+    <div id="voice-logger-modal" class="hidden fixed inset-0 z-[75] flex items-end sm:items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div class="bg-[#120722] border border-purple-500/30 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden flex flex-col text-white transition-all transform animate-in zoom-in-95 duration-200">
+            <!-- Header -->
+            <div class="px-4 py-3 border-b border-white/10 flex items-center justify-between bg-black/30">
+                <div class="flex items-center gap-2">
+                    <span id="voice-modal-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+                    <span class="font-bold text-sm tracking-wide text-white">Audio Logger</span>
+                    <span id="voice-modal-badge" class="text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30 font-medium">Ready</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                    <button id="voice-modal-audio-toggle" onclick="toggleVoiceAudioReply()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white transition-colors flex items-center justify-center text-xs" title="Toggle spoken feedback">
+                        <i id="voice-modal-audio-icon" class="fas fa-volume-up text-amber-300"></i>
+                    </button>
+                    <button onclick="closeVoiceLoggerModal()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors flex items-center justify-center text-sm">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Core Audio Stage -->
+            <div class="p-5 flex flex-col items-center text-center space-y-4">
+                
+                <!-- Animated Big Mic Button -->
+                <div class="relative my-1 flex items-center justify-center">
+                    <!-- Pulsing Ring when listening -->
+                    <div id="voice-pulse-ring" class="hidden absolute w-28 h-28 rounded-full bg-purple-500/20 animate-ping"></div>
+                    <div id="voice-glow-ring" class="hidden absolute w-24 h-24 rounded-full bg-purple-600/30 blur-md"></div>
+                    
+                    <button id="btn-voice-modal-mic" onclick="toggleModalVoiceRecognition()" class="relative z-10 w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-2 border-purple-400/40" title="Tap to speak or stop">
+                        <i id="voice-modal-mic-icon" class="fas fa-microphone text-2xl text-amber-300"></i>
+                    </button>
+                </div>
+
+                <!-- Live Audio Equalizer Wave Bars -->
+                <div id="voice-audio-waves" class="hidden flex items-center justify-center gap-1.5 h-6">
+                    <span class="w-1 bg-amber-400 rounded-full audio-bar-1 h-2"></span>
+                    <span class="w-1 bg-purple-400 rounded-full audio-bar-2 h-4"></span>
+                    <span class="w-1 bg-amber-300 rounded-full audio-bar-3 h-5"></span>
+                    <span class="w-1 bg-purple-300 rounded-full audio-bar-4 h-3"></span>
+                    <span class="w-1 bg-amber-400 rounded-full audio-bar-5 h-2"></span>
+                </div>
+
+                <!-- Status & Live Transcript Box -->
+                <div class="w-full">
+                    <p id="voice-modal-status-text" class="text-xs font-medium text-purple-300 mb-1.5">Tap mic to speak your update</p>
+                    <div id="voice-modal-transcript-box" class="min-h-[54px] max-h-24 overflow-y-auto bg-black/40 border border-white/10 rounded-2xl p-3 text-sm text-gray-300 flex items-center justify-center text-center leading-snug">
+                        <span id="voice-modal-transcript-text" class="italic text-gray-400 text-xs">"Log 3 sets of 10 reps bench press at 60kg"</span>
+                    </div>
+                </div>
+
+                <!-- Result Confirmation Card -->
+                <div id="voice-modal-result-card" class="hidden w-full bg-emerald-500/10 border border-emerald-500/30 rounded-2xl p-3 text-left space-y-1 animate-in fade-in zoom-in-95 duration-150">
+                    <div class="flex items-center justify-between text-xs font-bold text-emerald-400">
+                        <span id="voice-result-title" class="flex items-center gap-1.5"><i class="fas fa-check-circle"></i> Logged Successfully</span>
+                    </div>
+                    <p id="voice-result-detail" class="text-xs text-gray-200"></p>
+                </div>
+
+                <!-- Quick One-Tap Shortcuts -->
+                <div class="w-full pt-1">
+                    <div class="text-[10px] text-gray-400 font-medium uppercase tracking-wider mb-2 text-left">
+                        Quick Shortcuts
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-left">
+                        <button onclick="handleQuickVoiceCommand('Log 3 sets of 10 reps of bench press at 60kg')" class="p-2 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/30 transition-all text-xs text-gray-300 hover:text-white flex items-center gap-2 group">
+                            <span class="text-base">🏋️</span>
+                            <div class="truncate">
+                                <div class="font-medium text-[11px] text-white">3 Sets Bench</div>
+                                <div class="text-[9px] text-gray-400">60kg × 10 reps</div>
+                            </div>
+                        </button>
+                        <button onclick="handleQuickVoiceCommand('Log 8000 steps')" class="p-2 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/30 transition-all text-xs text-gray-300 hover:text-white flex items-center gap-2 group">
+                            <span class="text-base">👟</span>
+                            <div class="truncate">
+                                <div class="font-medium text-[11px] text-white">8,000 Steps</div>
+                                <div class="text-[9px] text-gray-400">Daily activity</div>
+                            </div>
+                        </button>
+                        <button onclick="handleQuickVoiceCommand('Log 3.5 km walked')" class="p-2 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/30 transition-all text-xs text-gray-300 hover:text-white flex items-center gap-2 group">
+                            <span class="text-base">🏃</span>
+                            <div class="truncate">
+                                <div class="font-medium text-[11px] text-white">3.5 KM Run</div>
+                                <div class="text-[9px] text-gray-400">Challenge distance</div>
+                            </div>
+                        </button>
+                        <button onclick="handleQuickVoiceCommand('Start 60 second rest timer')" class="p-2 rounded-xl bg-white/5 hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/30 transition-all text-xs text-gray-300 hover:text-white flex items-center gap-2 group">
+                            <span class="text-base">⏱️</span>
+                            <div class="truncate">
+                                <div class="font-medium text-[11px] text-white">60s Rest</div>
+                                <div class="text-[9px] text-gray-400">Rest interval</div>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Discreet manual text bar fallback -->
+                <div class="w-full pt-1">
+                    <div class="flex items-center gap-1.5 bg-black/30 border border-white/10 rounded-xl px-2.5 py-1.5 text-xs">
+                        <input type="text" id="voice-modal-text-input" placeholder="Or type a quick command..." class="flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none text-xs" onkeypress="if(event.key === 'Enter') handleManualVoiceInput()">
+                        <button onclick="handleManualVoiceInput()" class="text-purple-400 hover:text-white transition-colors p-1" title="Submit command">
+                            <i class="fas fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Chatbot Window & Unified Floating Launcher -->
     <div id="chatbot-container" class="fixed bottom-20 sm:bottom-6 right-3 sm:right-6 z-50 flex flex-col items-end">
-        <!-- Chat Window -->
+        <!-- AI Coach Chat Window (for conversational advice) -->
         <div id="chat-window" class="hidden w-80 sm:w-96 bg-card border border-subtle rounded-2xl shadow-2xl mb-4 flex flex-col overflow-hidden transition-all duration-300 transform origin-bottom-right">
             <!-- Header -->
             <div class="bg-[#1a0f2e] border-b border-subtle p-3 flex justify-between items-center">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30">
+                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center border border-purple-500/30">
                         <i class="fas fa-robot text-sm"></i>
                     </div>
                     <div>
                         <h3 class="text-white font-bold text-sm leading-tight flex items-center gap-1.5">
-                            AI Coach & Voice
-                            <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.2 rounded font-mono font-semibold">VOICE</span>
+                            AI Coach
                         </h3>
-                        <p class="text-[10px] text-gray-400">Speak or chat to log data & get tips</p>
+                        <p class="text-[10px] text-gray-400">Ask training questions & form advice</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-1.5">
-                    <button id="chat-voice-audio-toggle" onclick="toggleVoiceAudioReply()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-amber-500/20 text-amber-400 border border-subtle transition-colors flex items-center justify-center text-xs" title="Toggle spoken voice replies">
-                        <i id="chat-voice-audio-icon" class="fas fa-volume-up"></i>
+                    <button onclick="openVoiceLoggerModal(); toggleChat();" class="text-xs text-purple-300 hover:text-white bg-purple-500/20 px-2 py-1 rounded-lg border border-purple-500/30 flex items-center gap-1 transition-colors" title="Switch to Audio Logger">
+                        <i class="fas fa-microphone text-[10px]"></i> Audio Log
                     </button>
                     <button onclick="toggleChat()" class="w-7 h-7 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white transition-colors flex items-center justify-center">
                         <i class="fas fa-times text-xs"></i>
@@ -843,79 +963,37 @@
             </div>
 
             <!-- Messages -->
-            <div id="chat-messages" class="flex-1 p-3.5 overflow-y-auto h-80 space-y-3 bg-[#0a0510]">
+            <div id="chat-messages" class="flex-1 p-3.5 overflow-y-auto h-72 space-y-3 bg-[#0a0510]">
                 <div class="flex gap-2">
-                    <div class="w-8 h-8 rounded-full bg-[#3d2b5e] flex items-center justify-center shrink-0 mt-0.5 border border-purple-500/30">
-                        <i class="fas fa-robot text-amber-300 text-xs"></i>
+                    <div class="w-7 h-7 rounded-full bg-[#3d2b5e] flex items-center justify-center shrink-0 mt-0.5 border border-purple-500/30">
+                        <i class="fas fa-robot text-purple-300 text-xs"></i>
                     </div>
-                    <div class="bg-[#2d1b4e] text-xs text-gray-200 p-3 rounded-xl rounded-tl-none markdown-body space-y-2 border border-purple-500/20 shadow-sm leading-relaxed">
-                        <p class="font-semibold text-white">Hi! I'm your AI Coach & Voice Assistant.</p>
-                        <p>You can ask me exercise questions or <strong>speak commands</strong> to update your fitness data hands-free:</p>
-                        <div class="bg-black/40 rounded-lg p-2 font-mono text-[11px] text-amber-300/90 space-y-1 border border-white/5">
-                            <div>• "Log 3 sets of 10 reps of bench press at 60kg"</div>
-                            <div>• "Log 8,500 steps"</div>
-                            <div>• "Walked 4.2 km"</div>
-                            <div>• "Add note to workout: Great energy today"</div>
-                            <div>• "Start 60s rest timer"</div>
-                        </div>
+                    <div class="bg-[#2d1b4e] text-xs text-gray-200 p-3 rounded-xl rounded-tl-none markdown-body space-y-1.5 border border-purple-500/20 shadow-sm leading-relaxed">
+                        <p class="font-semibold text-white">Hi! I'm your AI Coach.</p>
+                        <p>Ask me about workout technique, nutrition, or recovery. For quick hands-free set & step logging, tap <strong>Audio Log</strong>!</p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Voice Listening Banner -->
-            <div id="voice-listening-bar" class="hidden bg-gradient-to-r from-amber-500/20 via-purple-600/30 to-amber-500/20 border-t border-amber-500/30 px-3 py-2 flex items-center justify-between text-xs animate-in slide-in-from-bottom duration-200">
-                <div class="flex items-center gap-2 text-amber-300 font-medium">
-                    <span class="relative flex h-2.5 w-2.5">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
-                    </span>
-                    <span id="voice-listening-status" class="truncate max-w-[210px]">Listening... Speak now</span>
-                </div>
-                <button onclick="stopVoiceRecognition()" class="text-[10px] bg-red-500/20 hover:bg-red-500/30 text-red-300 px-2 py-0.5 rounded border border-red-500/30 transition-colors">
-                    Stop
-                </button>
-            </div>
-
-            <!-- Quick Voice Command Suggestions -->
-            <div class="px-2.5 py-1.5 bg-[#120724] border-t border-subtle/40 flex gap-1.5 overflow-x-auto no-scrollbar text-[11px]">
-                <button onclick="insertVoiceCommand('Log 3 sets of 10 reps of bench press at 60kg')" class="shrink-0 bg-white/5 hover:bg-amber-500/20 text-gray-300 hover:text-amber-300 px-2 py-1 rounded-full border border-subtle transition-colors flex items-center gap-1 font-medium">
-                    🏋️ 3 Sets Bench (60kg)
-                </button>
-                <button onclick="insertVoiceCommand('Log 8000 steps')" class="shrink-0 bg-white/5 hover:bg-amber-500/20 text-gray-300 hover:text-amber-300 px-2 py-1 rounded-full border border-subtle transition-colors flex items-center gap-1 font-medium">
-                    👟 8,000 Steps
-                </button>
-                <button onclick="insertVoiceCommand('Log 3.5 km walked')" class="shrink-0 bg-white/5 hover:bg-amber-500/20 text-gray-300 hover:text-amber-300 px-2 py-1 rounded-full border border-subtle transition-colors flex items-center gap-1 font-medium">
-                    🏃 3.5 KM
-                </button>
-                <button onclick="insertVoiceCommand('Add workout note: Feeling strong and energetic today!')" class="shrink-0 bg-white/5 hover:bg-amber-500/20 text-gray-300 hover:text-amber-300 px-2 py-1 rounded-full border border-subtle transition-colors flex items-center gap-1 font-medium">
-                    📝 Workout Note
-                </button>
-                <button onclick="insertVoiceCommand('Start 60 second rest timer')" class="shrink-0 bg-white/5 hover:bg-amber-500/20 text-gray-300 hover:text-amber-300 px-2 py-1 rounded-full border border-subtle transition-colors flex items-center gap-1 font-medium">
-                    ⏱️ 60s Rest
-                </button>
             </div>
 
             <!-- Input Bar -->
             <div class="p-2.5 bg-[#1a0f2e] border-t border-subtle flex gap-1.5 items-center">
-                <input type="text" id="chat-input" placeholder="Type or click mic to speak..." class="flex-1 bg-input border border-subtle rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-500 transition-colors placeholder-gray-500" onkeypress="if(event.key === 'Enter') sendChatMessage()">
-                <button id="btn-chat-mic" onclick="toggleVoiceRecognition()" class="w-9 h-9 shrink-0 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-amber-300 border border-purple-500/40 hover:border-amber-400 transition-all flex items-center justify-center shadow-sm" title="Speak via voice">
-                    <i id="chat-mic-icon" class="fas fa-microphone text-sm"></i>
-                </button>
-                <button id="btn-chat-send" onclick="sendChatMessage()" class="w-9 h-9 shrink-0 bg-amber-500 hover:bg-amber-400 text-white rounded-xl transition-colors flex items-center justify-center shadow-sm" title="Send message">
+                <input type="text" id="chat-input" placeholder="Ask AI coach a question..." class="flex-1 bg-input border border-subtle rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-purple-500 transition-colors placeholder-gray-500" onkeypress="if(event.key === 'Enter') sendChatMessage()">
+                <button id="btn-chat-send" onclick="sendChatMessage()" class="w-9 h-9 shrink-0 bg-purple-600 hover:bg-purple-500 text-white rounded-xl transition-colors flex items-center justify-center shadow-sm" title="Send message">
                     <i class="fas fa-paper-plane text-xs"></i>
                 </button>
             </div>
         </div>
         
-        <!-- Floating Buttons Group -->
+        <!-- Streamlined Floating Buttons Group -->
         <div class="flex items-center gap-2">
-            <!-- Dedicated Quick Voice Mic Button -->
-            <button id="btn-floating-voice" onclick="startVoiceAssistantDirectly()" class="w-12 h-12 sm:w-13 sm:h-13 bg-gradient-to-tr from-purple-600 via-indigo-600 to-amber-500 hover:from-purple-500 hover:to-amber-400 text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-105 border border-amber-400/40" title="Voice Assistant & Hands-free Logger">
-                <i class="fas fa-microphone text-lg sm:text-xl text-amber-300"></i>
+            <!-- Primary One-Touch Voice Logger Floating Button -->
+            <button id="btn-floating-voice" onclick="openVoiceLoggerModal()" class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold text-xs rounded-full shadow-xl shadow-purple-900/40 border border-purple-400/40 hover:scale-105 active:scale-95 transition-all" title="Audio Voice Logger">
+                <i class="fas fa-microphone text-amber-300 text-sm"></i>
+                <span class="tracking-wide">Voice Log</span>
             </button>
-            <!-- Chat Window Toggle Button -->
-            <button onclick="toggleChat()" class="w-12 h-12 sm:w-13 sm:h-13 bg-amber-500 hover:bg-amber-400 text-white rounded-full shadow-xl flex items-center justify-center transition-all hover:scale-105 shadow-amber-500/20" title="AI Coach Chat">
-                <i class="fas fa-comments text-lg sm:text-xl"></i>
+            <!-- Minimal AI Coach Chat Trigger -->
+            <button onclick="toggleChat()" class="w-10 h-10 rounded-full bg-card hover:bg-white/10 text-gray-300 hover:text-white border border-subtle flex items-center justify-center shadow-lg transition-all" title="Ask AI Coach">
+                <i class="fas fa-robot text-sm"></i>
             </button>
         </div>
     </div>
@@ -6148,15 +6226,31 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
         function updateVoiceAudioToggleUI() {
             const icon = document.getElementById('chat-voice-audio-icon');
             const btn = document.getElementById('chat-voice-audio-toggle');
-            if (!icon || !btn) return;
+            const modalIcon = document.getElementById('voice-modal-audio-icon');
+            const modalBtn = document.getElementById('voice-modal-audio-toggle');
+
             if (voiceAudioReplyEnabled) {
-                icon.className = 'fas fa-volume-up text-amber-400';
-                btn.className = 'w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-colors flex items-center justify-center text-xs';
-                btn.title = 'Spoken voice replies: ON (Click to mute)';
+                if (icon) icon.className = 'fas fa-volume-up text-amber-400';
+                if (btn) {
+                    btn.className = 'w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-colors flex items-center justify-center text-xs';
+                    btn.title = 'Spoken voice replies: ON (Click to mute)';
+                }
+                if (modalIcon) modalIcon.className = 'fas fa-volume-up text-amber-300';
+                if (modalBtn) {
+                    modalBtn.className = 'w-8 h-8 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 transition-colors flex items-center justify-center text-xs';
+                    modalBtn.title = 'Spoken audio replies: ON (Click to mute)';
+                }
             } else {
-                icon.className = 'fas fa-volume-mute text-gray-400';
-                btn.className = 'w-7 h-7 rounded-lg bg-white/5 text-gray-400 border border-subtle transition-colors flex items-center justify-center text-xs';
-                btn.title = 'Spoken voice replies: MUTED (Click to unmute)';
+                if (icon) icon.className = 'fas fa-volume-mute text-gray-400';
+                if (btn) {
+                    btn.className = 'w-7 h-7 rounded-lg bg-white/5 text-gray-400 border border-subtle transition-colors flex items-center justify-center text-xs';
+                    btn.title = 'Spoken voice replies: MUTED (Click to unmute)';
+                }
+                if (modalIcon) modalIcon.className = 'fas fa-volume-mute text-gray-500';
+                if (modalBtn) {
+                    modalBtn.className = 'w-8 h-8 rounded-xl bg-white/5 text-gray-400 transition-colors flex items-center justify-center text-xs';
+                    modalBtn.title = 'Spoken audio replies: MUTED (Click to unmute)';
+                }
             }
         }
 
@@ -6213,15 +6307,28 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
 
                 rec.onstart = () => {
                     isVoiceListening = true;
-                    const listeningBar = document.getElementById('voice-listening-bar');
-                    const micIcon = document.getElementById('chat-mic-icon');
-                    const micBtn = document.getElementById('btn-chat-mic');
-                    const statusText = document.getElementById('voice-listening-status');
 
-                    if (listeningBar) listeningBar.classList.remove('hidden');
-                    if (micIcon) micIcon.className = 'fas fa-microphone text-red-400 animate-pulse';
-                    if (micBtn) micBtn.className = 'w-9 h-9 shrink-0 rounded-xl bg-red-500/20 text-red-400 border border-red-500/40 transition-all flex items-center justify-center shadow-md ring-2 ring-red-500/30';
-                    if (statusText) statusText.innerText = 'Listening... Speak your steps, distance, or workout update';
+                    // Update Simplified Audio Logger Modal UI
+                    const modalIndicator = document.getElementById('voice-modal-indicator');
+                    const modalBadge = document.getElementById('voice-modal-badge');
+                    const pulseRing = document.getElementById('voice-pulse-ring');
+                    const glowRing = document.getElementById('voice-glow-ring');
+                    const audioWaves = document.getElementById('voice-audio-waves');
+                    const modalMicBtn = document.getElementById('btn-voice-modal-mic');
+                    const modalMicIcon = document.getElementById('voice-modal-mic-icon');
+                    const statusText = document.getElementById('voice-modal-status-text');
+
+                    if (modalIndicator) modalIndicator.className = 'w-2.5 h-2.5 rounded-full bg-red-500 animate-ping';
+                    if (modalBadge) {
+                        modalBadge.className = 'text-[10px] bg-red-500/20 text-red-300 px-2 py-0.5 rounded-full border border-red-500/30 font-medium';
+                        modalBadge.textContent = 'Listening...';
+                    }
+                    if (pulseRing) pulseRing.classList.remove('hidden');
+                    if (glowRing) glowRing.classList.remove('hidden');
+                    if (audioWaves) audioWaves.classList.remove('hidden');
+                    if (modalMicBtn) modalMicBtn.className = 'relative z-10 w-20 h-20 rounded-full bg-gradient-to-tr from-red-600 to-amber-600 text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-2 border-red-400 ring-4 ring-red-500/40 animate-pulse';
+                    if (modalMicIcon) modalMicIcon.className = 'fas fa-microphone text-2xl text-white';
+                    if (statusText) statusText.textContent = 'Listening... Speak naturally';
                 };
 
                 rec.onresult = (event) => {
@@ -6229,34 +6336,32 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
                     for (let i = event.resultIndex; i < event.results.length; ++i) {
                         transcript += event.results[i][0].transcript;
                     }
-                    const inputEl = document.getElementById('chat-input');
-                    if (inputEl) inputEl.value = transcript;
-
-                    const statusText = document.getElementById('voice-listening-status');
-                    if (statusText && transcript) {
-                        statusText.innerText = `"${transcript.slice(-30)}"`;
+                    const transcriptEl = document.getElementById('voice-modal-transcript-text');
+                    if (transcriptEl && transcript) {
+                        transcriptEl.textContent = `"${transcript}"`;
+                        transcriptEl.className = 'font-bold text-white text-sm tracking-wide';
                     }
                 };
 
                 rec.onspeechend = () => {
-                    // Small timeout then auto send if input is populated
                     setTimeout(() => {
-                        const inputEl = document.getElementById('chat-input');
-                        if (inputEl && inputEl.value.trim().length > 0) {
-                            sendChatMessage();
-                        }
+                        const transcriptEl = document.getElementById('voice-modal-transcript-text');
+                        const transcript = transcriptEl ? transcriptEl.textContent.replace(/^"|"$/g, '').trim() : '';
                         stopVoiceRecognition();
+                        if (transcript && transcript !== 'Log 3 sets of 10 reps bench press at 60kg') {
+                            executeVoiceCommandInModal(transcript);
+                        }
                     }, 400);
                 };
 
                 rec.onerror = (event) => {
                     console.warn("Voice recognition error:", event.error);
-                    const statusText = document.getElementById('voice-listening-status');
+                    const statusText = document.getElementById('voice-modal-status-text');
                     if (statusText) {
                         if (event.error === 'not-allowed') {
                             statusText.innerText = 'Microphone permission blocked. Please allow mic in browser settings.';
                         } else {
-                            statusText.innerText = 'Voice input stopped. Type your update below.';
+                            statusText.innerText = 'Listening stopped. Tap mic or a shortcut below.';
                         }
                     }
                     setTimeout(() => stopVoiceRecognition(), 2000);
@@ -6286,7 +6391,7 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
                 speechRecognition = initSpeechRecognition();
             }
             if (!speechRecognition) {
-                alert("Speech Recognition is not supported in this browser. You can type your commands (e.g. 'Log 8500 steps' or 'Add workout note') directly into the chat input!");
+                alert("Speech Recognition is not supported in this browser. You can type commands in the input below or tap any quick shortcut button!");
                 return;
             }
             try {
@@ -6301,41 +6406,144 @@ E | Dead Bug Crunches | 8x20s on / 10s rest`;
             if (speechRecognition) {
                 try { speechRecognition.stop(); } catch (e) {}
             }
-            const listeningBar = document.getElementById('voice-listening-bar');
-            const micIcon = document.getElementById('chat-mic-icon');
-            const micBtn = document.getElementById('btn-chat-mic');
-            if (listeningBar) listeningBar.classList.add('hidden');
-            if (micIcon) micIcon.className = 'fas fa-microphone text-sm';
-            if (micBtn) micBtn.className = 'w-9 h-9 shrink-0 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 text-amber-300 border border-purple-500/40 hover:border-amber-400 transition-all flex items-center justify-center shadow-sm';
+            
+            // Reset Simplified Audio Logger Modal UI
+            const modalIndicator = document.getElementById('voice-modal-indicator');
+            const modalBadge = document.getElementById('voice-modal-badge');
+            const pulseRing = document.getElementById('voice-pulse-ring');
+            const glowRing = document.getElementById('voice-glow-ring');
+            const audioWaves = document.getElementById('voice-audio-waves');
+            const modalMicBtn = document.getElementById('btn-voice-modal-mic');
+            const modalMicIcon = document.getElementById('voice-modal-mic-icon');
+            const statusText = document.getElementById('voice-modal-status-text');
+
+            if (modalIndicator) modalIndicator.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+            if (modalBadge) {
+                modalBadge.className = 'text-[10px] bg-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/30 font-medium';
+                modalBadge.textContent = 'Ready';
+            }
+            if (pulseRing) pulseRing.classList.add('hidden');
+            if (glowRing) glowRing.classList.add('hidden');
+            if (audioWaves) audioWaves.classList.add('hidden');
+            if (modalMicBtn) modalMicBtn.className = 'relative z-10 w-20 h-20 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-xl flex items-center justify-center transition-all hover:scale-105 active:scale-95 border-2 border-purple-400/40';
+            if (modalMicIcon) modalMicIcon.className = 'fas fa-microphone text-2xl text-amber-300';
+
+            const resultCard = document.getElementById('voice-modal-result-card');
+            if (statusText && (!resultCard || resultCard.classList.contains('hidden'))) {
+                statusText.textContent = 'Tap mic to speak your update';
+            }
         };
 
-        window.startVoiceAssistantDirectly = (prefillHint = '') => {
+        // --- Simplified Audio Logger Modal Controller ---
+        window.openVoiceLoggerModal = (initialPrompt = '') => {
             const chatWindow = document.getElementById('chat-window');
-            if (chatWindow && chatWindow.classList.contains('hidden')) {
-                toggleChat();
+            if (chatWindow && !chatWindow.classList.contains('hidden')) {
+                chatWindow.classList.add('hidden');
             }
-            if (prefillHint) {
-                const inputEl = document.getElementById('chat-input');
-                if (inputEl) inputEl.placeholder = `e.g. "${prefillHint}"`;
+
+            const modal = document.getElementById('voice-logger-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+
+            const resultCard = document.getElementById('voice-modal-result-card');
+            if (resultCard) resultCard.classList.add('hidden');
+
+            const transcriptEl = document.getElementById('voice-modal-transcript-text');
+            if (transcriptEl) {
+                transcriptEl.textContent = initialPrompt ? `"${initialPrompt}"` : '"Log 3 sets of 10 reps bench press at 60kg"';
+                transcriptEl.className = 'italic text-gray-400 text-xs';
             }
+
+            const statusText = document.getElementById('voice-modal-status-text');
+            if (statusText) statusText.textContent = 'Listening... Speak your workout or activity update';
+
+            // Auto-start listening on open for frictionless 1-tap UX
             startVoiceRecognition();
+        };
+
+        window.closeVoiceLoggerModal = () => {
+            stopVoiceRecognition();
+            const modal = document.getElementById('voice-logger-modal');
+            if (modal) modal.classList.add('hidden');
+        };
+
+        window.toggleModalVoiceRecognition = () => {
+            if (isVoiceListening) {
+                stopVoiceRecognition();
+            } else {
+                const resultCard = document.getElementById('voice-modal-result-card');
+                if (resultCard) resultCard.classList.add('hidden');
+                startVoiceRecognition();
+            }
+        };
+
+        window.handleQuickVoiceCommand = async (cmdText) => {
+            stopVoiceRecognition();
+            const transcriptEl = document.getElementById('voice-modal-transcript-text');
+            if (transcriptEl) {
+                transcriptEl.textContent = `"${cmdText}"`;
+                transcriptEl.className = 'font-bold text-white text-sm tracking-wide';
+            }
+            await executeVoiceCommandInModal(cmdText);
+        };
+
+        window.handleManualVoiceInput = async () => {
+            const input = document.getElementById('voice-modal-text-input');
+            if (!input || !input.value.trim()) return;
+            const text = input.value.trim();
+            input.value = '';
+            stopVoiceRecognition();
+            const transcriptEl = document.getElementById('voice-modal-transcript-text');
+            if (transcriptEl) {
+                transcriptEl.textContent = `"${text}"`;
+                transcriptEl.className = 'font-bold text-white text-sm tracking-wide';
+            }
+            await executeVoiceCommandInModal(text);
+        };
+
+        async function executeVoiceCommandInModal(rawMessage) {
+            const statusText = document.getElementById('voice-modal-status-text');
+            if (statusText) statusText.textContent = 'Updating your fitness data...';
+
+            try {
+                const actionRes = await processVoiceAndChatAction(rawMessage);
+                if (actionRes && actionRes.executed) {
+                    const resultCard = document.getElementById('voice-modal-result-card');
+                    const resultTitle = document.getElementById('voice-result-title');
+                    const resultDetail = document.getElementById('voice-result-detail');
+
+                    if (resultCard && resultDetail) {
+                        resultCard.classList.remove('hidden');
+                        if (resultTitle) {
+                            resultTitle.innerHTML = '<i class="fas fa-check-circle"></i> Logged Successfully';
+                        }
+                        resultDetail.textContent = actionRes.spokenReply;
+                    }
+
+                    if (statusText) statusText.textContent = 'Update saved! Tap mic to log another';
+                    if (actionRes.spokenReply) {
+                        speakVoiceReply(actionRes.spokenReply);
+                    }
+                } else {
+                    if (statusText) statusText.textContent = 'Could not detect update. Try an example shortcut below';
+                    speakVoiceReply("Sorry, I could not detect that command. Try an example like log 3 sets bench press or log 8,000 steps.");
+                }
+            } catch (err) {
+                console.error("Error executing command in modal:", err);
+                if (statusText) statusText.textContent = 'Error processing update: ' + err.message;
+            }
+        }
+
+        window.startVoiceAssistantDirectly = (prefillHint = '') => {
+            openVoiceLoggerModal(prefillHint);
         };
 
         window.openVoiceLoggerForWorkout = () => {
-            const chatWindow = document.getElementById('chat-window');
-            if (chatWindow && chatWindow.classList.contains('hidden')) {
-                toggleChat();
-            }
-            appendChatMessage('ai', `🎙️ **Workout Voice Logger Active**\n\nYou can speak commands like:\n- *"Log 3 sets of 10 reps of bench press at 60kg"*\n- *"Log Bench Press 60kg 10 reps"*\n- *"Log set 2 for Squat 80kg 8 reps"*\n- *"Add note to workout: Feeling strong today!"*\n- *"Start 60 second rest timer"*`);
-            startVoiceRecognition();
+            openVoiceLoggerModal();
         };
 
         window.insertVoiceCommand = (cmdText) => {
-            const inputEl = document.getElementById('chat-input');
-            if (inputEl) {
-                inputEl.value = cmdText;
-                sendChatMessage();
-            }
+            handleQuickVoiceCommand(cmdText);
         };
 
         // Manual prompt to add a workout note
